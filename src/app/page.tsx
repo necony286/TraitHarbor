@@ -14,7 +14,7 @@ export default function HomePage() {
           <a className="button" href="#tokens">
             View design tokens
           </a>
-          <a className="button button--ghost" href="https://ipip.ori.org/" target="_blank" rel="noreferrer">
+          <a className="button button--ghost" href="https://ipip.ori.org/" target="_blank" rel="noopener noreferrer">
             Read about the Big Five
           </a>
         </div>

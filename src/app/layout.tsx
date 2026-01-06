@@ -22,7 +22,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body className={inter.className}>
         <div className="shell">
           <header className="shell__header">
-            <p className="brand">BigFive</p>
+            <Link href="/" className="brand">BigFive</Link>
             <nav aria-label="Primary">
               <a className="nav-link" href="#tokens">Design system</a>
               <a className="nav-link" href="#get-started">Get started</a>

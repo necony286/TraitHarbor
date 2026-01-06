@@ -1,1 +1,722 @@
-[]
+[
+  {
+    "id": "Q1",
+    "prompt": "I enjoy exploring new ideas.",
+    "trait": "O",
+    "reverseKeyed": false
+  },
+  {
+    "id": "Q2",
+    "prompt": "I avoid exploring unfamiliar ideas.",
+    "trait": "O",
+    "reverseKeyed": true
+  },
+  {
+    "id": "Q3",
+    "prompt": "I appreciate art and beauty.",
+    "trait": "O",
+    "reverseKeyed": false
+  },
+  {
+    "id": "Q4",
+    "prompt": "I pay little attention to art or beauty.",
+    "trait": "O",
+    "reverseKeyed": true
+  },
+  {
+    "id": "Q5",
+    "prompt": "I like solving complex problems.",
+    "trait": "O",
+    "reverseKeyed": false
+  },
+  {
+    "id": "Q6",
+    "prompt": "I feel uneasy with complex problems.",
+    "trait": "O",
+    "reverseKeyed": true
+  },
+  {
+    "id": "Q7",
+    "prompt": "I seek out new experiences.",
+    "trait": "O",
+    "reverseKeyed": false
+  },
+  {
+    "id": "Q8",
+    "prompt": "I stick to familiar experiences.",
+    "trait": "O",
+    "reverseKeyed": true
+  },
+  {
+    "id": "Q9",
+    "prompt": "I enjoy philosophical discussions.",
+    "trait": "O",
+    "reverseKeyed": false
+  },
+  {
+    "id": "Q10",
+    "prompt": "I lose interest in philosophical discussions.",
+    "trait": "O",
+    "reverseKeyed": true
+  },
+  {
+    "id": "Q11",
+    "prompt": "I value creativity in daily life.",
+    "trait": "O",
+    "reverseKeyed": false
+  },
+  {
+    "id": "Q12",
+    "prompt": "I rarely look for creative approaches.",
+    "trait": "O",
+    "reverseKeyed": true
+  },
+  {
+    "id": "Q13",
+    "prompt": "I am curious about many topics.",
+    "trait": "O",
+    "reverseKeyed": false
+  },
+  {
+    "id": "Q14",
+    "prompt": "I rarely feel curious about new topics.",
+    "trait": "O",
+    "reverseKeyed": true
+  },
+  {
+    "id": "Q15",
+    "prompt": "I enjoy learning languages.",
+    "trait": "O",
+    "reverseKeyed": false
+  },
+  {
+    "id": "Q16",
+    "prompt": "I avoid learning new languages.",
+    "trait": "O",
+    "reverseKeyed": true
+  },
+  {
+    "id": "Q17",
+    "prompt": "I think about abstract concepts.",
+    "trait": "O",
+    "reverseKeyed": false
+  },
+  {
+    "id": "Q18",
+    "prompt": "I avoid abstract ideas.",
+    "trait": "O",
+    "reverseKeyed": true
+  },
+  {
+    "id": "Q19",
+    "prompt": "I notice patterns others miss.",
+    "trait": "O",
+    "reverseKeyed": false
+  },
+  {
+    "id": "Q20",
+    "prompt": "I miss patterns others notice.",
+    "trait": "O",
+    "reverseKeyed": true
+  },
+  {
+    "id": "Q21",
+    "prompt": "I enjoy trying unusual foods.",
+    "trait": "O",
+    "reverseKeyed": false
+  },
+  {
+    "id": "Q22",
+    "prompt": "I avoid unusual foods.",
+    "trait": "O",
+    "reverseKeyed": true
+  },
+  {
+    "id": "Q23",
+    "prompt": "I prefer variety to routine.",
+    "trait": "O",
+    "reverseKeyed": false
+  },
+  {
+    "id": "Q24",
+    "prompt": "I prefer routine over variety.",
+    "trait": "O",
+    "reverseKeyed": true
+  },
+  {
+    "id": "Q25",
+    "prompt": "I keep tasks well organized.",
+    "trait": "C",
+    "reverseKeyed": false
+  },
+  {
+    "id": "Q26",
+    "prompt": "I let tasks pile up.",
+    "trait": "C",
+    "reverseKeyed": true
+  },
+  {
+    "id": "Q27",
+    "prompt": "I follow schedules carefully.",
+    "trait": "C",
+    "reverseKeyed": false
+  },
+  {
+    "id": "Q28",
+    "prompt": "I ignore schedules when I can.",
+    "trait": "C",
+    "reverseKeyed": true
+  },
+  {
+    "id": "Q29",
+    "prompt": "I like checking items off a list.",
+    "trait": "C",
+    "reverseKeyed": false
+  },
+  {
+    "id": "Q30",
+    "prompt": "I leave checklists unfinished.",
+    "trait": "C",
+    "reverseKeyed": true
+  },
+  {
+    "id": "Q31",
+    "prompt": "I arrive prepared for commitments.",
+    "trait": "C",
+    "reverseKeyed": false
+  },
+  {
+    "id": "Q32",
+    "prompt": "I show up unprepared.",
+    "trait": "C",
+    "reverseKeyed": true
+  },
+  {
+    "id": "Q33",
+    "prompt": "I pay attention to details.",
+    "trait": "C",
+    "reverseKeyed": false
+  },
+  {
+    "id": "Q34",
+    "prompt": "I overlook small details.",
+    "trait": "C",
+    "reverseKeyed": true
+  },
+  {
+    "id": "Q35",
+    "prompt": "I work hard until a job is done.",
+    "trait": "C",
+    "reverseKeyed": false
+  },
+  {
+    "id": "Q36",
+    "prompt": "I quit working when tasks get tiring.",
+    "trait": "C",
+    "reverseKeyed": true
+  },
+  {
+    "id": "Q37",
+    "prompt": "I plan my day ahead of time.",
+    "trait": "C",
+    "reverseKeyed": false
+  },
+  {
+    "id": "Q38",
+    "prompt": "I rarely plan my day.",
+    "trait": "C",
+    "reverseKeyed": true
+  },
+  {
+    "id": "Q39",
+    "prompt": "I keep my living space tidy.",
+    "trait": "C",
+    "reverseKeyed": false
+  },
+  {
+    "id": "Q40",
+    "prompt": "I leave my living space messy.",
+    "trait": "C",
+    "reverseKeyed": true
+  },
+  {
+    "id": "Q41",
+    "prompt": "I track goals and milestones.",
+    "trait": "C",
+    "reverseKeyed": false
+  },
+  {
+    "id": "Q42",
+    "prompt": "I lose track of my goals.",
+    "trait": "C",
+    "reverseKeyed": true
+  },
+  {
+    "id": "Q43",
+    "prompt": "I double-check my work.",
+    "trait": "C",
+    "reverseKeyed": false
+  },
+  {
+    "id": "Q44",
+    "prompt": "I submit work without reviewing.",
+    "trait": "C",
+    "reverseKeyed": true
+  },
+  {
+    "id": "Q45",
+    "prompt": "I finish projects before starting new ones.",
+    "trait": "C",
+    "reverseKeyed": false
+  },
+  {
+    "id": "Q46",
+    "prompt": "I start new projects before finishing current ones.",
+    "trait": "C",
+    "reverseKeyed": true
+  },
+  {
+    "id": "Q47",
+    "prompt": "I like dependable routines.",
+    "trait": "C",
+    "reverseKeyed": false
+  },
+  {
+    "id": "Q48",
+    "prompt": "I dislike routines and skip them.",
+    "trait": "C",
+    "reverseKeyed": true
+  },
+  {
+    "id": "Q49",
+    "prompt": "I feel energized by social gatherings.",
+    "trait": "E",
+    "reverseKeyed": false
+  },
+  {
+    "id": "Q50",
+    "prompt": "I feel drained by social gatherings.",
+    "trait": "E",
+    "reverseKeyed": true
+  },
+  {
+    "id": "Q51",
+    "prompt": "I enjoy meeting new people.",
+    "trait": "E",
+    "reverseKeyed": false
+  },
+  {
+    "id": "Q52",
+    "prompt": "I avoid meeting new people.",
+    "trait": "E",
+    "reverseKeyed": true
+  },
+  {
+    "id": "Q53",
+    "prompt": "I like being the center of attention.",
+    "trait": "E",
+    "reverseKeyed": false
+  },
+  {
+    "id": "Q54",
+    "prompt": "I shy away from being the center of attention.",
+    "trait": "E",
+    "reverseKeyed": true
+  },
+  {
+    "id": "Q55",
+    "prompt": "I start conversations easily.",
+    "trait": "E",
+    "reverseKeyed": false
+  },
+  {
+    "id": "Q56",
+    "prompt": "I wait for others to start conversations.",
+    "trait": "E",
+    "reverseKeyed": true
+  },
+  {
+    "id": "Q57",
+    "prompt": "I feel comfortable speaking in groups.",
+    "trait": "E",
+    "reverseKeyed": false
+  },
+  {
+    "id": "Q58",
+    "prompt": "I feel uncomfortable speaking in groups.",
+    "trait": "E",
+    "reverseKeyed": true
+  },
+  {
+    "id": "Q59",
+    "prompt": "I laugh and smile often.",
+    "trait": "E",
+    "reverseKeyed": false
+  },
+  {
+    "id": "Q60",
+    "prompt": "I rarely laugh or smile.",
+    "trait": "E",
+    "reverseKeyed": true
+  },
+  {
+    "id": "Q61",
+    "prompt": "I enjoy leading group activities.",
+    "trait": "E",
+    "reverseKeyed": false
+  },
+  {
+    "id": "Q62",
+    "prompt": "I avoid leading group activities.",
+    "trait": "E",
+    "reverseKeyed": true
+  },
+  {
+    "id": "Q63",
+    "prompt": "I share my thoughts openly.",
+    "trait": "E",
+    "reverseKeyed": false
+  },
+  {
+    "id": "Q64",
+    "prompt": "I keep most thoughts to myself.",
+    "trait": "E",
+    "reverseKeyed": true
+  },
+  {
+    "id": "Q65",
+    "prompt": "I make friends quickly.",
+    "trait": "E",
+    "reverseKeyed": false
+  },
+  {
+    "id": "Q66",
+    "prompt": "I struggle to make friends quickly.",
+    "trait": "E",
+    "reverseKeyed": true
+  },
+  {
+    "id": "Q67",
+    "prompt": "I feel upbeat around others.",
+    "trait": "E",
+    "reverseKeyed": false
+  },
+  {
+    "id": "Q68",
+    "prompt": "I feel subdued around others.",
+    "trait": "E",
+    "reverseKeyed": true
+  },
+  {
+    "id": "Q69",
+    "prompt": "I like busy, active days.",
+    "trait": "E",
+    "reverseKeyed": false
+  },
+  {
+    "id": "Q70",
+    "prompt": "I prefer slow, quiet days.",
+    "trait": "E",
+    "reverseKeyed": true
+  },
+  {
+    "id": "Q71",
+    "prompt": "I act spontaneously with friends.",
+    "trait": "E",
+    "reverseKeyed": false
+  },
+  {
+    "id": "Q72",
+    "prompt": "I hold back when with friends.",
+    "trait": "E",
+    "reverseKeyed": true
+  },
+  {
+    "id": "Q73",
+    "prompt": "I feel sympathy for others' struggles.",
+    "trait": "A",
+    "reverseKeyed": false
+  },
+  {
+    "id": "Q74",
+    "prompt": "I find it hard to relate to others' struggles.",
+    "trait": "A",
+    "reverseKeyed": true
+  },
+  {
+    "id": "Q75",
+    "prompt": "I make time to help people.",
+    "trait": "A",
+    "reverseKeyed": false
+  },
+  {
+    "id": "Q76",
+    "prompt": "I avoid getting involved in others' problems.",
+    "trait": "A",
+    "reverseKeyed": true
+  },
+  {
+    "id": "Q77",
+    "prompt": "I trust that people mean well.",
+    "trait": "A",
+    "reverseKeyed": false
+  },
+  {
+    "id": "Q78",
+    "prompt": "I doubt that people mean well.",
+    "trait": "A",
+    "reverseKeyed": true
+  },
+  {
+    "id": "Q79",
+    "prompt": "I enjoy cooperating on projects.",
+    "trait": "A",
+    "reverseKeyed": false
+  },
+  {
+    "id": "Q80",
+    "prompt": "I prefer to work alone to avoid compromise.",
+    "trait": "A",
+    "reverseKeyed": true
+  },
+  {
+    "id": "Q81",
+    "prompt": "I stay patient in tense moments.",
+    "trait": "A",
+    "reverseKeyed": false
+  },
+  {
+    "id": "Q82",
+    "prompt": "I lose patience quickly.",
+    "trait": "A",
+    "reverseKeyed": true
+  },
+  {
+    "id": "Q83",
+    "prompt": "I listen carefully to others.",
+    "trait": "A",
+    "reverseKeyed": false
+  },
+  {
+    "id": "Q84",
+    "prompt": "I interrupt others when they speak.",
+    "trait": "A",
+    "reverseKeyed": true
+  },
+  {
+    "id": "Q85",
+    "prompt": "I forgive people who make mistakes.",
+    "trait": "A",
+    "reverseKeyed": false
+  },
+  {
+    "id": "Q86",
+    "prompt": "I hold onto grudges.",
+    "trait": "A",
+    "reverseKeyed": true
+  },
+  {
+    "id": "Q87",
+    "prompt": "I speak kindly even when stressed.",
+    "trait": "A",
+    "reverseKeyed": false
+  },
+  {
+    "id": "Q88",
+    "prompt": "I become sharp when stressed.",
+    "trait": "A",
+    "reverseKeyed": true
+  },
+  {
+    "id": "Q89",
+    "prompt": "I look for win-win solutions.",
+    "trait": "A",
+    "reverseKeyed": false
+  },
+  {
+    "id": "Q90",
+    "prompt": "I focus on getting my way.",
+    "trait": "A",
+    "reverseKeyed": true
+  },
+  {
+    "id": "Q91",
+    "prompt": "I enjoy making people feel welcome.",
+    "trait": "A",
+    "reverseKeyed": false
+  },
+  {
+    "id": "Q92",
+    "prompt": "I do not try to make people feel welcome.",
+    "trait": "A",
+    "reverseKeyed": true
+  },
+  {
+    "id": "Q93",
+    "prompt": "I believe most people are honest.",
+    "trait": "A",
+    "reverseKeyed": false
+  },
+  {
+    "id": "Q94",
+    "prompt": "I expect people to take advantage of me.",
+    "trait": "A",
+    "reverseKeyed": true
+  },
+  {
+    "id": "Q95",
+    "prompt": "I prefer harmony over conflict.",
+    "trait": "A",
+    "reverseKeyed": false
+  },
+  {
+    "id": "Q96",
+    "prompt": "I do not mind conflict.",
+    "trait": "A",
+    "reverseKeyed": true
+  },
+  {
+    "id": "Q97",
+    "prompt": "I worry about many things.",
+    "trait": "N",
+    "reverseKeyed": false
+  },
+  {
+    "id": "Q98",
+    "prompt": "I rarely worry about things.",
+    "trait": "N",
+    "reverseKeyed": true
+  },
+  {
+    "id": "Q99",
+    "prompt": "I feel anxious before big events.",
+    "trait": "N",
+    "reverseKeyed": false
+  },
+  {
+    "id": "Q100",
+    "prompt": "I stay calm before big events.",
+    "trait": "N",
+    "reverseKeyed": true
+  },
+  {
+    "id": "Q101",
+    "prompt": "I get frustrated easily.",
+    "trait": "N",
+    "reverseKeyed": false
+  },
+  {
+    "id": "Q102",
+    "prompt": "I rarely get frustrated.",
+    "trait": "N",
+    "reverseKeyed": true
+  },
+  {
+    "id": "Q103",
+    "prompt": "I feel self-conscious in groups.",
+    "trait": "N",
+    "reverseKeyed": false
+  },
+  {
+    "id": "Q104",
+    "prompt": "I rarely feel self-conscious in groups.",
+    "trait": "N",
+    "reverseKeyed": true
+  },
+  {
+    "id": "Q105",
+    "prompt": "I stress over unexpected changes.",
+    "trait": "N",
+    "reverseKeyed": false
+  },
+  {
+    "id": "Q106",
+    "prompt": "I take unexpected changes in stride.",
+    "trait": "N",
+    "reverseKeyed": true
+  },
+  {
+    "id": "Q107",
+    "prompt": "I dwell on mistakes.",
+    "trait": "N",
+    "reverseKeyed": false
+  },
+  {
+    "id": "Q108",
+    "prompt": "I move on quickly from mistakes.",
+    "trait": "N",
+    "reverseKeyed": true
+  },
+  {
+    "id": "Q109",
+    "prompt": "I feel tense during busy days.",
+    "trait": "N",
+    "reverseKeyed": false
+  },
+  {
+    "id": "Q110",
+    "prompt": "I stay relaxed during busy days.",
+    "trait": "N",
+    "reverseKeyed": true
+  },
+  {
+    "id": "Q111",
+    "prompt": "I get upset when plans fall through.",
+    "trait": "N",
+    "reverseKeyed": false
+  },
+  {
+    "id": "Q112",
+    "prompt": "I stay composed when plans change.",
+    "trait": "N",
+    "reverseKeyed": true
+  },
+  {
+    "id": "Q113",
+    "prompt": "I notice physical signs of stress.",
+    "trait": "N",
+    "reverseKeyed": false
+  },
+  {
+    "id": "Q114",
+    "prompt": "I rarely notice physical signs of stress.",
+    "trait": "N",
+    "reverseKeyed": true
+  },
+  {
+    "id": "Q115",
+    "prompt": "I worry about relationships.",
+    "trait": "N",
+    "reverseKeyed": false
+  },
+  {
+    "id": "Q116",
+    "prompt": "I rarely worry about relationships.",
+    "trait": "N",
+    "reverseKeyed": true
+  },
+  {
+    "id": "Q117",
+    "prompt": "I feel overwhelmed by responsibilities.",
+    "trait": "N",
+    "reverseKeyed": false
+  },
+  {
+    "id": "Q118",
+    "prompt": "I rarely feel overwhelmed by responsibilities.",
+    "trait": "N",
+    "reverseKeyed": true
+  },
+  {
+    "id": "Q119",
+    "prompt": "I experience mood swings.",
+    "trait": "N",
+    "reverseKeyed": false
+  },
+  {
+    "id": "Q120",
+    "prompt": "I rarely experience mood swings.",
+    "trait": "N",
+    "reverseKeyed": true
+  }
+]

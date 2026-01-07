@@ -37,10 +37,7 @@ export default function QuizPage() {
 
   const sanitizedAnswers = useMemo(() => filterAnswers(answers, itemIds), [answers, itemIds]);
 
-  const answeredCount = useMemo(
-    () => items.reduce((count, item) => (sanitizedAnswers[item.id] !== undefined ? count + 1 : count), 0),
-    [items, sanitizedAnswers]
-  );
+  const answeredCount = Object.keys(sanitizedAnswers).length;
 
   useEffect(() => {
     trackQuizEvent('quiz_view');

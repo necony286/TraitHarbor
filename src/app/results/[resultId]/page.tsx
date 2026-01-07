@@ -35,12 +35,8 @@ export default async function ResultsPage({ params }: ResultsPageProps) {
   const supabase = getSupabaseAdminClient();
   const { data, error } = await supabase.from('results').select('id, traits').eq('id', resultId).single();
 
-  if (error || !data) {
-    redirect('/quiz');
-  }
-
   const parsed = resultSchema.safeParse(data);
-  if (!parsed.success) {
+  if (error || !parsed.success) {
     redirect('/quiz');
   }
 

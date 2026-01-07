@@ -47,7 +47,7 @@ export default function QuizPage() {
   }, [answeredCount]);
 
   useEffect(() => {
-    const thresholds: { name: QuizEventName; value: number }[] = [
+    const thresholds: ReadonlyArray<{ readonly name: QuizEventName; readonly value: number }> = [
       { name: 'quiz_25', value: Math.ceil(items.length * 0.25) },
       { name: 'quiz_50', value: Math.ceil(items.length * 0.5) },
       { name: 'quiz_75', value: Math.ceil(items.length * 0.75) },

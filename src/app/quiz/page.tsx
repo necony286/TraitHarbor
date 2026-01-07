@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { PaginationControls } from '../../../components/quiz/PaginationControls';
 import { Progress } from '../../../components/quiz/Progress';
 import { QuestionCard } from '../../../components/quiz/QuestionCard';
@@ -16,7 +17,10 @@ export default function QuizPage() {
   const items = useMemo<QuizItem[]>(() => loadQuizItems(), []);
   const [answers, setAnswers] = useState<AnswerMap>({});
   const [currentPage, setCurrentPage] = useState(0);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
   const totalPages = Math.max(1, Math.ceil(items.length / PAGE_SIZE));
+  const router = useRouter();
 
   const milestonesRef = useRef<Set<string>>(new Set());
   const startTrackedRef = useRef(false);
@@ -76,14 +80,38 @@ export default function QuizPage() {
     setCurrentPage((prev) => Math.max(prev - 1, 0));
   };
 
-  const handleSubmit = () => {
-    if (answeredCount !== items.length) return;
-    clearQuizState();
+  const handleSubmit = async () => {
+    if (answeredCount !== items.length || isSubmitting) return;
+
     if (!milestonesRef.current.has('quiz_complete')) {
       trackQuizEvent('quiz_complete');
       milestonesRef.current.add('quiz_complete');
     }
-    alert('Thanks for completing the quiz! Scoring and results are coming next.');
+
+    setIsSubmitting(true);
+    setSubmitError(null);
+
+    try {
+      const response = await fetch('/api/score', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ answers })
+      });
+
+      const payload = (await response.json()) as { resultId?: string; error?: string };
+
+      if (!response.ok || !payload.resultId) {
+        setSubmitError(payload.error ?? 'We could not score your quiz. Please try again.');
+        return;
+      }
+
+      clearQuizState();
+      router.push(`/results/${payload.resultId}`);
+    } catch (error) {
+      setSubmitError((error as Error).message || 'We could not score your quiz. Please try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -112,10 +140,11 @@ export default function QuizPage() {
       />
 
       <div className="quiz__footer">
-        <button className="button" type="button" onClick={handleSubmit} disabled={answeredCount !== items.length}>
-          Submit answers
+        <button className="button" type="button" onClick={handleSubmit} disabled={answeredCount !== items.length || isSubmitting}>
+          {isSubmitting ? 'Scoring...' : 'Submit answers'}
         </button>
-        <p className="muted">Submit unlocks scoring and results in the next phase.</p>
+        <p className="muted">Submit your answers to generate your free results.</p>
+        {submitError ? <p className="quiz__error">{submitError}</p> : null}
       </div>
     </div>
   );

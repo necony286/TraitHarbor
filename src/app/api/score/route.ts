@@ -37,7 +37,8 @@ export async function POST(request: Request) {
   try {
     supabase = getSupabaseAdminClient();
   } catch (error) {
-    return NextResponse.json({ error: (error as Error).message }, { status: 500 });
+    console.error('Failed to initialize Supabase admin client in score route.', error);
+    return NextResponse.json({ error: 'Unable to process request.' }, { status: 500 });
   }
 
   const { data: createdResult, error: resultError } = await supabase

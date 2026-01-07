@@ -3,6 +3,7 @@ import { getSupabaseAdminClient } from '../../../../../lib/supabase';
 import { logError, logInfo, logWarn } from '../../../../../lib/logger';
 import { parsePaddleWebhook, shouldUpdateOrder } from '../../../../../lib/paddle-webhook';
 import { verifyPaddleSignature } from '../../../../../lib/signature';
+import { orderStatusSchema } from '../../../../../lib/orders';
 
 const getWebhookSecret = () => {
   const secret = process.env.PADDLE_WEBHOOK_SECRET;
@@ -95,10 +96,16 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Order not found.' }, { status: 404 });
   }
 
-  if (!shouldUpdateOrder(order.status, parsedEvent.status)) {
+  const parsedStatus = orderStatusSchema.safeParse(order.status);
+  if (!parsedStatus.success) {
+    logError('Order has invalid status.', { orderId: order.id, status: order.status });
+    return NextResponse.json({ error: 'Invalid order status.' }, { status: 500 });
+  }
+
+  if (!shouldUpdateOrder(parsedStatus.data, parsedEvent.status)) {
     logInfo('Webhook received for already processed order.', {
       orderId: order.id,
-      status: order.status,
+      status: parsedStatus.data,
       eventType: parsedEvent.eventType
     });
     return NextResponse.json({ received: true, ignored: true });

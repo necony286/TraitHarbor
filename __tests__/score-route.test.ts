@@ -30,7 +30,10 @@ describe('score API route', () => {
     rpcMock.mockImplementation(async () => {
       return {
         data: null,
-        error: { message: 'Failed to insert answers: check constraint failed' }
+        error: {
+          message: 'Failed to insert answers: check constraint failed',
+          code: 'XXA02'
+        }
       };
     });
 
@@ -43,7 +46,7 @@ describe('score API route', () => {
     const payload = await response.json();
 
     expect(rpcMock).toHaveBeenCalledWith('create_result_with_answers', {
-      traits: expect.any(Object),
+      traits: { O: 50, C: 0, E: 0, A: 0, N: 0 },
       answers: mockAnswers,
       expected_count: mockItems.length
     });

@@ -11,20 +11,20 @@ declare
   actual_count integer;
 begin
   if traits is null then
-    raise exception 'Traits payload is required.';
+    raise exception 'Traits payload is required.' using errcode = 'XXP01';
   end if;
 
   if answers is null then
-    raise exception 'Answers payload is required.';
+    raise exception 'Answers payload is required.' using errcode = 'XXP01';
   end if;
 
   if expected_count is null then
-    raise exception 'Expected count is required.';
+    raise exception 'Expected count is required.' using errcode = 'XXP01';
   end if;
 
   actual_count := jsonb_object_length(answers);
   if actual_count <> expected_count then
-    raise exception 'Answer count mismatch. Expected %, got %.', expected_count, actual_count;
+    raise exception 'Answer count mismatch. Expected %, got %.', expected_count, actual_count using errcode = 'XXA01';
   end if;
 
   insert into results (traits)
@@ -37,7 +37,7 @@ begin
     from jsonb_each_text(answers);
   exception
     when others then
-      raise exception 'Failed to insert answers: %', SQLERRM;
+      raise exception 'Failed to insert answers: %', SQLERRM using errcode = 'XXA02';
   end;
 
   return result_id;

@@ -5,6 +5,8 @@ import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { orderRecordSchema, type OrderRecord } from '../../../../lib/orders';
 
+const ORDER_STATUS_POLL_INTERVAL_MS = 3000;
+
 const fetchOrder = async (orderId: string) => {
   const response = await fetch(`/api/orders?orderId=${orderId}`);
   if (!response.ok) {
@@ -58,7 +60,7 @@ export default function CheckoutCallbackClient() {
         const updated = await fetchOrder(orderId);
         setOrder(updated);
       } catch (error) {
-        setErrorMessage((error as Error).message || 'Unable to fetch order status.');
+        setErrorMessage(error instanceof Error ? error.message : 'Unable to fetch order status.');
       } finally {
         if (!silent) {
           setIsLoading(false);
@@ -80,7 +82,7 @@ export default function CheckoutCallbackClient() {
         const updated = await markPendingWebhook(orderId);
         setOrder(updated);
       } catch (error) {
-        setErrorMessage((error as Error).message || 'Unable to update order status.');
+        setErrorMessage(error instanceof Error ? error.message : 'Unable to update order status.');
       } finally {
         setIsLoading(false);
       }
@@ -128,7 +130,12 @@ export default function CheckoutCallbackClient() {
         ) : null}
 
         <div className="checkout__actions">
-          <button className="button button--ghost" type="button" onClick={refreshStatus} disabled={!orderId || isLoading}>
+          <button
+            className="button button--ghost"
+            type="button"
+            onClick={() => refreshStatus()}
+            disabled={!orderId || isLoading}
+          >
             Retry status check
           </button>
           <Link className="button" href="/quiz">

@@ -1,15 +1,14 @@
 'use client';
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { trackEvent } from '../../lib/analytics';
+import type { CheckoutConfig } from '../../lib/payments';
+import type { OrderRecord } from '../../lib/orders';
 
-type CheckoutConfig = {
-  environment: 'sandbox' | 'production';
-  clientToken: string;
-  priceId: string;
-  currency: 'EUR';
-  amount: number;
-  description: string;
+type CreateOrderResponse = {
+  order: OrderRecord;
+  checkout: CheckoutConfig;
 };
 
 type CheckoutButtonProps = {
@@ -49,18 +48,19 @@ function loadPaddleScript(): Promise<void> {
 export function CheckoutButton({ resultId }: CheckoutButtonProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const router = useRouter();
 
   const handleCheckout = async () => {
     setErrorMessage(null);
     setIsLoading(true);
 
     try {
-      const response = await fetch('/api/checkout');
+      const response = await fetch('/api/orders', { method: 'POST' });
       if (!response.ok) {
         throw new Error('Checkout unavailable.');
       }
 
-      const config = (await response.json()) as CheckoutConfig;
+      const { order, checkout } = (await response.json()) as CreateOrderResponse;
 
       await loadPaddleScript();
 
@@ -68,18 +68,24 @@ export function CheckoutButton({ resultId }: CheckoutButtonProps) {
         throw new Error('Paddle SDK not available.');
       }
 
-      window.Paddle.Environment.set(config.environment);
-      window.Paddle.Initialize({ token: config.clientToken });
+      window.Paddle.Environment.set(checkout.environment);
+      window.Paddle.Initialize({ token: checkout.clientToken });
 
-      trackEvent('checkout_open', { resultId, priceId: config.priceId });
+      trackEvent('checkout_open', { resultId, priceId: checkout.priceId, orderId: order.id });
 
       window.Paddle.Checkout.open({
         items: [
           {
-            priceId: config.priceId,
+            priceId: checkout.priceId,
             quantity: 1
           }
-        ]
+        ],
+        customData: {
+          order_id: order.id
+        },
+        successCallback: () => {
+          router.push(`/checkout/callback?orderId=${order.id}`);
+        }
       });
     } catch (error) {
       // eslint-disable-next-line no-console

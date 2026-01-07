@@ -442,6 +442,53 @@ a {
   color: var(--color-muted);
 }
 
+.checkout {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.checkout__header h1 {
+  margin: 8px 0 4px;
+}
+
+.checkout__card {
+  background: #fff;
+  border-radius: var(--radius-lg);
+  border: 1px solid rgba(71, 85, 105, 0.15);
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  box-shadow: 0 18px 40px rgba(15, 23, 42, 0.08);
+}
+
+.checkout__status {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.checkout__order {
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.checkout__actions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.checkout__error {
+  color: #b91c1c;
+  margin: 0;
+}
+
+.checkout__note {
+  margin: 0;
+}
+
 @media (max-width: 900px) {
   .quiz-progress__header {
     flex-direction: column;

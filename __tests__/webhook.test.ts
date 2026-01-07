@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { OrderStatus } from '../lib/orders';
 import { extractOrderIds, parsePaddleWebhook, shouldUpdateOrder } from '../lib/paddle-webhook';
 import { createPaddleSignatureHeader, verifyPaddleSignature } from '../lib/signature';
@@ -58,19 +58,60 @@ describe('paddle webhook idempotency', () => {
 });
 
 describe('paddle webhook signatures', () => {
+  it('verifies a valid signature within the tolerance window', () => {
+    const body = JSON.stringify({ event_type: 'payment_succeeded', data: { id: 'txn' } });
+    const secret = 'secret';
+    const now = new Date('2024-01-01T00:00:00Z');
+
+    vi.useFakeTimers();
+    vi.setSystemTime(now);
+
+    const header = createPaddleSignatureHeader(body, secret, Date.now());
+
+    expect(verifyPaddleSignature(body, header, secret)).toBe(true);
+
+    vi.useRealTimers();
+  });
+
   it('verifies a valid signature', () => {
     const body = JSON.stringify({ event_type: 'payment_succeeded', data: { id: 'txn' } });
     const secret = 'secret';
-    const header = createPaddleSignatureHeader(body, secret, 1234567890);
+    const now = new Date('2024-01-01T00:00:00Z');
+
+    vi.useFakeTimers();
+    vi.setSystemTime(now);
+    const header = createPaddleSignatureHeader(body, secret, Date.now());
 
     expect(verifyPaddleSignature(body, header, secret)).toBe(true);
+
+    vi.useRealTimers();
   });
 
   it('rejects an invalid signature', () => {
     const body = JSON.stringify({ event_type: 'payment_succeeded', data: { id: 'txn' } });
     const secret = 'secret';
-    const header = createPaddleSignatureHeader(body, 'wrong', 1234567890);
+    const now = new Date('2024-01-01T00:00:00Z');
+
+    vi.useFakeTimers();
+    vi.setSystemTime(now);
+    const header = createPaddleSignatureHeader(body, 'wrong', Date.now());
 
     expect(verifyPaddleSignature(body, header, secret)).toBe(false);
+
+    vi.useRealTimers();
+  });
+
+  it('rejects stale timestamps for h1 signatures', () => {
+    const body = JSON.stringify({ event_type: 'payment_succeeded', data: { id: 'txn' } });
+    const secret = 'secret';
+    const now = new Date('2024-01-01T00:10:00Z');
+
+    vi.useFakeTimers();
+    vi.setSystemTime(now);
+    const header = createPaddleSignatureHeader(body, secret, '1704066900');
+
+    expect(verifyPaddleSignature(body, header, secret)).toBe(false);
+
+    vi.useRealTimers();
   });
 });

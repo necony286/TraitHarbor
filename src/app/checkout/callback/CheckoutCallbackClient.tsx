@@ -60,7 +60,7 @@ export default function CheckoutCallbackClient() {
         const updated = await fetchOrder(orderId);
         setOrder(updated);
       } catch (error) {
-        setErrorMessage(error instanceof Error ? error.message : 'Unable to fetch order status.');
+        setErrorMessage((error instanceof Error && error.message) || 'Unable to fetch order status.');
       } finally {
         if (!silent) {
           setIsLoading(false);

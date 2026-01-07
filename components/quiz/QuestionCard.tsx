@@ -17,7 +17,12 @@ export function QuestionCard({ item, value, onChange }: QuestionCardProps) {
           {item.prompt}
         </p>
       </div>
-      <Likert name={item.id} value={value} onChange={onChange} />
+      <Likert
+        name={item.id}
+        value={value}
+        onChange={onChange}
+        ariaLabelledby={`${item.id}-label`}
+      />
     </article>
   );
 }

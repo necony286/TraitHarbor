@@ -44,12 +44,13 @@ describe('quiz storage helpers', () => {
 describe('Likert component', () => {
   it('renders options and reports selections', () => {
     const onChange = vi.fn();
-    render(<Likert name="test" value={3} onChange={onChange} />);
+    render(<Likert name="test" value={3} onChange={onChange} ariaLabelledby="test-label" />);
 
     const agreeOption = screen.getByLabelText(/^Agree$/i);
     fireEvent.click(agreeOption);
 
     expect(onChange).toHaveBeenCalledWith(4);
     expect(screen.getAllByRole('radio')).toHaveLength(5);
+    expect(screen.getByRole('radiogroup')).toHaveAttribute('aria-labelledby', 'test-label');
   });
 });

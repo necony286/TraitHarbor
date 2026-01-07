@@ -8,6 +8,16 @@ const scoreRequestSchema = z.object({
   answers: z.record(z.string(), z.number().int().min(1).max(5))
 });
 
+const isAnswerStorageError = (error?: { message?: string } | null) => {
+  if (!error?.message) return false;
+  const message = error.message.toLowerCase();
+  return (
+    message.includes('answer') ||
+    message.includes('result_answers') ||
+    message.includes('constraint')
+  );
+};
+
 export async function POST(request: Request) {
   let payload: unknown;
 
@@ -47,34 +57,24 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Unable to process request.' }, { status: 500 });
   }
 
-  const { data: createdResult, error: resultError } = await supabase
-    .from('results')
-    .insert({ traits: result.traits })
-    .select('id')
-    .single();
-
-  if (resultError || !createdResult) {
-    if (resultError) {
-      console.error('Failed to store results', resultError);
+  const { data: createdResultId, error: rpcError } = await supabase.rpc(
+    'create_result_with_answers',
+    {
+      traits: result.traits,
+      answers,
+      expected_count: items.length
     }
-    return NextResponse.json({ error: 'Failed to store results.' }, { status: 500 });
+  );
+
+  if (rpcError || !createdResultId) {
+    if (rpcError) {
+      console.error('Failed to store result answers via RPC.', rpcError);
+    }
+    const errorMessage = isAnswerStorageError(rpcError)
+      ? 'Failed to store answers.'
+      : 'Failed to store results.';
+    return NextResponse.json({ error: errorMessage }, { status: 500 });
   }
 
-  const answerRows = items.map((item) => ({
-    result_id: createdResult.id,
-    question_id: item.id,
-    answer: answers[item.id]
-  }));
-
-  const { error: answersError } = await supabase.from('result_answers').insert(answerRows);
-
-  if (answersError) {
-    console.error('Failed to store answers for result.', {
-      resultId: createdResult.id,
-      error: answersError
-    });
-    return NextResponse.json({ error: 'Failed to store answers.' }, { status: 500 });
-  }
-
-  return NextResponse.json({ resultId: createdResult.id });
+  return NextResponse.json({ resultId: createdResultId });
 }

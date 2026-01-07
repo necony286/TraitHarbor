@@ -72,15 +72,15 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Unable to process webhook.' }, { status: 500 });
   }
 
-  const lookupQuery = parsedEvent.orderId
-    ? supabase.from('orders').select('id, status, paddle_order_id').eq('id', parsedEvent.orderId).maybeSingle()
-    : supabase
-        .from('orders')
-        .select('id, status, paddle_order_id')
-        .eq('paddle_order_id', parsedEvent.paddleOrderId ?? '')
-        .maybeSingle();
+  let lookupQuery = supabase.from('orders').select('id, status, paddle_order_id');
 
-  const { data: order, error: lookupError } = await lookupQuery;
+  if (parsedEvent.orderId) {
+    lookupQuery = lookupQuery.eq('id', parsedEvent.orderId);
+  } else {
+    lookupQuery = lookupQuery.eq('paddle_order_id', parsedEvent.paddleOrderId!);
+  }
+
+  const { data: order, error: lookupError } = await lookupQuery.maybeSingle();
 
   if (lookupError) {
     logError('Failed to lookup order for webhook.', { error: lookupError.message });

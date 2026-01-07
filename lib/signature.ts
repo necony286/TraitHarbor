@@ -1,7 +1,8 @@
 import crypto from 'crypto';
 
 type SignatureParts = {
-  timestamp: string;
+  scheme: 'h1' | 'v1';
+  timestamp?: string;
   signature: string;
 };
 
@@ -17,13 +18,21 @@ const parseSignatureHeader = (header: string): SignatureParts | null => {
   });
 
   const timestamp = map.get('ts') ?? map.get('t');
-  const signature = map.get('h1') ?? map.get('v1');
+  const h1Signature = map.get('h1');
+  const v1Signature = map.get('v1');
 
-  if (!timestamp || !signature) {
-    return null;
+  if (h1Signature) {
+    if (!timestamp) {
+      return null;
+    }
+    return { scheme: 'h1', timestamp, signature: h1Signature };
   }
 
-  return { timestamp, signature };
+  if (v1Signature) {
+    return { scheme: 'v1', signature: v1Signature };
+  }
+
+  return null;
 };
 
 const createHmac = (payload: string, secret: string) =>
@@ -44,8 +53,27 @@ export const verifyPaddleSignature = (body: string, header: string | null, secre
   const parsed = parseSignatureHeader(header);
   if (!parsed) return false;
 
-  const primary = createHmac(`${parsed.timestamp}:${body}`, secret);
-  const legacy = createHmac(body, secret);
+  if (parsed.scheme === 'h1') {
+    const eventTimestamp = Number(parsed.timestamp);
+    if (!Number.isFinite(eventTimestamp)) {
+      return false;
+    }
 
-  return parsed.signature === primary || parsed.signature === legacy;
+    const timestampMs = eventTimestamp >= 1_000_000_000_000 ? eventTimestamp : eventTimestamp * 1000;
+    const toleranceMs = 5 * 60 * 1000;
+
+    if (Math.abs(Date.now() - timestampMs) > toleranceMs) {
+      return false;
+    }
+
+    const expectedSignature = createHmac(`${parsed.timestamp}:${body}`, secret);
+    return parsed.signature === expectedSignature;
+  }
+
+  if (parsed.scheme === 'v1') {
+    const expectedSignature = createHmac(body, secret);
+    return parsed.signature === expectedSignature;
+  }
+
+  return false;
 };

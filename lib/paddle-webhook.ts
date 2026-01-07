@@ -71,6 +71,5 @@ export const shouldUpdateOrder = (currentStatus: OrderStatus, nextStatus?: Paddl
   if (!nextStatus) return false;
   if (currentStatus === nextStatus) return false;
   if (currentStatus === 'paid') return false;
-  if (currentStatus === 'failed' && nextStatus === 'failed') return false;
   return true;
 };

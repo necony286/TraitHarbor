@@ -25,6 +25,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <header className="shell__header">
             <Link href="/" className="brand">BigFive</Link>
             <nav aria-label="Primary">
+              <Link className="nav-link" href="/quiz">
+                Quiz
+              </Link>
               <a className="nav-link" href="#tokens">Design system</a>
               <a className="nav-link" href="#get-started">Get started</a>
             </nav>

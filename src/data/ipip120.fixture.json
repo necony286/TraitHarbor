@@ -1,1 +1,62 @@
-[]
+[
+  {
+    "id": "Q1",
+    "prompt": "I enjoy exploring new ideas.",
+    "trait": "O",
+    "reverseKeyed": false
+  },
+  {
+    "id": "Q2",
+    "prompt": "I avoid exploring unfamiliar ideas.",
+    "trait": "O",
+    "reverseKeyed": true
+  },
+  {
+    "id": "Q3",
+    "prompt": "I appreciate art and beauty.",
+    "trait": "O",
+    "reverseKeyed": false
+  },
+  {
+    "id": "Q4",
+    "prompt": "I pay little attention to art or beauty.",
+    "trait": "O",
+    "reverseKeyed": true
+  },
+  {
+    "id": "Q5",
+    "prompt": "I like solving complex problems.",
+    "trait": "O",
+    "reverseKeyed": false
+  },
+  {
+    "id": "Q6",
+    "prompt": "I feel uneasy with complex problems.",
+    "trait": "O",
+    "reverseKeyed": true
+  },
+  {
+    "id": "Q7",
+    "prompt": "I seek out new experiences.",
+    "trait": "O",
+    "reverseKeyed": false
+  },
+  {
+    "id": "Q8",
+    "prompt": "I stick to familiar experiences.",
+    "trait": "O",
+    "reverseKeyed": true
+  },
+  {
+    "id": "Q9",
+    "prompt": "I enjoy philosophical discussions.",
+    "trait": "O",
+    "reverseKeyed": false
+  },
+  {
+    "id": "Q10",
+    "prompt": "I lose interest in philosophical discussions.",
+    "trait": "O",
+    "reverseKeyed": true
+  }
+]

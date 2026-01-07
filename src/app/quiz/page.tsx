@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { PaginationControls } from '../../../components/quiz/PaginationControls';
 import { Progress } from '../../../components/quiz/Progress';
 import { QuestionCard } from '../../../components/quiz/QuestionCard';
-import { trackQuizEvent } from '../../../lib/analytics';
+import { QuizEventName, trackQuizEvent } from '../../../lib/analytics';
 import { loadQuizItems, QuizItem } from '../../../lib/ipip';
 import { clearQuizState, loadQuizState, saveQuizState } from '../../../lib/storage';
 
@@ -47,7 +47,7 @@ export default function QuizPage() {
   }, [answeredCount]);
 
   useEffect(() => {
-    const thresholds = [
+    const thresholds: { name: QuizEventName; value: number }[] = [
       { name: 'quiz_25', value: Math.ceil(items.length * 0.25) },
       { name: 'quiz_50', value: Math.ceil(items.length * 0.5) },
       { name: 'quiz_75', value: Math.ceil(items.length * 0.75) },
@@ -56,7 +56,7 @@ export default function QuizPage() {
 
     thresholds.forEach((threshold) => {
       if (answeredCount >= threshold.value && !milestonesRef.current.has(threshold.name)) {
-        trackQuizEvent(threshold.name as Parameters<typeof trackQuizEvent>[0]);
+        trackQuizEvent(threshold.name);
         milestonesRef.current.add(threshold.name);
       }
     });

@@ -5,9 +5,10 @@ export type AnalyticsEventName =
   | 'quiz_50'
   | 'quiz_75'
   | 'quiz_complete'
-  | 'paywall_view';
+  | 'paywall_view'
+  | 'checkout_open';
 
-export type QuizEventName = Exclude<AnalyticsEventName, 'paywall_view'>;
+export type QuizEventName = Exclude<AnalyticsEventName, 'paywall_view' | 'checkout_open'>;
 
 type EventPayload = Record<string, unknown> | undefined;
 

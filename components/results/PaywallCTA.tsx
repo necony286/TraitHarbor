@@ -2,6 +2,7 @@
 
 import { useEffect } from 'react';
 import { trackEvent } from '../../lib/analytics';
+import { CheckoutButton } from '../paywall/CheckoutButton';
 
 type PaywallCTAProps = {
   resultId: string;
@@ -12,10 +13,6 @@ export function PaywallCTA({ resultId }: PaywallCTAProps) {
     trackEvent('paywall_view', { resultId });
   }, [resultId]);
 
-  const handleClick = () => {
-    alert('Checkout is coming next. You will be able to unlock your full PDF report soon.');
-  };
-
   return (
     <div className="paywall-cta">
       <div>
@@ -23,9 +20,7 @@ export function PaywallCTA({ resultId }: PaywallCTAProps) {
         <h2>Unlock full report (PDF)</h2>
         <p className="muted">Get a personalized, shareable report with deep trait insights and tailored guidance.</p>
       </div>
-      <button className="button" type="button" onClick={handleClick}>
-        Unlock full report (PDF)
-      </button>
+      <CheckoutButton resultId={resultId} />
     </div>
   );
 }

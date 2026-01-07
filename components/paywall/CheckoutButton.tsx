@@ -63,6 +63,7 @@ export function CheckoutButton({ resultId }: CheckoutButtonProps) {
 
       const parsedResponse = createOrderResponseSchema.safeParse(await response.json());
       if (!parsedResponse.success) {
+        console.error('Invalid checkout response from API:', parsedResponse.error);
         throw new Error('Invalid checkout response.');
       }
 

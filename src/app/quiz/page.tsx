@@ -25,10 +25,7 @@ export default function QuizPage() {
   const milestonesRef = useRef<Set<string>>(new Set());
   const startTrackedRef = useRef(false);
 
-  const answeredCount = useMemo(
-    () => items.reduce((count, item) => (answers[item.id] ? count + 1 : count), 0),
-    [answers, items]
-  );
+  const answeredCount = Object.keys(answers).length;
 
   useEffect(() => {
     trackQuizEvent('quiz_view');

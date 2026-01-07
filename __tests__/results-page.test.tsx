@@ -9,17 +9,14 @@ vi.mock('next/navigation', () => ({
 const validResultId = '11111111-1111-1111-1111-111111111111';
 
 describe('ResultsPage', () => {
-  const originalEnv = process.env;
-
   beforeEach(() => {
     vi.resetModules();
-    process.env = { ...originalEnv };
-    delete process.env.SUPABASE_URL;
-    delete process.env.SUPABASE_SERVICE_ROLE_KEY;
+    vi.stubEnv('SUPABASE_URL', '');
+    vi.stubEnv('SUPABASE_SERVICE_ROLE_KEY', '');
   });
 
   afterEach(() => {
-    process.env = originalEnv;
+    vi.unstubAllEnvs();
   });
 
   it('renders a fallback when Supabase configuration is missing', async () => {

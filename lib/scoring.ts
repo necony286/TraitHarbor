@@ -28,7 +28,7 @@ export const normalizeScore = (raw: number, count: number) => {
   const min = -2 * count;
   const max = 2 * count;
   const normalized = ((raw - min) / (max - min)) * 100;
-  return Number(normalized.toFixed(2));
+  return Math.round(normalized * 100) / 100;
 };
 
 export const getMissingAnswerIds = (answers: AnswerMap, items: QuizItem[]) =>

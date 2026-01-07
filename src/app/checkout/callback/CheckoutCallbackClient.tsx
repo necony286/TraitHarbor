@@ -82,7 +82,7 @@ export default function CheckoutCallbackClient() {
         const updated = await markPendingWebhook(orderId);
         setOrder(updated);
       } catch (error) {
-        setErrorMessage(error instanceof Error ? error.message : 'Unable to update order status.');
+        setErrorMessage((error instanceof Error && error.message) || 'Unable to update order status.');
       } finally {
         setIsLoading(false);
       }

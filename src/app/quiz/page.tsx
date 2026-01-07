@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { z } from 'zod';
 import { PaginationControls } from '../../../components/quiz/PaginationControls';
 import { Progress } from '../../../components/quiz/Progress';
 import { QuestionCard } from '../../../components/quiz/QuestionCard';
@@ -12,6 +13,11 @@ import { clearQuizState, loadQuizState, saveQuizState } from '../../../lib/stora
 const PAGE_SIZE = 12;
 
 type AnswerMap = Record<string, number>;
+
+const scoreResponseSchema = z.object({
+  resultId: z.string().optional(),
+  error: z.string().optional()
+});
 
 export default function QuizPage() {
   const items = useMemo<QuizItem[]>(() => loadQuizItems(), []);
@@ -93,7 +99,15 @@ export default function QuizPage() {
         body: JSON.stringify({ answers })
       });
 
-      const payload = (await response.json()) as { resultId?: string; error?: string };
+      const parsedPayload = scoreResponseSchema.safeParse(await response.json());
+
+      if (!parsedPayload.success) {
+        console.error('Invalid score response payload', parsedPayload.error);
+        setSubmitError('We could not score your quiz. Please try again.');
+        return;
+      }
+
+      const payload = parsedPayload.data;
 
       if (!response.ok || !payload.resultId) {
         setSubmitError(payload.error ?? 'We could not score your quiz. Please try again.');

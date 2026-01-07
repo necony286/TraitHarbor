@@ -23,8 +23,8 @@ export function TraitSummary({ scores }: TraitSummaryProps) {
             </header>
             <p className="muted">{details.description}</p>
             <ul>
-              {details.guidance.map((tip) => (
-                <li key={tip}>{tip}</li>
+              {details.guidance.map((tip, index) => (
+                <li key={index}>{tip}</li>
               ))}
             </ul>
           </article>

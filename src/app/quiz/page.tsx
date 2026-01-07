@@ -83,11 +83,6 @@ export default function QuizPage() {
   const handleSubmit = async () => {
     if (answeredCount !== items.length || isSubmitting) return;
 
-    if (!milestonesRef.current.has('quiz_complete')) {
-      trackQuizEvent('quiz_complete');
-      milestonesRef.current.add('quiz_complete');
-    }
-
     setIsSubmitting(true);
     setSubmitError(null);
 

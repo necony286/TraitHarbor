@@ -4,6 +4,7 @@ type LikertProps = {
   name: string;
   value?: number;
   onChange: (value: number) => void;
+  ariaLabelledby: string;
 };
 
 const options = [
@@ -14,9 +15,9 @@ const options = [
   { label: 'Strongly agree', value: 5 }
 ];
 
-export function Likert({ name, value, onChange }: LikertProps) {
+export function Likert({ name, value, onChange, ariaLabelledby }: LikertProps) {
   return (
-    <div className="likert" role="radiogroup" aria-label="Rate your agreement">
+    <div className="likert" role="radiogroup" aria-labelledby={ariaLabelledby}>
       {options.map((option) => (
         <label key={option.value} className={`likert__option${value === option.value ? ' likert__option--selected' : ''}`}>
           <input

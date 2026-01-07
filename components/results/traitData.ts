@@ -6,6 +6,8 @@ export type TraitDetails = {
   guidance: string[];
 };
 
+export const TRAIT_ORDER: TraitKey[] = ['O', 'C', 'E', 'A', 'N'];
+
 export const TRAIT_DETAILS: Record<TraitKey, TraitDetails> = {
   O: {
     label: 'Openness',

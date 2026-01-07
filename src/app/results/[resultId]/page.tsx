@@ -1,3 +1,4 @@
+import React from 'react';
 import { redirect } from 'next/navigation';
 import { z } from 'zod';
 import { PaywallCTA } from '../../../../components/results/PaywallCTA';
@@ -32,7 +33,24 @@ export default async function ResultsPage({ params }: ResultsPageProps) {
     redirect('/quiz');
   }
 
-  const supabase = getSupabaseAdminClient();
+  let supabase: ReturnType<typeof getSupabaseAdminClient>;
+  try {
+    supabase = getSupabaseAdminClient();
+  } catch (error) {
+    console.error('Failed to initialize Supabase admin client for results page.', {
+      message: error instanceof Error ? error.message : 'Unknown error'
+    });
+
+    return (
+      <div className="results">
+        <header className="results__header">
+          <p className="eyebrow">Results unavailable</p>
+          <h1>We couldn&apos;t load your results</h1>
+          <p className="muted">Please return to the quiz and try again in a moment.</p>
+        </header>
+      </div>
+    );
+  }
   const { data, error } = await supabase.from('results').select('id, traits').eq('id', resultId).single();
 
   const parsed = resultSchema.safeParse(data);

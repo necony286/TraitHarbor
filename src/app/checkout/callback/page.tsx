@@ -100,7 +100,7 @@ export default function CheckoutCallbackPage() {
 
     const intervalId = window.setInterval(() => {
       void refreshStatus({ silent: true });
-    }, 4000);
+    }, ORDER_STATUS_POLL_INTERVAL_MS);
 
     return () => window.clearInterval(intervalId);
   }, [orderId, order?.status, refreshStatus]);

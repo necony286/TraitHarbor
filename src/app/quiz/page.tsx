@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { z } from 'zod';
 import { PaginationControls } from '../../../components/quiz/PaginationControls';
@@ -32,12 +32,14 @@ export default function QuizPage() {
   const totalPages = Math.max(1, Math.ceil(items.length / PAGE_SIZE));
   const router = useRouter();
 
-  const milestonesRef = useRef<Set<string>>(new Set());
-  const startTrackedRef = useRef(false);
-
   const sanitizedAnswers = useMemo(() => filterAnswers(answers, itemIds), [answers, itemIds]);
 
   const answeredCount = Object.keys(sanitizedAnswers).length;
+
+  const milestonesRef = useRef<Set<string>>(new Set());
+  const startTrackedRef = useRef(false);
+  const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const latestSaveStateRef = useRef({ answers: sanitizedAnswers, currentPage, itemCount: items.length });
 
   useEffect(() => {
     trackQuizEvent('quiz_view');
@@ -72,8 +74,36 @@ export default function QuizPage() {
   }, [answeredCount, items.length]);
 
   useEffect(() => {
-    saveQuizState({ answers: sanitizedAnswers, currentPage, itemCount: items.length });
+    latestSaveStateRef.current = { answers: sanitizedAnswers, currentPage, itemCount: items.length };
   }, [currentPage, items.length, sanitizedAnswers]);
+
+  useEffect(() => {
+    if (saveTimerRef.current) {
+      clearTimeout(saveTimerRef.current);
+    }
+
+    saveTimerRef.current = setTimeout(() => {
+      saveQuizState(latestSaveStateRef.current);
+      saveTimerRef.current = null;
+    }, 400);
+
+    return () => {
+      if (saveTimerRef.current) {
+        clearTimeout(saveTimerRef.current);
+        saveTimerRef.current = null;
+      }
+    };
+  }, [currentPage, items.length, sanitizedAnswers]);
+
+  useEffect(() => {
+    return () => {
+      if (saveTimerRef.current) {
+        clearTimeout(saveTimerRef.current);
+        saveTimerRef.current = null;
+      }
+      saveQuizState(latestSaveStateRef.current);
+    };
+  }, []);
 
   const pageItems = items.slice(currentPage * PAGE_SIZE, currentPage * PAGE_SIZE + PAGE_SIZE);
 

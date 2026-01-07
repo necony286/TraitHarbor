@@ -19,8 +19,12 @@ const scoreResponseSchema = z.object({
   error: z.string().optional()
 });
 
+const filterAnswers = (answers: AnswerMap, itemIds: Set<string>) =>
+  Object.fromEntries(Object.entries(answers).filter(([id]) => itemIds.has(id)));
+
 export default function QuizPage() {
   const items = useMemo<QuizItem[]>(() => loadQuizItems(), []);
+  const itemIds = useMemo(() => new Set(items.map((item) => item.id)), [items]);
   const [answers, setAnswers] = useState<AnswerMap>({});
   const [currentPage, setCurrentPage] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -31,19 +35,21 @@ export default function QuizPage() {
   const milestonesRef = useRef<Set<string>>(new Set());
   const startTrackedRef = useRef(false);
 
+  const sanitizedAnswers = useMemo(() => filterAnswers(answers, itemIds), [answers, itemIds]);
+
   const answeredCount = useMemo(
-    () => items.reduce((count, item) => (answers[item.id] ? count + 1 : count), 0),
-    [answers, items]
+    () => items.reduce((count, item) => (sanitizedAnswers[item.id] !== undefined ? count + 1 : count), 0),
+    [items, sanitizedAnswers]
   );
 
   useEffect(() => {
     trackQuizEvent('quiz_view');
     const saved = loadQuizState(items.length);
     if (saved) {
-      setAnswers(saved.answers);
+      setAnswers(filterAnswers(saved.answers, itemIds));
       setCurrentPage(Math.min(saved.currentPage, totalPages - 1));
     }
-  }, [items.length, totalPages]);
+  }, [itemIds, items.length, totalPages]);
 
   useEffect(() => {
     if (answeredCount > 0 && !startTrackedRef.current) {
@@ -69,8 +75,8 @@ export default function QuizPage() {
   }, [answeredCount, items.length]);
 
   useEffect(() => {
-    saveQuizState({ answers, currentPage, itemCount: items.length });
-  }, [answers, currentPage, items.length]);
+    saveQuizState({ answers: sanitizedAnswers, currentPage, itemCount: items.length });
+  }, [currentPage, items.length, sanitizedAnswers]);
 
   const pageItems = items.slice(currentPage * PAGE_SIZE, currentPage * PAGE_SIZE + PAGE_SIZE);
 
@@ -96,7 +102,7 @@ export default function QuizPage() {
       const response = await fetch('/api/score', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ answers })
+        body: JSON.stringify({ answers: sanitizedAnswers })
       });
 
       const parsedPayload = scoreResponseSchema.safeParse(await response.json());
@@ -137,7 +143,12 @@ export default function QuizPage() {
 
       <div className="question-grid" aria-live="polite">
         {pageItems.map((item) => (
-          <QuestionCard key={item.id} item={item} value={answers[item.id]} onChange={(value) => updateAnswer(item.id, value)} />
+          <QuestionCard
+            key={item.id}
+            item={item}
+            value={sanitizedAnswers[item.id]}
+            onChange={(value) => updateAnswer(item.id, value)}
+          />
         ))}
       </div>
 

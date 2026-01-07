@@ -17,12 +17,12 @@ const updateOrderSchema = z.object({
 });
 
 export async function POST(request: Request) {
-  let payload: unknown = {};
+  let payload: unknown;
 
   try {
     payload = await request.json();
   } catch {
-    payload = {};
+    return NextResponse.json({ error: 'Invalid JSON payload.' }, { status: 400 });
   }
 
   const parsed = createOrderBodySchema.safeParse(payload);
@@ -95,7 +95,15 @@ export async function GET(request: Request) {
     .eq('id', orderId)
     .single();
 
-  if (error || !data) {
+  if (error) {
+    console.error('Failed to fetch order.', error);
+    if (error.code === 'PGRST116') {
+      return NextResponse.json({ error: 'Order not found.' }, { status: 404 });
+    }
+    return NextResponse.json({ error: 'Unable to fetch order.' }, { status: 500 });
+  }
+
+  if (!data) {
     return NextResponse.json({ error: 'Order not found.' }, { status: 404 });
   }
 
@@ -144,8 +152,16 @@ export async function PATCH(request: Request) {
     .select('id, status, amount_cents, paddle_order_id, created_at')
     .single();
 
-  if (error || !data) {
-    return NextResponse.json({ error: 'Unable to update order.' }, { status: 404 });
+  if (error) {
+    console.error('Failed to update order.', error);
+    if (error.code === 'PGRST116') {
+      return NextResponse.json({ error: 'Order not found.' }, { status: 404 });
+    }
+    return NextResponse.json({ error: 'Unable to update order.' }, { status: 500 });
+  }
+
+  if (!data) {
+    return NextResponse.json({ error: 'Order not found.' }, { status: 404 });
   }
 
   const parsedOrder = orderSchema.safeParse(data);

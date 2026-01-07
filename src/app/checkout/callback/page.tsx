@@ -3,15 +3,19 @@
 import { useCallback, useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
-import type { OrderRecord } from '../../../../lib/orders';
+import { orderRecordSchema, type OrderRecord } from '../../../../lib/orders';
 
 const fetchOrder = async (orderId: string) => {
   const response = await fetch(`/api/orders?orderId=${orderId}`);
   if (!response.ok) {
     throw new Error('Unable to load order status.');
   }
-  const payload = (await response.json()) as { order: OrderRecord };
-  return payload.order;
+  const payload = await response.json();
+  const parsed = orderRecordSchema.safeParse(payload?.order);
+  if (!parsed.success) {
+    throw new Error('Unable to load order status.');
+  }
+  return parsed.data;
 };
 
 const markPendingWebhook = async (orderId: string) => {
@@ -25,8 +29,12 @@ const markPendingWebhook = async (orderId: string) => {
     throw new Error('Unable to update order status.');
   }
 
-  const payload = (await response.json()) as { order: OrderRecord };
-  return payload.order;
+  const payload = await response.json();
+  const parsed = orderRecordSchema.safeParse(payload?.order);
+  if (!parsed.success) {
+    throw new Error('Unable to update order status.');
+  }
+  return parsed.data;
 };
 
 export default function CheckoutCallbackPage() {
@@ -36,10 +44,13 @@ export default function CheckoutCallbackPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  const refreshStatus = useCallback(async () => {
+  const refreshStatus = useCallback(
+    async ({ silent = false }: { silent?: boolean } = {}) => {
     if (!orderId) return;
-    setIsLoading(true);
-    setErrorMessage(null);
+    if (!silent) {
+      setIsLoading(true);
+      setErrorMessage(null);
+    }
 
     try {
       const updated = await fetchOrder(orderId);
@@ -47,9 +58,13 @@ export default function CheckoutCallbackPage() {
     } catch (error) {
       setErrorMessage((error as Error).message || 'Unable to fetch order status.');
     } finally {
-      setIsLoading(false);
+      if (!silent) {
+        setIsLoading(false);
+      }
     }
-  }, [orderId]);
+  },
+    [orderId]
+  );
 
   useEffect(() => {
     if (!orderId) {
@@ -71,6 +86,22 @@ export default function CheckoutCallbackPage() {
 
     updateOrderStatus();
   }, [orderId]);
+
+  useEffect(() => {
+    if (!orderId) {
+      return;
+    }
+
+    if (order?.status && order.status !== 'pending_webhook') {
+      return;
+    }
+
+    const intervalId = window.setInterval(() => {
+      void refreshStatus({ silent: true });
+    }, 4000);
+
+    return () => window.clearInterval(intervalId);
+  }, [orderId, order?.status, refreshStatus]);
 
   return (
     <div className="checkout">

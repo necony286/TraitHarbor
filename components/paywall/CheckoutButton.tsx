@@ -3,13 +3,14 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { trackEvent } from '../../lib/analytics';
-import type { CheckoutConfig } from '../../lib/payments';
-import type { OrderRecord } from '../../lib/orders';
+import { z } from 'zod';
+import { checkoutConfigSchema } from '../../lib/payments';
+import { orderRecordSchema } from '../../lib/orders';
 
-type CreateOrderResponse = {
-  order: OrderRecord;
-  checkout: CheckoutConfig;
-};
+const createOrderResponseSchema = z.object({
+  order: orderRecordSchema,
+  checkout: checkoutConfigSchema
+});
 
 type CheckoutButtonProps = {
   resultId: string;
@@ -60,7 +61,12 @@ export function CheckoutButton({ resultId }: CheckoutButtonProps) {
         throw new Error('Checkout unavailable.');
       }
 
-      const { order, checkout } = (await response.json()) as CreateOrderResponse;
+      const parsedResponse = createOrderResponseSchema.safeParse(await response.json());
+      if (!parsedResponse.success) {
+        throw new Error('Invalid checkout response.');
+      }
+
+      const { order, checkout } = parsedResponse.data;
 
       await loadPaddleScript();
 

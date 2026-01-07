@@ -1,3 +1,5 @@
+import { z } from 'zod';
+
 export type PaddleEnvironment = 'sandbox' | 'production';
 
 export type CheckoutPrice = {
@@ -11,6 +13,15 @@ export type CheckoutConfig = CheckoutPrice & {
   environment: PaddleEnvironment;
   clientToken: string;
 };
+
+export const checkoutConfigSchema = z.object({
+  priceId: z.string(),
+  currency: z.literal('EUR'),
+  amount: z.number(),
+  description: z.string(),
+  environment: z.enum(['sandbox', 'production']),
+  clientToken: z.string()
+});
 
 const DEFAULT_PRICE: CheckoutPrice = {
   priceId: process.env.PADDLE_PRICE_ID ?? '',

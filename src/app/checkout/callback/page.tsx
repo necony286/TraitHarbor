@@ -33,6 +33,7 @@ const markPendingWebhook = async (orderId: string) => {
   const payload = await response.json();
   const parsed = orderRecordSchema.safeParse(payload?.order);
   if (!parsed.success) {
+    console.error('Failed to parse order from API after update:', parsed.error);
     throw new Error('Unable to update order status.');
   }
   return parsed.data;

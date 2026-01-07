@@ -20,7 +20,13 @@ export async function POST(request: Request) {
   const parsed = scoreRequestSchema.safeParse(payload);
 
   if (!parsed.success) {
-    return NextResponse.json({ error: 'Invalid request body.' }, { status: 400 });
+    return NextResponse.json(
+      {
+        error: 'Invalid request body.',
+        details: parsed.error.flatten()
+      },
+      { status: 400 }
+    );
   }
 
   const { answers } = parsed.data;

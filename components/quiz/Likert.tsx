@@ -4,7 +4,7 @@ type LikertProps = {
   name: string;
   value?: number;
   onChange: (value: number) => void;
-  ariaLabelledby?: string;
+  ariaLabelledby: string;
 };
 
 const options = [

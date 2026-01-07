@@ -1,9 +1,16 @@
 import { NextResponse } from 'next/server';
+import { z } from 'zod';
 import { getSupabaseAdminClient } from '../../../../../lib/supabase';
 import { logError, logInfo, logWarn } from '../../../../../lib/logger';
 import { parsePaddleWebhook, shouldUpdateOrder } from '../../../../../lib/paddle-webhook';
 import { verifyPaddleSignature } from '../../../../../lib/signature';
 import { orderStatusSchema } from '../../../../../lib/orders';
+
+const orderLookupSchema = z.object({
+  id: z.string().uuid(),
+  status: orderStatusSchema,
+  paddle_order_id: z.string().nullable().optional()
+});
 
 const getWebhookSecret = () => {
   const secret = process.env.PADDLE_WEBHOOK_SECRET;
@@ -96,15 +103,28 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Order not found.' }, { status: 404 });
   }
 
-  const parsedStatus = orderStatusSchema.safeParse(order.status);
+  const parsedOrder = orderLookupSchema.safeParse(order);
+  if (!parsedOrder.success) {
+    logError('Order lookup returned invalid data.', {
+      error: parsedOrder.error.message,
+      orderId: parsedEvent.orderId,
+      paddleOrderId: parsedEvent.paddleOrderId
+    });
+    return NextResponse.json({ error: 'Invalid order status.' }, { status: 500 });
+  }
+
+  const parsedStatus = orderStatusSchema.safeParse(parsedOrder.data.status);
   if (!parsedStatus.success) {
-    logError('Order has invalid status.', { orderId: order.id, status: order.status });
+    logError('Order has invalid status.', {
+      orderId: parsedOrder.data.id,
+      status: parsedOrder.data.status
+    });
     return NextResponse.json({ error: 'Invalid order status.' }, { status: 500 });
   }
 
   if (!shouldUpdateOrder(parsedStatus.data, parsedEvent.status)) {
     logInfo('Webhook received for already processed order.', {
-      orderId: order.id,
+      orderId: parsedOrder.data.id,
       status: parsedStatus.data,
       eventType: parsedEvent.eventType
     });
@@ -115,24 +135,27 @@ export async function POST(request: Request) {
     status: parsedEvent.status
   };
 
-  if (parsedEvent.paddleOrderId && parsedEvent.paddleOrderId !== order.paddle_order_id) {
+  if (parsedEvent.paddleOrderId && parsedEvent.paddleOrderId !== parsedOrder.data.paddle_order_id) {
     updates.paddle_order_id = parsedEvent.paddleOrderId;
   }
 
   const { error: updateError } = await supabase
     .from('orders')
     .update(updates)
-    .eq('id', order.id)
+    .eq('id', parsedOrder.data.id)
     .select('id')
     .single();
 
   if (updateError) {
-    logError('Failed to update order from webhook.', { error: updateError.message, orderId: order.id });
+    logError('Failed to update order from webhook.', {
+      error: updateError.message,
+      orderId: parsedOrder.data.id
+    });
     return NextResponse.json({ error: 'Unable to update order.' }, { status: 500 });
   }
 
   if (parsedEvent.status === 'paid') {
-    requestPdfGeneration(order.id);
+    requestPdfGeneration(parsedOrder.data.id);
   }
 
   return NextResponse.json({ received: true });

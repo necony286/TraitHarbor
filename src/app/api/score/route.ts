@@ -47,6 +47,9 @@ export async function POST(request: Request) {
     .single();
 
   if (resultError || !createdResult) {
+    if (resultError) {
+      console.error('Failed to store results', resultError);
+    }
     return NextResponse.json({ error: 'Failed to store results.' }, { status: 500 });
   }
 

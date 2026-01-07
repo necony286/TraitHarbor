@@ -8,14 +8,9 @@ const scoreRequestSchema = z.object({
   answers: z.record(z.string(), z.number().int().min(1).max(5))
 });
 
-const isAnswerStorageError = (error?: { message?: string } | null) => {
-  if (!error?.message) return false;
-  const message = error.message.toLowerCase();
-  return (
-    message.includes('answer') ||
-    message.includes('result_answers') ||
-    message.includes('constraint')
-  );
+const isAnswerStorageError = (error?: { code?: string } | null) => {
+  if (!error?.code) return false;
+  return error.code.startsWith('XXA');
 };
 
 export async function POST(request: Request) {

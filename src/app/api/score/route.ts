@@ -59,6 +59,10 @@ export async function POST(request: Request) {
   const { error: answersError } = await supabase.from('result_answers').insert(answerRows);
 
   if (answersError) {
+    console.error('Failed to store answers for result.', {
+      resultId: createdResult.id,
+      error: answersError
+    });
     return NextResponse.json({ error: 'Failed to store answers.' }, { status: 500 });
   }
 

@@ -33,13 +33,13 @@ const clampScore = (value: number) => Math.max(0, Math.min(100, Math.round(value
 const formatDate = (date: Date) =>
   new Intl.DateTimeFormat('en-US', { month: 'long', day: 'numeric', year: 'numeric' }).format(date);
 
-let chromium: typeof ChromiumType | undefined;
+let chromiumPromise: Promise<typeof ChromiumType> | undefined;
 
-const getChromium = async () => {
-  if (!chromium) {
-    chromium = (await import('playwright')).chromium;
+const getChromium = () => {
+  if (!chromiumPromise) {
+    chromiumPromise = import('playwright').then((playwright) => playwright.chromium);
   }
-  return chromium;
+  return chromiumPromise;
 };
 
 export async function buildReportHtml(payload: ReportPayload) {

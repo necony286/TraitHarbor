@@ -2,6 +2,7 @@ import { test, expect } from '@playwright/test';
 
 const FIXTURE_RESULT_ID = '11111111-1111-1111-1111-111111111111';
 const ORDER_ID = '22222222-2222-2222-2222-222222222222';
+const AGREE_LABEL = 'Agree';
 
 const paddleScriptStub = `
   window.Paddle = {
@@ -86,7 +87,7 @@ test('quiz to paid flow with report download', async ({ page }) => {
   const questionCount = await questionCards.count();
 
   for (let i = 0; i < questionCount; i += 1) {
-    await questionCards.nth(i).getByRole('radio', { name: 'Agree', exact: true }).check();
+    await questionCards.nth(i).getByRole('radio', { name: AGREE_LABEL, exact: true }).check();
   }
 
   await page.getByRole('button', { name: 'Submit answers' }).click();

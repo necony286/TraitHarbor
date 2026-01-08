@@ -1,3 +1,4 @@
+import React from 'react';
 import { redirect } from 'next/navigation';
 import { z } from 'zod';
 import { ResultsDisplay } from '../../../../components/results/ResultsDisplay';

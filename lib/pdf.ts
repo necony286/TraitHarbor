@@ -32,7 +32,7 @@ const clampScore = (value: number) => Math.max(0, Math.min(100, Math.round(value
 const formatDate = (date: Date) =>
   new Intl.DateTimeFormat('en-US', { month: 'long', day: 'numeric', year: 'numeric' }).format(date);
 
-let chromiumPromise: Promise<any> | undefined;
+let chromiumPromise: Promise<Chromium> | undefined;
 
 const getChromium = () => {
   if (!chromiumPromise) {

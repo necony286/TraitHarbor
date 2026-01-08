@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
 import { logError, logInfo, logWarn } from '../../../../lib/logger';
+import { orderStatusSchema } from '../../../../lib/orders';
 import { generateReportPdf } from '../../../../lib/pdf';
 import { getSupabaseAdminClient } from '../../../../lib/supabase';
 import { getReportSignedUrl, uploadReport } from '../../../../lib/storage';
@@ -12,7 +13,7 @@ const requestSchema = z.object({
 
 const orderSchema = z.object({
   id: z.string().uuid(),
-  status: z.string(),
+  status: orderStatusSchema,
   result_id: z.string().uuid().nullable(),
   created_at: z.string().datetime()
 });

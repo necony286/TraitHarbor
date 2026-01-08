@@ -1,6 +1,7 @@
 import { readFile } from 'fs/promises';
 import path from 'path';
-import { chromium } from 'playwright';
+import { encode } from 'he';
+import { chromium, type Browser } from 'playwright';
 
 export type ReportTraits = {
   O: number;
@@ -20,13 +21,7 @@ const MAX_PDF_BYTES = 700 * 1024;
 
 const templatePath = (filename: string) => path.join(process.cwd(), 'templates', filename);
 
-const escapeHtml = (value: string) =>
-  value
-    .replaceAll('&', '&amp;')
-    .replaceAll('<', '&lt;')
-    .replaceAll('>', '&gt;')
-    .replaceAll('"', '&quot;')
-    .replaceAll("'", '&#39;');
+const escapeHtml = (value: string) => encode(value);
 
 const clampScore = (value: number) => Math.max(0, Math.min(100, Math.round(value)));
 
@@ -48,7 +43,7 @@ export async function buildReportHtml(payload: ReportPayload) {
   };
 
   return template
-    .replace('{{styles}}', styles)
+    .replaceAll('{{styles}}', styles)
     .replaceAll('{{name}}', escapeHtml(payload.name))
     .replaceAll('{{date}}', escapeHtml(formatDate(payload.date)))
     .replaceAll('{{score_O}}', scores.O.toString())
@@ -60,11 +55,11 @@ export async function buildReportHtml(payload: ReportPayload) {
 
 export async function generateReportPdf(payload: ReportPayload) {
   const html = await buildReportHtml(payload);
-  const browser = await chromium.launch();
+  const browser = await getBrowser();
+  const page = await browser.newPage();
 
   try {
-    const page = await browser.newPage();
-    await page.setContent(html, { waitUntil: 'networkidle' });
+    await page.setContent(html, { waitUntil: 'domcontentloaded' });
     await page.emulateMedia({ media: 'screen' });
 
     const pdf = await page.pdf({
@@ -79,6 +74,16 @@ export async function generateReportPdf(payload: ReportPayload) {
 
     return pdf;
   } finally {
-    await browser.close();
+    await page.close();
   }
 }
+
+let browserPromise: Promise<Browser> | null = null;
+
+const getBrowser = () => {
+  if (!browserPromise) {
+    browserPromise = chromium.launch();
+  }
+
+  return browserPromise;
+};

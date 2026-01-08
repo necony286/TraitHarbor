@@ -58,6 +58,8 @@ describe('orders API route', () => {
     expect(supabaseUpdateChainMock.update).toHaveBeenCalledWith({ status: 'pending_webhook' });
     expect(supabaseUpdateChainMock.eq).toHaveBeenCalledWith('id', orderId);
     expect(supabaseUpdateChainMock.eq).toHaveBeenCalledWith('status', 'created');
+    expect(supabaseUpdateChainMock.select).toHaveBeenCalledWith('id, status, amount_cents, result_id, paddle_order_id, created_at');
+    expect(supabaseUpdateChainMock.maybeSingle).toHaveBeenCalledTimes(1);
     expect(response.status).toBe(409);
     expect(payload).toEqual({ error: 'Order status conflict.' });
   });

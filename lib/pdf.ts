@@ -1,6 +1,5 @@
 import { readFile } from 'fs/promises';
 import path from 'path';
-import type { chromium as ChromiumType } from 'playwright';
 
 export type ReportTraits = {
   O: number;
@@ -33,11 +32,13 @@ const clampScore = (value: number) => Math.max(0, Math.min(100, Math.round(value
 const formatDate = (date: Date) =>
   new Intl.DateTimeFormat('en-US', { month: 'long', day: 'numeric', year: 'numeric' }).format(date);
 
-let chromiumPromise: Promise<typeof ChromiumType> | undefined;
+let chromiumPromise: Promise<any> | undefined;
 
 const getChromium = () => {
   if (!chromiumPromise) {
-    chromiumPromise = import('playwright').then((playwright) => playwright.chromium);
+    chromiumPromise = import(/* webpackIgnore: true */ 'playwright').then(
+      (playwright) => playwright.chromium
+    );
   }
   return chromiumPromise;
 };

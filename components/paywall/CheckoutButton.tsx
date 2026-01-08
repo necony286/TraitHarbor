@@ -56,7 +56,11 @@ export function CheckoutButton({ resultId }: CheckoutButtonProps) {
     setIsLoading(true);
 
     try {
-      const response = await fetch('/api/orders', { method: 'POST' });
+      const response = await fetch('/api/orders', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ resultId })
+      });
       if (!response.ok) {
         throw new Error('Checkout unavailable.');
       }

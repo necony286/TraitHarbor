@@ -30,7 +30,7 @@ test('quiz to paid flow with report download', async ({ page }) => {
     route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ resultId: FIXTURE_RESULT_ID }) })
   );
 
-  await page.route('**/api/orders', async (route) => {
+  await page.route('**/api/orders*', async (route) => {
     const request = route.request();
     const method = request.method();
 

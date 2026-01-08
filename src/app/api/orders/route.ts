@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
-import { getCheckoutConfig } from '../../../../lib/payments';
+import { getCheckoutAmountCents, getCheckoutConfig } from '../../../../lib/payments';
 import { mapOrderRecord, orderSchema, orderStatusSchema } from '../../../../lib/orders';
 import { PG_FOREIGN_KEY_VIOLATION_ERROR_CODE } from '../../../../lib/constants';
 import { getSupabaseAdminClient } from '../../../../lib/supabase';
@@ -42,14 +42,6 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Unable to create order.' }, { status: 500 });
   }
 
-  let checkoutConfig;
-  try {
-    checkoutConfig = getCheckoutConfig();
-  } catch (error) {
-    console.error('Failed to load checkout config for order creation.', error);
-    return NextResponse.json({ error: 'Checkout is currently unavailable.' }, { status: 500 });
-  }
-
   const { data: resultData, error: resultError } = await supabase
     .from('results')
     .select('id')
@@ -68,7 +60,7 @@ export async function POST(request: Request) {
   const { data, error } = await supabase
     .from('orders')
     .insert({
-      amount_cents: checkoutConfig.amount,
+      amount_cents: getCheckoutAmountCents(),
       status: 'created',
       result_id: parsed.data.resultId
     })
@@ -87,6 +79,14 @@ export async function POST(request: Request) {
   if (!parsedOrder.success) {
     console.error('Failed to parse created order payload.', parsedOrder.error);
     return NextResponse.json({ error: 'Unable to create order.' }, { status: 500 });
+  }
+
+  let checkoutConfig;
+  try {
+    checkoutConfig = getCheckoutConfig();
+  } catch (error) {
+    console.error('Failed to load checkout config for order creation.', error);
+    return NextResponse.json({ error: 'Checkout is currently unavailable.' }, { status: 500 });
   }
 
   return NextResponse.json({

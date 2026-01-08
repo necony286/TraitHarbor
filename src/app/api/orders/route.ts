@@ -49,6 +49,21 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Checkout is currently unavailable.' }, { status: 500 });
   }
 
+  const { data: resultData, error: resultError } = await supabase
+    .from('results')
+    .select('id')
+    .eq('id', parsed.data.resultId)
+    .maybeSingle();
+
+  if (resultError) {
+    console.error('Failed to confirm result before order creation.', resultError);
+    return NextResponse.json({ error: 'Unable to create order.' }, { status: 500 });
+  }
+
+  if (!resultData) {
+    return NextResponse.json({ error: 'Result not found.' }, { status: 404 });
+  }
+
   const { data, error } = await supabase
     .from('orders')
     .insert({
@@ -61,6 +76,9 @@ export async function POST(request: Request) {
 
   if (error || !data) {
     console.error('Failed to create provisional order.', error);
+    if (error?.code === '23503') {
+      return NextResponse.json({ error: 'Result not found.' }, { status: 404 });
+    }
     return NextResponse.json({ error: 'Unable to create order.' }, { status: 500 });
   }
 

@@ -1,7 +1,7 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { describe, expect, it, beforeEach, vi } from 'vitest';
-import { PATCH } from '../src/app/api/orders/route';
+import { PATCH, POST } from '../src/app/api/orders/route';
 import CheckoutCallbackClient from '../src/app/checkout/callback/CheckoutCallbackClient';
 
 const orderId = '0d2a9f23-1f52-4f7d-9b75-b9b21c0ef35d';
@@ -62,6 +62,47 @@ describe('orders API route', () => {
     expect(supabaseUpdateChainMock.maybeSingle).toHaveBeenCalledTimes(1);
     expect(response.status).toBe(409);
     expect(payload).toEqual({ error: 'Order status conflict.' });
+  });
+
+  it('returns 404 when creating an order with a missing result', async () => {
+    const maybeSingleMock = vi.fn().mockResolvedValue({ data: null, error: null });
+    const resultsSelectChainMock = {
+      select: vi.fn().mockReturnThis(),
+      eq: vi.fn().mockReturnThis(),
+      maybeSingle: maybeSingleMock
+    };
+    const insertMock = vi.fn().mockReturnThis();
+    const ordersInsertChainMock = {
+      insert: insertMock,
+      select: vi.fn().mockReturnThis(),
+      single: vi.fn()
+    };
+
+    supabaseMock.from.mockImplementation((table: string) => {
+      if (table === 'results') {
+        return resultsSelectChainMock;
+      }
+      if (table === 'orders') {
+        return ordersInsertChainMock;
+      }
+      return undefined;
+    });
+
+    const request = new Request('http://localhost/api/orders', {
+      method: 'POST',
+      body: JSON.stringify({ resultId })
+    });
+
+    const response = await POST(request);
+    const payload = await response.json();
+
+    expect(supabaseMock.from).toHaveBeenCalledWith('results');
+    expect(resultsSelectChainMock.select).toHaveBeenCalledWith('id');
+    expect(resultsSelectChainMock.eq).toHaveBeenCalledWith('id', resultId);
+    expect(maybeSingleMock).toHaveBeenCalledTimes(1);
+    expect(insertMock).not.toHaveBeenCalled();
+    expect(response.status).toBe(404);
+    expect(payload).toEqual({ error: 'Result not found.' });
   });
 });
 

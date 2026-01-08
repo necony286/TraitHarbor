@@ -82,7 +82,10 @@ let browserPromise: Promise<Browser> | null = null;
 
 const getBrowser = () => {
   if (!browserPromise) {
-    browserPromise = chromium.launch();
+    browserPromise = chromium.launch().catch((err) => {
+      browserPromise = null;
+      throw err;
+    });
   }
 
   return browserPromise;

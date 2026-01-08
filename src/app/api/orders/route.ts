@@ -3,7 +3,7 @@ import { z } from 'zod';
 import { getCheckoutConfig } from '../../../../lib/payments';
 import { mapOrderRecord, orderSchema, orderStatusSchema } from '../../../../lib/orders';
 import { getSupabaseAdminClient } from '../../../../lib/supabase';
-import { PG_FOREIGN_KEY_VIOLATION_ERROR_CODE } from '../../../../lib/db/constants';
+import { PG_ERROR_CODES } from '../../../../lib/db/constants';
 
 const createOrderBodySchema = z.object({
   resultId: z.string().uuid()

@@ -37,12 +37,14 @@ describe('orders API route', () => {
 
   it('returns 409 when attempting to update a non-created order', async () => {
     const maybeSingleMock = vi.fn().mockResolvedValue({ data: null, error: null });
-    const selectMock = vi.fn(() => ({ maybeSingle: maybeSingleMock }));
-    const eqStatusMock = vi.fn(() => ({ select: selectMock }));
-    const eqIdMock = vi.fn(() => ({ eq: eqStatusMock }));
-    const updateMock = vi.fn(() => ({ eq: eqIdMock }));
+    const supabaseUpdateChainMock = {
+      update: vi.fn().mockReturnThis(),
+      eq: vi.fn().mockReturnThis(),
+      select: vi.fn().mockReturnThis(),
+      maybeSingle: maybeSingleMock
+    };
 
-    supabaseMock.from.mockReturnValue({ update: updateMock });
+    supabaseMock.from.mockReturnValue(supabaseUpdateChainMock);
 
     const request = new Request('http://localhost/api/orders', {
       method: 'PATCH',
@@ -53,6 +55,11 @@ describe('orders API route', () => {
     const payload = await response.json();
 
     expect(supabaseMock.from).toHaveBeenCalledWith('orders');
+    expect(supabaseUpdateChainMock.update).toHaveBeenCalledWith({ status: 'pending_webhook' });
+    expect(supabaseUpdateChainMock.eq).toHaveBeenCalledWith('id', orderId);
+    expect(supabaseUpdateChainMock.eq).toHaveBeenCalledWith('status', 'created');
+    expect(supabaseUpdateChainMock.select).toHaveBeenCalledWith('id, status, amount_cents, result_id, paddle_order_id, created_at');
+    expect(supabaseUpdateChainMock.maybeSingle).toHaveBeenCalledTimes(1);
     expect(response.status).toBe(409);
     expect(payload).toEqual({ error: 'Order status conflict.' });
   });

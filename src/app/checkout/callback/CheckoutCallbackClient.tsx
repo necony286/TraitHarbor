@@ -105,6 +105,8 @@ export default function CheckoutCallbackClient() {
       return;
     }
 
+    void refreshStatus({ silent: true });
+
     const intervalId = window.setInterval(() => {
       void refreshStatus({ silent: true });
     }, ORDER_STATUS_POLL_INTERVAL_MS);

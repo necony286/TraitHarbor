@@ -1,9 +1,7 @@
 import { PaywallCTA } from './PaywallCTA';
 import { TraitChart } from './TraitChart';
 import { TraitSummary } from './TraitSummary';
-import { TraitKey } from './traitData';
-
-type TraitScores = Record<TraitKey, number>;
+import { TraitKey, TraitScores } from './traitData';
 
 type ResultsDisplayProps = {
   traits: TraitScores;

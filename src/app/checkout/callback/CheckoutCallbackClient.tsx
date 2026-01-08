@@ -1,8 +1,9 @@
 'use client';
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
+import { trackEvent } from '../../../../lib/analytics';
 import { orderRecordSchema, type OrderRecord } from '../../../../lib/orders';
 
 const ORDER_STATUS_POLL_INTERVAL_MS = 3000;
@@ -47,6 +48,10 @@ export default function CheckoutCallbackClient() {
   const [order, setOrder] = useState<OrderRecord | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [reportUrl, setReportUrl] = useState<string | null>(null);
+  const [isGeneratingReport, setIsGeneratingReport] = useState(false);
+  const [reportError, setReportError] = useState<string | null>(null);
+  const trackedPurchaseRef = useRef(false);
 
   const refreshStatus = useCallback(
     async ({ silent = false }: { silent?: boolean } = {}) => {
@@ -107,6 +112,49 @@ export default function CheckoutCallbackClient() {
     return () => window.clearInterval(intervalId);
   }, [orderId, order?.status, refreshStatus]);
 
+  useEffect(() => {
+    if (!orderId || !order || order.status !== 'paid') {
+      return;
+    }
+
+    if (trackedPurchaseRef.current) {
+      return;
+    }
+
+    trackEvent('purchase_success', { orderId, resultId: order.resultId });
+    trackedPurchaseRef.current = true;
+  }, [order, orderId]);
+
+  const handleReportDownload = async () => {
+    if (!orderId || isGeneratingReport) return;
+
+    setIsGeneratingReport(true);
+    setReportError(null);
+
+    try {
+      const response = await fetch('/api/report', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ orderId })
+      });
+
+      if (!response.ok) {
+        throw new Error('Unable to generate report.');
+      }
+
+      const payload = await response.json();
+      if (!payload?.url) {
+        throw new Error('Report URL missing.');
+      }
+
+      setReportUrl(payload.url);
+    } catch (error) {
+      setReportError((error instanceof Error && error.message) || 'Unable to generate report.');
+    } finally {
+      setIsGeneratingReport(false);
+    }
+  };
+
   return (
     <div className="checkout">
       <header className="checkout__header">
@@ -126,6 +174,22 @@ export default function CheckoutCallbackClient() {
               Order <span className="checkout__order">{order.id}</span>
             </p>
             <p className="muted">Status: {order.status.replace('_', ' ')}</p>
+          </div>
+        ) : null}
+
+        {order?.status === 'paid' ? (
+          <div className="checkout__report">
+            <p className="muted">Your payment is confirmed. Download your premium report below.</p>
+            {reportUrl ? (
+              <a className="checkout__download" href={reportUrl} target="_blank" rel="noopener noreferrer">
+                Download report PDF
+              </a>
+            ) : (
+              <button className="button" type="button" onClick={handleReportDownload} disabled={isGeneratingReport}>
+                {isGeneratingReport ? 'Preparing report…' : 'Generate report PDF'}
+              </button>
+            )}
+            {reportError ? <p className="checkout__error">{reportError}</p> : null}
           </div>
         ) : null}
 

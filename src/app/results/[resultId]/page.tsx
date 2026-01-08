@@ -22,29 +22,53 @@ const resultSchema = z.object({
 });
 
 type ResultsPageProps = {
-  params: {
+  params: Promise<{
     resultId: string;
-  };
+  }>;
 };
 
+type ResultsDisplayProps = {
+  traits: z.infer<typeof traitSchema>;
+  resultId: string;
+};
+
+const ResultsDisplay = ({ traits, resultId }: ResultsDisplayProps) => (
+  <div className="results">
+    <header className="results__header">
+      <p className="eyebrow">Your results</p>
+      <h1>Big Five personality snapshot</h1>
+      <p className="muted">
+        Here is a quick look at your scores. Each trait is scored from 0–100 based on the IPIP-120 assessment.
+      </p>
+    </header>
+
+    <TraitChart scores={traits} />
+
+    <PaywallCTA resultId={resultId} />
+
+    <TraitSummary scores={traits} />
+  </div>
+);
+
 export async function generateMetadata({ params }: ResultsPageProps) {
+  const { resultId } = await params;
   return {
     title: 'Results | BigFive',
     description: 'Your Big Five personality results and next steps.',
     alternates: {
-      canonical: `/results/${params.resultId}`
+      canonical: `/results/${resultId}`
     },
     openGraph: {
       title: 'BigFive Results',
       description: 'Your Big Five personality results and next steps.',
-      url: `/results/${params.resultId}`,
+      url: `/results/${resultId}`,
       siteName: 'BigFive'
     }
   };
 }
 
 export default async function ResultsPage({ params }: ResultsPageProps) {
-  const { resultId } = params;
+  const { resultId } = await params;
 
   if (!resultIdSchema.safeParse(resultId).success) {
     redirect('/quiz');
@@ -59,23 +83,7 @@ export default async function ResultsPage({ params }: ResultsPageProps) {
 
     const { traits } = fixtureResult.data;
 
-    return (
-      <div className="results">
-        <header className="results__header">
-          <p className="eyebrow">Your results</p>
-          <h1>Big Five personality snapshot</h1>
-          <p className="muted">
-            Here is a quick look at your scores. Each trait is scored from 0–100 based on the IPIP-120 assessment.
-          </p>
-        </header>
-
-        <TraitChart scores={traits} />
-
-        <PaywallCTA resultId={resultId} />
-
-        <TraitSummary scores={traits} />
-      </div>
-    );
+    return <ResultsDisplay traits={traits} resultId={resultId} />;
   }
 
   let supabase: ReturnType<typeof getSupabaseAdminClient>;
@@ -105,21 +113,5 @@ export default async function ResultsPage({ params }: ResultsPageProps) {
 
   const { traits } = parsed.data;
 
-  return (
-    <div className="results">
-      <header className="results__header">
-        <p className="eyebrow">Your results</p>
-        <h1>Big Five personality snapshot</h1>
-        <p className="muted">
-          Here is a quick look at your scores. Each trait is scored from 0–100 based on the IPIP-120 assessment.
-        </p>
-      </header>
-
-      <TraitChart scores={traits} />
-
-      <PaywallCTA resultId={resultId} />
-
-      <TraitSummary scores={traits} />
-    </div>
-  );
+  return <ResultsDisplay traits={traits} resultId={resultId} />;
 }

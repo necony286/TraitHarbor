@@ -42,13 +42,14 @@ const readStoredUtms = () => {
   if (!isBrowser) return {};
   try {
     const stored = window.sessionStorage.getItem(UTM_STORAGE_KEY);
-    if (!stored) return {};
-    const parsed = JSON.parse(stored);
-    if (parsed && typeof parsed === 'object') {
-      return parsed as Record<string, string>;
+    if (stored) {
+      const parsed = JSON.parse(stored);
+      if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {
+        return parsed as Record<string, string>;
+      }
     }
   } catch {
-    return {};
+    // Ignore storage or parsing errors.
   }
   return {};
 };
@@ -62,11 +63,20 @@ const persistUtms = (utmProps: Record<string, string>) => {
   }
 };
 
+const readBreakpoint = (name: string, fallback: number) => {
+  if (!isBrowser) return fallback;
+  const raw = window.getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+  const parsed = Number.parseInt(raw.replace('px', ''), 10);
+  return Number.isFinite(parsed) ? parsed : fallback;
+};
+
 const getDeviceType = () => {
   if (!isBrowser) return 'unknown';
+  const mobileMax = readBreakpoint('--breakpoint-mobile', 640);
+  const tabletMax = readBreakpoint('--breakpoint-tablet', 900);
   const width = window.innerWidth;
-  if (width < 640) return 'mobile';
-  if (width < 1024) return 'tablet';
+  if (width < mobileMax) return 'mobile';
+  if (width < tabletMax) return 'tablet';
   return 'desktop';
 };
 

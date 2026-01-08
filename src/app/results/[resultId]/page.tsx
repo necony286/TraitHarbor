@@ -1,9 +1,6 @@
-import React from 'react';
 import { redirect } from 'next/navigation';
 import { z } from 'zod';
-import { PaywallCTA } from '../../../../components/results/PaywallCTA';
-import { TraitChart } from '../../../../components/results/TraitChart';
-import { TraitSummary } from '../../../../components/results/TraitSummary';
+import { ResultsDisplay } from '../../../../components/results/ResultsDisplay';
 import { getSupabaseAdminClient } from '../../../../lib/supabase';
 import resultsFixture from '../../../data/results.fixture.json';
 
@@ -26,29 +23,6 @@ type ResultsPageProps = {
     resultId: string;
   }>;
 };
-
-type ResultsDisplayProps = {
-  traits: z.infer<typeof traitSchema>;
-  resultId: string;
-};
-
-const ResultsDisplay = ({ traits, resultId }: ResultsDisplayProps) => (
-  <div className="results">
-    <header className="results__header">
-      <p className="eyebrow">Your results</p>
-      <h1>Big Five personality snapshot</h1>
-      <p className="muted">
-        Here is a quick look at your scores. Each trait is scored from 0–100 based on the IPIP-120 assessment.
-      </p>
-    </header>
-
-    <TraitChart scores={traits} />
-
-    <PaywallCTA resultId={resultId} />
-
-    <TraitSummary scores={traits} />
-  </div>
-);
 
 export async function generateMetadata({ params }: ResultsPageProps) {
   const { resultId } = await params;

@@ -11,7 +11,9 @@ export type AnalyticsEventName =
 
 export type QuizEventName = Exclude<AnalyticsEventName, 'paywall_view' | 'checkout_open' | 'purchase_success'>;
 
-type EventPayload = Record<string, unknown> | undefined;
+type AnalyticsProps = Record<string, string | number | boolean | null | undefined>;
+
+type EventPayload = AnalyticsProps | undefined;
 
 const isBrowser = typeof window !== 'undefined';
 const UTM_STORAGE_KEY = 'bf_utm_props';
@@ -66,7 +68,7 @@ const persistUtms = (utmProps: Record<string, string>) => {
 const readBreakpoint = (name: string, fallback: number) => {
   if (!isBrowser) return fallback;
   const raw = window.getComputedStyle(document.documentElement).getPropertyValue(name).trim();
-  const parsed = Number.parseInt(raw.replace('px', ''), 10);
+  const parsed = Number.parseInt(raw, 10);
   return Number.isFinite(parsed) ? parsed : fallback;
 };
 
@@ -99,7 +101,7 @@ export function trackEvent(name: AnalyticsEventName, payload?: EventPayload) {
 
   const utmProps = getUtmProps();
   const device = getDeviceType();
-  const mergedPayload = {
+  const mergedPayload: AnalyticsProps = {
     ...utmProps,
     ...(payload ?? {}),
     device: payload?.device ?? device

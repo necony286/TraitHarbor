@@ -1,5 +1,6 @@
 import { readFile } from 'fs/promises';
 import path from 'path';
+import type { Chromium } from 'playwright';
 
 export type ReportTraits = {
   O: number;

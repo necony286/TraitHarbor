@@ -1,13 +1,31 @@
 import { readFile } from 'fs/promises';
 import path from 'path';
+
+type SetContentOptions = {
+  waitUntil: 'networkidle';
+};
+
+type EmulateMediaOptions = {
+  media: 'screen';
+};
+
+type PdfMargin = {
+  top: string;
+  bottom: string;
+  left: string;
+  right: string;
+};
+
+type PdfOptions = {
+  format: 'A4';
+  printBackground: boolean;
+  margin: PdfMargin;
+};
+
 type ChromiumPage = {
-  setContent: (html: string, options: { waitUntil: 'networkidle' }) => Promise<void>;
-  emulateMedia: (options: { media: 'screen' }) => Promise<void>;
-  pdf: (options: {
-    format: 'A4';
-    printBackground: true;
-    margin: { top: string; bottom: string; left: string; right: string };
-  }) => Promise<Uint8Array>;
+  setContent: (html: string, options: SetContentOptions) => Promise<void>;
+  emulateMedia: (options: EmulateMediaOptions) => Promise<void>;
+  pdf: (options: PdfOptions) => Promise<Uint8Array>;
 };
 
 type ChromiumBrowser = {

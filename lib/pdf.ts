@@ -1,6 +1,5 @@
 import { readFile } from 'fs/promises';
 import path from 'path';
-import { chromium } from 'playwright';
 
 export type ReportTraits = {
   O: number;
@@ -60,6 +59,7 @@ export async function buildReportHtml(payload: ReportPayload) {
 
 export async function generateReportPdf(payload: ReportPayload) {
   const html = await buildReportHtml(payload);
+  const { chromium } = await import('playwright');
   const browser = await chromium.launch();
 
   try {

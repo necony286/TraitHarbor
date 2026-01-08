@@ -9,7 +9,6 @@ const createOrderBodySchema = z.object({
 });
 
 const orderIdSchema = z.string().uuid();
-export const PG_FOREIGN_KEY_VIOLATION_ERROR_CODE = '23503';
 
 const updateOrderSchema = z.object({
   orderId: orderIdSchema,
@@ -77,7 +76,7 @@ export async function POST(request: Request) {
 
   if (error || !data) {
     console.error('Failed to create provisional order.', error);
-    if (error?.code === PG_FOREIGN_KEY_VIOLATION_ERROR_CODE) {
+    if (error?.code === '23503') {
       return NextResponse.json({ error: 'Result not found.' }, { status: 404 });
     }
     return NextResponse.json({ error: 'Unable to create order.' }, { status: 500 });

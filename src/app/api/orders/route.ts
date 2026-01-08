@@ -152,8 +152,9 @@ export async function PATCH(request: Request) {
     .from('orders')
     .update({ status: parsed.data.status })
     .eq('id', parsed.data.orderId)
+    .eq('status', 'created')
     .select('id, status, amount_cents, result_id, paddle_order_id, created_at')
-    .single();
+    .maybeSingle();
 
   if (error) {
     console.error('Failed to update order.', error);
@@ -164,7 +165,7 @@ export async function PATCH(request: Request) {
   }
 
   if (!data) {
-    return NextResponse.json({ error: 'Order not found.' }, { status: 404 });
+    return NextResponse.json({ error: 'Order status conflict.' }, { status: 409 });
   }
 
   const parsedOrder = orderSchema.safeParse(data);

@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { trackEvent } from '../../../../lib/analytics';
@@ -84,6 +84,11 @@ export default function CheckoutCallbackClient() {
 
     const updateOrderStatus = async () => {
       try {
+        const currentOrder = await fetchOrder(orderId);
+        if (currentOrder.status !== 'created') {
+          setOrder(currentOrder);
+          return;
+        }
         const updated = await markPendingWebhook(orderId);
         setOrder(updated);
       } catch (error) {

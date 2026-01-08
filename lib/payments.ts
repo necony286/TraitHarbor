@@ -32,6 +32,10 @@ const DEFAULT_PRICE: CheckoutPrice = {
 
 const PRICE_ALLOWLIST = [DEFAULT_PRICE];
 
+export function getCheckoutAmountCents(): number {
+  return DEFAULT_PRICE.amount;
+}
+
 function assertEnvValue(value: string | undefined, name: string): string {
   if (!value) {
     throw new Error(`Missing ${name}`);

@@ -1,6 +1,4 @@
-import { TRAIT_DETAILS, TRAIT_ORDER, TraitKey } from './traitData';
-
-type TraitScores = Record<TraitKey, number>;
+import { TRAIT_DETAILS, TRAIT_ORDER, TraitScores } from './traitData';
 
 type TraitSummaryProps = {
   scores: TraitScores;

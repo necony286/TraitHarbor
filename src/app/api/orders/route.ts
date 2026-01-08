@@ -9,7 +9,7 @@ const createOrderBodySchema = z.object({
 });
 
 const orderIdSchema = z.string().uuid();
-const PG_FOREIGN_KEY_VIOLATION_ERROR_CODE = '23503';
+export const PG_FOREIGN_KEY_VIOLATION_ERROR_CODE = '23503';
 
 const updateOrderSchema = z.object({
   orderId: orderIdSchema,

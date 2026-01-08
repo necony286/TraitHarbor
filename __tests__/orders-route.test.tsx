@@ -1,7 +1,7 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { describe, expect, it, beforeEach, vi } from 'vitest';
-import { PATCH, POST } from '../src/app/api/orders/route';
+import { PATCH, POST, PG_FOREIGN_KEY_VIOLATION_ERROR_CODE } from '../src/app/api/orders/route';
 import CheckoutCallbackClient from '../src/app/checkout/callback/CheckoutCallbackClient';
 
 const orderId = '0d2a9f23-1f52-4f7d-9b75-b9b21c0ef35d';
@@ -112,7 +112,7 @@ describe('orders API route', () => {
       eq: vi.fn().mockReturnThis(),
       maybeSingle: resultsMaybeSingleMock
     };
-    const insertError = { code: '23503' };
+    const insertError = { code: PG_FOREIGN_KEY_VIOLATION_ERROR_CODE };
     const ordersInsertChainMock = {
       insert: vi.fn().mockReturnThis(),
       select: vi.fn().mockReturnThis(),

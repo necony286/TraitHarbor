@@ -104,6 +104,52 @@ describe('orders API route', () => {
     expect(response.status).toBe(404);
     expect(payload).toEqual({ error: 'Result not found.' });
   });
+
+  it('returns 404 when the result disappears before order creation', async () => {
+    const resultsMaybeSingleMock = vi.fn().mockResolvedValue({ data: { id: resultId }, error: null });
+    const resultsSelectChainMock = {
+      select: vi.fn().mockReturnThis(),
+      eq: vi.fn().mockReturnThis(),
+      maybeSingle: resultsMaybeSingleMock
+    };
+    const insertError = { code: '23503' };
+    const ordersInsertChainMock = {
+      insert: vi.fn().mockReturnThis(),
+      select: vi.fn().mockReturnThis(),
+      single: vi.fn().mockResolvedValue({ data: null, error: insertError })
+    };
+
+    supabaseMock.from.mockImplementation((table: string) => {
+      if (table === 'results') {
+        return resultsSelectChainMock;
+      }
+      if (table === 'orders') {
+        return ordersInsertChainMock;
+      }
+      return undefined;
+    });
+
+    const request = new Request('http://localhost/api/orders', {
+      method: 'POST',
+      body: JSON.stringify({ resultId })
+    });
+
+    const response = await POST(request);
+    const payload = await response.json();
+
+    expect(supabaseMock.from).toHaveBeenCalledWith('results');
+    expect(resultsSelectChainMock.select).toHaveBeenCalledWith('id');
+    expect(resultsSelectChainMock.eq).toHaveBeenCalledWith('id', resultId);
+    expect(resultsMaybeSingleMock).toHaveBeenCalledTimes(1);
+    expect(supabaseMock.from).toHaveBeenCalledWith('orders');
+    expect(ordersInsertChainMock.insert).toHaveBeenCalledWith({
+      amount_cents: expect.any(Number),
+      status: 'created',
+      result_id: resultId
+    });
+    expect(response.status).toBe(404);
+    expect(payload).toEqual({ error: 'Result not found.' });
+  });
 });
 
 describe('Checkout callback behavior', () => {

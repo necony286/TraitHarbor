@@ -4,7 +4,9 @@ import { getCheckoutConfig } from '../../../../lib/payments';
 import { mapOrderRecord, orderSchema, orderStatusSchema } from '../../../../lib/orders';
 import { getSupabaseAdminClient } from '../../../../lib/supabase';
 
-const createOrderBodySchema = z.object({}).passthrough();
+const createOrderBodySchema = z.object({
+  resultId: z.string().uuid()
+});
 
 const orderIdSchema = z.string().uuid();
 
@@ -51,9 +53,10 @@ export async function POST(request: Request) {
     .from('orders')
     .insert({
       amount_cents: checkoutConfig.amount,
-      status: 'created'
+      status: 'created',
+      result_id: parsed.data.resultId
     })
-    .select('id, status, amount_cents, paddle_order_id, created_at')
+    .select('id, status, amount_cents, result_id, paddle_order_id, created_at')
     .single();
 
   if (error || !data) {
@@ -91,7 +94,7 @@ export async function GET(request: Request) {
 
   const { data, error } = await supabase
     .from('orders')
-    .select('id, status, amount_cents, paddle_order_id, created_at')
+    .select('id, status, amount_cents, result_id, paddle_order_id, created_at')
     .eq('id', orderId)
     .single();
 
@@ -149,7 +152,7 @@ export async function PATCH(request: Request) {
     .from('orders')
     .update({ status: parsed.data.status })
     .eq('id', parsed.data.orderId)
-    .select('id, status, amount_cents, paddle_order_id, created_at')
+    .select('id, status, amount_cents, result_id, paddle_order_id, created_at')
     .single();
 
   if (error) {

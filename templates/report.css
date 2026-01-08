@@ -1,0 +1,102 @@
+:root {
+  color-scheme: light;
+  font-family: 'Inter', 'Helvetica Neue', Arial, sans-serif;
+  font-size: 14px;
+  line-height: 1.6;
+  color: #101828;
+}
+
+body {
+  margin: 0;
+  background: #ffffff;
+}
+
+.report {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.report__cover {
+  padding: 24px;
+  border-radius: 16px;
+  background: linear-gradient(135deg, #f5f5ff, #eef4ff);
+}
+
+.report__cover h1 {
+  margin: 8px 0 4px;
+  font-size: 28px;
+}
+
+.eyebrow {
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  color: #475467;
+}
+
+.muted {
+  color: #475467;
+}
+
+h2 {
+  margin-bottom: 12px;
+  font-size: 18px;
+}
+
+.chart {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.chart__row {
+  display: grid;
+  grid-template-columns: 140px 1fr 48px;
+  align-items: center;
+  gap: 12px;
+}
+
+.chart__bar {
+  position: relative;
+  height: 10px;
+  background: #e4e7ec;
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.chart__bar span {
+  position: absolute;
+  inset: 0;
+  background: #7b5cff;
+  border-radius: 999px;
+}
+
+.trait-grid {
+  display: grid;
+  gap: 12px;
+}
+
+.trait-grid article {
+  padding: 12px 16px;
+  border: 1px solid #eaecf0;
+  border-radius: 12px;
+  background: #ffffff;
+}
+
+.trait-grid h3 {
+  margin: 0 0 6px;
+  font-size: 15px;
+}
+
+.report__tips ul {
+  margin: 0;
+  padding-left: 18px;
+  color: #344054;
+}
+
+.report__resources {
+  padding: 16px;
+  border-radius: 12px;
+  background: #f8fafc;
+}

@@ -1,5 +1,6 @@
 import { readFile } from 'fs/promises';
 import path from 'path';
+import type { chromium as ChromiumType } from 'playwright';
 
 export type ReportTraits = {
   O: number;
@@ -32,6 +33,15 @@ const clampScore = (value: number) => Math.max(0, Math.min(100, Math.round(value
 const formatDate = (date: Date) =>
   new Intl.DateTimeFormat('en-US', { month: 'long', day: 'numeric', year: 'numeric' }).format(date);
 
+let chromium: typeof ChromiumType | undefined;
+
+const getChromium = async () => {
+  if (!chromium) {
+    chromium = (await import('playwright')).chromium;
+  }
+  return chromium;
+};
+
 export async function buildReportHtml(payload: ReportPayload) {
   const [template, styles] = await Promise.all([
     readFile(templatePath('report.html'), 'utf8'),
@@ -59,7 +69,7 @@ export async function buildReportHtml(payload: ReportPayload) {
 
 export async function generateReportPdf(payload: ReportPayload) {
   const html = await buildReportHtml(payload);
-  const { chromium } = await import('playwright');
+  const chromium = await getChromium();
   const browser = await chromium.launch();
 
   try {

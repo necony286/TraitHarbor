@@ -81,12 +81,11 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Unable to create order.' }, { status: 500 });
   }
 
-  let checkoutConfig;
+  let checkoutConfig = null;
   try {
     checkoutConfig = getCheckoutConfig();
   } catch (error) {
     console.error('Failed to load checkout config for order creation.', error);
-    return NextResponse.json({ error: 'Checkout is currently unavailable.' }, { status: 500 });
   }
 
   return NextResponse.json({

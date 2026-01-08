@@ -86,7 +86,7 @@ test('quiz to paid flow with report download', async ({ page }) => {
   const questionCount = await questionCards.count();
 
   for (let i = 0; i < questionCount; i += 1) {
-    await questionCards.nth(i).getByRole('radio', { name: 'Agree' }).check();
+    await questionCards.nth(i).getByRole('radio', { name: 'Agree', exact: true }).check();
   }
 
   await page.getByRole('button', { name: 'Submit answers' }).click();

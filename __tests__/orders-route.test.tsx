@@ -2,6 +2,7 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { describe, expect, it, beforeEach, vi } from 'vitest';
 import { PG_FOREIGN_KEY_VIOLATION_ERROR_CODE } from '../lib/constants';
+import { getCheckoutConfig } from '../lib/payments';
 import { PATCH, POST } from '../src/app/api/orders/route';
 import CheckoutCallbackClient from '../src/app/checkout/callback/CheckoutCallbackClient';
 
@@ -15,6 +16,11 @@ vi.mock('../lib/analytics', () => ({
 
 vi.mock('../lib/supabase', () => ({
   getSupabaseAdminClient: () => supabaseMock
+}));
+
+vi.mock('../lib/payments', () => ({
+  getCheckoutAmountCents: () => 5000,
+  getCheckoutConfig: vi.fn()
 }));
 
 vi.mock('next/navigation', () => ({
@@ -150,6 +156,80 @@ describe('orders API route', () => {
     });
     expect(response.status).toBe(404);
     expect(payload).toEqual({ error: 'Result not found.' });
+  });
+
+  it('returns checkout null when checkout config loading fails', async () => {
+    const resultsMaybeSingleMock = vi.fn().mockResolvedValue({ data: { id: resultId }, error: null });
+    const resultsSelectChainMock = {
+      select: vi.fn().mockReturnThis(),
+      eq: vi.fn().mockReturnThis(),
+      maybeSingle: resultsMaybeSingleMock
+    };
+    const createdOrder = {
+      id: orderId,
+      status: 'created',
+      amount_cents: 5000,
+      result_id: resultId,
+      paddle_order_id: null,
+      created_at: '2024-01-01T00:00:00.000Z'
+    };
+    const ordersInsertChainMock = {
+      insert: vi.fn().mockReturnThis(),
+      select: vi.fn().mockReturnThis(),
+      single: vi.fn().mockResolvedValue({ data: createdOrder, error: null })
+    };
+
+    supabaseMock.from.mockImplementation((table: string) => {
+      if (table === 'results') {
+        return resultsSelectChainMock;
+      }
+      if (table === 'orders') {
+        return ordersInsertChainMock;
+      }
+      return undefined;
+    });
+
+    const checkoutConfigError = new Error('Checkout config unavailable');
+    const getCheckoutConfigMock = vi.mocked(getCheckoutConfig);
+    getCheckoutConfigMock.mockImplementation(() => {
+      throw checkoutConfigError;
+    });
+    const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+
+    const request = new Request('http://localhost/api/orders', {
+      method: 'POST',
+      body: JSON.stringify({ resultId })
+    });
+
+    const response = await POST(request);
+    const payload = await response.json();
+
+    expect(resultsSelectChainMock.select).toHaveBeenCalledWith('id');
+    expect(resultsSelectChainMock.eq).toHaveBeenCalledWith('id', resultId);
+    expect(ordersInsertChainMock.insert).toHaveBeenCalledWith({
+      amount_cents: 5000,
+      status: 'created',
+      result_id: resultId
+    });
+    expect(getCheckoutConfigMock).toHaveBeenCalledTimes(1);
+    expect(consoleErrorSpy).toHaveBeenCalledWith(
+      'Failed to load checkout config for order creation.',
+      checkoutConfigError
+    );
+    expect(response.status).toBe(200);
+    expect(payload).toEqual({
+      order: {
+        id: orderId,
+        status: 'created',
+        amountCents: 5000,
+        resultId,
+        paddleOrderId: null,
+        createdAt: '2024-01-01T00:00:00.000Z'
+      },
+      checkout: null
+    });
+
+    consoleErrorSpy.mockRestore();
   });
 });
 

@@ -5,6 +5,7 @@ import { PaywallCTA } from '../../../../components/results/PaywallCTA';
 import { TraitChart } from '../../../../components/results/TraitChart';
 import { TraitSummary } from '../../../../components/results/TraitSummary';
 import { getSupabaseAdminClient } from '../../../../lib/supabase';
+import resultsFixture from '../../../data/results.fixture.json';
 
 const resultIdSchema = z.string().uuid();
 const traitSchema = z.object({
@@ -21,16 +22,60 @@ const resultSchema = z.object({
 });
 
 type ResultsPageProps = {
-  params: Promise<{
+  params: {
     resultId: string;
-  }>;
+  };
 };
 
+export async function generateMetadata({ params }: ResultsPageProps) {
+  return {
+    title: 'Results | BigFive',
+    description: 'Your Big Five personality results and next steps.',
+    alternates: {
+      canonical: `/results/${params.resultId}`
+    },
+    openGraph: {
+      title: 'BigFive Results',
+      description: 'Your Big Five personality results and next steps.',
+      url: `/results/${params.resultId}`,
+      siteName: 'BigFive'
+    }
+  };
+}
+
 export default async function ResultsPage({ params }: ResultsPageProps) {
-  const { resultId } = await params;
+  const { resultId } = params;
 
   if (!resultIdSchema.safeParse(resultId).success) {
     redirect('/quiz');
+  }
+
+  const useFixture = process.env.NEXT_PUBLIC_QUIZ_FIXTURE_MODE === '1';
+  if (useFixture) {
+    const fixtureResult = resultSchema.safeParse({ id: resultId, traits: resultsFixture });
+    if (!fixtureResult.success) {
+      redirect('/quiz');
+    }
+
+    const { traits } = fixtureResult.data;
+
+    return (
+      <div className="results">
+        <header className="results__header">
+          <p className="eyebrow">Your results</p>
+          <h1>Big Five personality snapshot</h1>
+          <p className="muted">
+            Here is a quick look at your scores. Each trait is scored from 0–100 based on the IPIP-120 assessment.
+          </p>
+        </header>
+
+        <TraitChart scores={traits} />
+
+        <PaywallCTA resultId={resultId} />
+
+        <TraitSummary scores={traits} />
+      </div>
+    );
   }
 
   let supabase: ReturnType<typeof getSupabaseAdminClient>;

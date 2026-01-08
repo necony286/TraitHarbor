@@ -47,6 +47,30 @@ a {
   margin-top: 48px;
 }
 
+.footer__content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.footer__links {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.footer__link {
+  font-weight: 600;
+  color: var(--color-muted);
+}
+
+.footer__link:hover,
+.footer__link:focus-visible {
+  color: var(--color-brand);
+}
+
 .brand {
   font-weight: 700;
   font-size: 1.2rem;
@@ -489,6 +513,34 @@ a {
   margin: 0;
 }
 
+.checkout__report {
+  display: grid;
+  gap: 8px;
+}
+
+.checkout__download {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+  color: var(--color-brand);
+}
+
+.legal {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  max-width: 720px;
+}
+
+.legal__list {
+  margin: 0;
+  padding-left: 20px;
+  color: var(--color-muted);
+  display: grid;
+  gap: 8px;
+}
+
 @media (max-width: 900px) {
   .quiz-progress__header {
     flex-direction: column;
@@ -506,6 +558,11 @@ a {
   }
 
   .paywall-cta {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .footer__content {
     flex-direction: column;
     align-items: flex-start;
   }

@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { z } from 'zod';
 import { getCheckoutConfig } from '../../../../lib/payments';
 import { mapOrderRecord, orderSchema, orderStatusSchema } from '../../../../lib/orders';
+import { PG_FOREIGN_KEY_VIOLATION_ERROR_CODE } from '../../../../lib/constants';
 import { getSupabaseAdminClient } from '../../../../lib/supabase';
 
 const createOrderBodySchema = z.object({
@@ -76,7 +77,7 @@ export async function POST(request: Request) {
 
   if (error || !data) {
     console.error('Failed to create provisional order.', error);
-    if (error?.code === '23503') {
+    if (error?.code === PG_FOREIGN_KEY_VIOLATION_ERROR_CODE) {
       return NextResponse.json({ error: 'Result not found.' }, { status: 404 });
     }
     return NextResponse.json({ error: 'Unable to create order.' }, { status: 500 });

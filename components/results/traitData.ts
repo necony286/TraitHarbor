@@ -1,5 +1,7 @@
 export type TraitKey = 'O' | 'C' | 'E' | 'A' | 'N';
 
+export type TraitScores = Record<TraitKey, number>;
+
 export type TraitDetails = {
   label: string;
   description: string;

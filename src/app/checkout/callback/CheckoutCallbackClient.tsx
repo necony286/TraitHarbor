@@ -97,11 +97,7 @@ export default function CheckoutCallbackClient() {
   }, [orderId]);
 
   useEffect(() => {
-    if (!orderId) {
-      return;
-    }
-
-    if (order?.status && order.status !== 'pending_webhook') {
+    if (!orderId || order?.status !== 'pending_webhook') {
       return;
     }
 

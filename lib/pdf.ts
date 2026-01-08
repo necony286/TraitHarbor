@@ -18,7 +18,7 @@ type PdfMargin = {
 
 type PdfOptions = {
   format: 'A4';
-  printBackground: true;
+  printBackground: boolean;
   margin: PdfMargin;
 };
 

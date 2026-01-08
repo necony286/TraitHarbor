@@ -1,6 +1,23 @@
 import { readFile } from 'fs/promises';
 import path from 'path';
-import type { Chromium } from 'playwright';
+type ChromiumPage = {
+  setContent: (html: string, options: { waitUntil: 'networkidle' }) => Promise<void>;
+  emulateMedia: (options: { media: 'screen' }) => Promise<void>;
+  pdf: (options: {
+    format: 'A4';
+    printBackground: true;
+    margin: { top: string; bottom: string; left: string; right: string };
+  }) => Promise<Uint8Array>;
+};
+
+type ChromiumBrowser = {
+  newPage: () => Promise<ChromiumPage>;
+  close: () => Promise<void>;
+};
+
+type Chromium = {
+  launch: () => Promise<ChromiumBrowser>;
+};
 
 export type ReportTraits = {
   O: number;

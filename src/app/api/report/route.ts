@@ -33,6 +33,34 @@ const resultSchema = z.object({
 
 export const runtime = 'nodejs';
 
+async function upsertReportAsset({
+  supabase,
+  orderId,
+  userId,
+  reportPath,
+  logMessage
+}: {
+  supabase: ReturnType<typeof getSupabaseAdminClient>;
+  orderId: string;
+  userId: string;
+  reportPath: string;
+  logMessage: string;
+}) {
+  const { error: assetsError } = await supabase.from('assets').upsert(
+    {
+      user_id: userId,
+      order_id: orderId,
+      kind: 'report_pdf',
+      path: reportPath
+    },
+    { onConflict: 'order_id,kind' }
+  );
+
+  if (assetsError) {
+    logWarn(logMessage, { orderId, error: assetsError.message });
+  }
+}
+
 export async function POST(request: Request) {
   let payload: unknown;
 
@@ -88,21 +116,13 @@ export async function POST(request: Request) {
   const reportPath = getReportPath(parsedOrder.data.id);
   const existingUrl = await getReportSignedUrl(parsedOrder.data.id);
   if (existingUrl) {
-    const { error: assetsError } = await supabase.from('assets').upsert(
-      {
-        user_id: parsedOrder.data.user_id,
-        order_id: parsedOrder.data.id,
-        kind: 'report_pdf',
-        path: reportPath
-      },
-      { onConflict: 'order_id,kind' }
-    );
-    if (assetsError) {
-      logWarn('Failed to persist cached report metadata.', {
-        orderId: parsedOrder.data.id,
-        error: assetsError.message
-      });
-    }
+    await upsertReportAsset({
+      supabase,
+      orderId: parsedOrder.data.id,
+      userId: parsedOrder.data.user_id,
+      reportPath,
+      logMessage: 'Failed to persist cached report metadata.'
+    });
 
     logInfo('Using cached report PDF.', { orderId: parsedOrder.data.id });
     return NextResponse.json({ url: existingUrl, cached: true });
@@ -143,19 +163,13 @@ export async function POST(request: Request) {
       throw new Error('Unable to create signed report URL.');
     }
 
-    const { error: assetsError } = await supabase.from('assets').upsert(
-      {
-        user_id: parsedOrder.data.user_id,
-        order_id: parsedOrder.data.id,
-        kind: 'report_pdf',
-        path: reportPath
-      },
-      { onConflict: 'order_id,kind' }
-    );
-
-    if (assetsError) {
-      logWarn('Failed to persist report metadata.', { orderId: parsedOrder.data.id, error: assetsError.message });
-    }
+    await upsertReportAsset({
+      supabase,
+      orderId: parsedOrder.data.id,
+      userId: parsedOrder.data.user_id,
+      reportPath,
+      logMessage: 'Failed to persist report metadata.'
+    });
 
     logInfo('Report generated and stored.', { orderId: parsedOrder.data.id, resultId: parsedOrder.data.result_id });
 

@@ -204,11 +204,11 @@ describe('orders API route', () => {
     const response = await POST(request);
     const payload = await response.json();
 
-    expect(supabaseMock.from).toHaveBeenCalledWith('results');
+    expect(supabaseMock.from).toHaveBeenNthCalledWith(1, 'results');
     expect(resultsSelectChainMock.select).toHaveBeenCalledWith('id');
     expect(resultsSelectChainMock.eq).toHaveBeenCalledWith('id', resultId);
     expect(resultsMaybeSingleMock).toHaveBeenCalledTimes(1);
-    expect(supabaseMock.from).toHaveBeenCalledWith('orders');
+    expect(supabaseMock.from).toHaveBeenNthCalledWith(2, 'orders');
     expect(ordersInsertChainMock.insert).toHaveBeenCalledWith({
       amount_cents: 5000,
       status: 'created',

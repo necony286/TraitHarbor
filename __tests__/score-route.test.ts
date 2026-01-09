@@ -53,4 +53,18 @@ describe('score API route', () => {
     expect(response.status).toBe(500);
     expect(payload).toEqual({ error: 'Failed to store answers.' });
   });
+
+  it('returns an error when extra answers are provided', async () => {
+    const request = new Request('http://localhost/api/score', {
+      method: 'POST',
+      body: JSON.stringify({ answers: { ...mockAnswers, Q2: 5 } })
+    });
+
+    const response = await POST(request);
+    const payload = await response.json();
+
+    expect(response.status).toBe(400);
+    expect(payload).toEqual({ error: 'Unexpected answers.', extra: ['Q2'] });
+    expect(rpcMock).not.toHaveBeenCalled();
+  });
 });

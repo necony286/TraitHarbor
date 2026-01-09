@@ -36,13 +36,26 @@ export async function POST(request: Request) {
 
   const { answers } = parsed.data;
   const items = loadQuizItems();
-  const missing = getMissingAnswerIds(answers, items);
+  const allowedIds = new Set(items.map((item) => item.id));
+  const sanitizedAnswers = Object.fromEntries(
+    Object.entries(answers).filter(([id]) => allowedIds.has(id))
+  );
+  const extraIds = Object.keys(answers).filter((id) => !allowedIds.has(id));
+
+  if (extraIds.length > 0) {
+    return NextResponse.json(
+      { error: 'Unexpected answers.', extra: extraIds },
+      { status: 400 }
+    );
+  }
+
+  const missing = getMissingAnswerIds(sanitizedAnswers, items);
 
   if (missing.length > 0) {
     return NextResponse.json({ error: 'Missing answers.', missing }, { status: 400 });
   }
 
-  const result = scoreAnswers(answers, items);
+  const result = scoreAnswers(sanitizedAnswers, items);
 
   let supabase;
   try {
@@ -56,7 +69,7 @@ export async function POST(request: Request) {
     'create_result_with_answers',
     {
       traits: result.traits,
-      answers,
+      answers: sanitizedAnswers,
       expected_count: items.length
     }
   );

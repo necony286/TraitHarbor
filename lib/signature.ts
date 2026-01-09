@@ -38,7 +38,7 @@ const parseSignatureHeader = (header: string): SignatureParts | null => {
 const createHmac = (payload: string, secret: string) =>
   crypto.createHmac('sha256', secret).update(payload, 'utf8').digest('hex');
 
-const timingSafeEquals = (a: string, b: string): boolean => {
+export const timingSafeEquals = (a: string, b: string): boolean => {
   const aBuffer = Buffer.from(a, 'hex');
   const bBuffer = Buffer.from(b, 'hex');
 

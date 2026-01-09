@@ -39,7 +39,8 @@ interface UpsertReportAssetParams {
   userId: string;
   reportPath: string;
   logMessage: string;
-  kind: string;
+  kind: 'report_pdf';
+}
 }
 
 async function upsertReportAsset({

@@ -43,7 +43,7 @@ const timingSafeEquals = (a: string, b: string): boolean => {
   const bBuffer = Buffer.from(b, 'utf8');
 
   if (aBuffer.length !== bBuffer.length) {
-    crypto.timingSafeEqual(aBuffer, aBuffer);
+    crypto.timingSafeEqual(bBuffer, bBuffer);
     return false;
   }
 

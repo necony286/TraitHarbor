@@ -6,10 +6,12 @@ import { trackEvent } from '../../lib/analytics';
 import { z } from 'zod';
 import { checkoutConfigSchema } from '../../lib/payments';
 import { orderRecordSchema } from '../../lib/orders';
+import { getReportAccessTokenKey } from '../../lib/report-access-token';
 
 const createOrderResponseSchema = z.object({
   order: orderRecordSchema,
-  checkout: checkoutConfigSchema
+  checkout: checkoutConfigSchema,
+  reportAccessToken: z.string().uuid()
 });
 
 type CheckoutButtonProps = {
@@ -71,7 +73,9 @@ export function CheckoutButton({ resultId }: CheckoutButtonProps) {
         throw new Error('Invalid checkout response.');
       }
 
-      const { order, checkout } = parsedResponse.data;
+      const { order, checkout, reportAccessToken } = parsedResponse.data;
+
+      sessionStorage.setItem(getReportAccessTokenKey(order.id), reportAccessToken);
 
       await loadPaddleScript();
 

@@ -204,13 +204,20 @@ describe('orders API route', () => {
     const response = await POST(request);
     const payload = await response.json();
 
+    expect(supabaseMock.from).toHaveBeenCalledWith('results');
     expect(resultsSelectChainMock.select).toHaveBeenCalledWith('id');
     expect(resultsSelectChainMock.eq).toHaveBeenCalledWith('id', resultId);
+    expect(resultsMaybeSingleMock).toHaveBeenCalledTimes(1);
+    expect(supabaseMock.from).toHaveBeenCalledWith('orders');
     expect(ordersInsertChainMock.insert).toHaveBeenCalledWith({
       amount_cents: 5000,
       status: 'created',
       result_id: resultId
     });
+    expect(ordersInsertChainMock.select).toHaveBeenCalledWith(
+      'id, status, amount_cents, result_id, paddle_order_id, created_at'
+    );
+    expect(ordersInsertChainMock.single).toHaveBeenCalledTimes(1);
     expect(getCheckoutConfigMock).toHaveBeenCalledTimes(1);
     expect(consoleErrorSpy).toHaveBeenCalledWith(
       'Failed to load checkout config for order creation.',

@@ -38,6 +38,17 @@ const parseSignatureHeader = (header: string): SignatureParts | null => {
 const createHmac = (payload: string, secret: string) =>
   crypto.createHmac('sha256', secret).update(payload, 'utf8').digest('hex');
 
+const timingSafeCompareHex = (a: string, b: string): boolean => {
+  const aBuffer = Buffer.from(a, 'hex');
+  const bBuffer = Buffer.from(b, 'hex');
+
+  if (aBuffer.length !== bBuffer.length) {
+    return false;
+  }
+
+  return crypto.timingSafeEqual(aBuffer, bBuffer);
+};
+
 export const createPaddleSignatureHeader = (
   body: string,
   secret: string,
@@ -67,12 +78,12 @@ export const verifyPaddleSignature = (body: string, header: string | null, secre
     }
 
     const expectedSignature = createHmac(`${parsed.timestamp}:${body}`, secret);
-    return parsed.signature === expectedSignature;
+    return timingSafeCompareHex(parsed.signature, expectedSignature);
   }
 
   if (parsed.scheme === 'v1') {
     const expectedSignature = createHmac(body, secret);
-    return parsed.signature === expectedSignature;
+    return timingSafeCompareHex(parsed.signature, expectedSignature);
   }
 
   return false;

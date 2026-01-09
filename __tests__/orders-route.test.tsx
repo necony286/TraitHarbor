@@ -1,7 +1,7 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { describe, expect, it, beforeEach, vi } from 'vitest';
-import { PG_FOREIGN_KEY_VIOLATION_ERROR_CODE } from '../lib/constants';
+import { PG_FOREIGN_KEY_VIOLATION_ERROR_CODE } from '../lib/db/constants';
 import { getCheckoutConfig } from '../lib/payments';
 import { PATCH, POST } from '../src/app/api/orders/route';
 import CheckoutCallbackClient from '../src/app/checkout/callback/CheckoutCallbackClient';

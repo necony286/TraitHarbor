@@ -101,6 +101,23 @@ describe('paddle webhook signatures', () => {
     vi.useRealTimers();
   });
 
+  it('rejects signatures with mismatched lengths', () => {
+    const body = JSON.stringify({ event_type: 'payment_succeeded', data: { id: 'txn' } });
+    const secret = 'secret';
+    const now = new Date('2024-01-01T00:00:00Z');
+
+    vi.useFakeTimers();
+    vi.setSystemTime(now);
+    const header = createPaddleSignatureHeader(body, secret, Date.now());
+    const shortenedHeader = header.replace(/h1=([0-9a-f]+)/i, (_match, signature: string) => {
+      return `h1=${signature.slice(0, -2)}`;
+    });
+
+    expect(verifyPaddleSignature(body, shortenedHeader, secret)).toBe(false);
+
+    vi.useRealTimers();
+  });
+
   it('rejects stale timestamps for h1 signatures', () => {
     const body = JSON.stringify({ event_type: 'payment_succeeded', data: { id: 'txn' } });
     const secret = 'secret';

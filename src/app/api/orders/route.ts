@@ -3,7 +3,7 @@ import { NextResponse } from 'next/server';
 import { z } from 'zod';
 import { getCheckoutAmountCents, getCheckoutConfig } from '../../../../lib/payments';
 import { mapOrderRecord, orderSchema, orderStatusSchema } from '../../../../lib/orders';
-import { PG_FOREIGN_KEY_VIOLATION_ERROR_CODE } from '../../../../lib/constants';
+import { PG_FOREIGN_KEY_VIOLATION_ERROR_CODE } from '../../../../lib/db/constants';
 import { getSupabaseAdminClient } from '../../../../lib/supabase';
 
 const createOrderBodySchema = z.object({

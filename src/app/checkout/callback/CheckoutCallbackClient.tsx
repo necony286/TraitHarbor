@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { trackEvent } from '../../../../lib/analytics';
 import { orderRecordSchema, type OrderRecord } from '../../../../lib/orders';
+import { getReportAccessTokenKey } from '../../../../lib/report-access-token';
 
 const ORDER_STATUS_POLL_INTERVAL_MS = 3000;
 
@@ -135,10 +136,15 @@ export default function CheckoutCallbackClient() {
     setReportError(null);
 
     try {
+      const reportAccessToken = sessionStorage.getItem(getReportAccessTokenKey(orderId));
+      if (!reportAccessToken) {
+        throw new Error('Missing report access token.');
+      }
+
       const response = await fetch('/api/report', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ orderId })
+        body: JSON.stringify({ orderId, reportAccessToken })
       });
 
       if (!response.ok) {

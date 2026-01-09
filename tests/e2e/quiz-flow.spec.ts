@@ -68,7 +68,8 @@ test('quiz to paid flow with report download', async ({ page }) => {
           description: 'Starter PDF',
           environment: 'sandbox',
           clientToken: 'test_token'
-        }
+        },
+        reportAccessToken: '33333333-3333-3333-3333-333333333333'
       })
     });
   });

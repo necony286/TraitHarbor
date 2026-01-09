@@ -1,3 +1,4 @@
+import { randomUUID } from 'crypto';
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
 import { getCheckoutAmountCents, getCheckoutConfig } from '../../../../lib/payments';
@@ -57,12 +58,14 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Result not found.' }, { status: 404 });
   }
 
+  const reportAccessToken = randomUUID();
   const { data, error } = await supabase
     .from('orders')
     .insert({
       amount_cents: getCheckoutAmountCents(),
       status: 'created',
-      result_id: parsed.data.resultId
+      result_id: parsed.data.resultId,
+      report_access_token: reportAccessToken
     })
     .select('id, status, amount_cents, result_id, paddle_order_id, created_at')
     .single();
@@ -90,7 +93,8 @@ export async function POST(request: Request) {
 
   return NextResponse.json({
     order: mapOrderRecord(parsedOrder.data),
-    checkout: checkoutConfig
+    checkout: checkoutConfig,
+    reportAccessToken
   });
 }
 

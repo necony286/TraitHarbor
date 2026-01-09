@@ -7,6 +7,7 @@ import { getReportSignedUrl, uploadReport } from '../../../../lib/storage';
 
 const requestSchema = z.object({
   orderId: z.string().uuid(),
+  reportAccessToken: z.string().uuid(),
   name: z.string().max(80).optional()
 });
 
@@ -14,7 +15,8 @@ const orderSchema = z.object({
   id: z.string().uuid(),
   status: z.string(),
   result_id: z.string().uuid().nullable(),
-  created_at: z.string().datetime()
+  created_at: z.string().datetime(),
+  report_access_token: z.string().uuid().nullable().optional()
 });
 
 const resultSchema = z.object({
@@ -54,7 +56,7 @@ export async function POST(request: Request) {
 
   const { data: orderData, error: orderError } = await supabase
     .from('orders')
-    .select('id, status, result_id, created_at')
+    .select('id, status, result_id, created_at, report_access_token')
     .eq('id', parsed.data.orderId)
     .single();
 
@@ -75,6 +77,11 @@ export async function POST(request: Request) {
 
   if (!parsedOrder.data.result_id) {
     return NextResponse.json({ error: 'Result not attached to order.' }, { status: 400 });
+  }
+
+  if (parsedOrder.data.report_access_token !== parsed.data.reportAccessToken) {
+    logWarn('Invalid report access token for report generation.', { orderId: parsedOrder.data.id });
+    return NextResponse.json({ error: 'Invalid report access token.' }, { status: 403 });
   }
 
   const existingUrl = await getReportSignedUrl(parsedOrder.data.id);

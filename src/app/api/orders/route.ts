@@ -7,7 +7,8 @@ import { PG_FOREIGN_KEY_VIOLATION_ERROR_CODE } from '../../../../lib/db/constant
 import { getSupabaseAdminClient } from '../../../../lib/supabase';
 
 const createOrderBodySchema = z.object({
-  resultId: z.string().uuid()
+  resultId: z.string().uuid(),
+  userId: z.string().uuid()
 });
 
 const orderIdSchema = z.string().uuid();
@@ -43,10 +44,18 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Unable to create order.' }, { status: 500 });
   }
 
+  const { error: userError } = await supabase.from('users').upsert({ id: parsed.data.userId }, { onConflict: 'id' });
+
+  if (userError) {
+    console.error('Failed to ensure user record before order creation.', userError);
+    return NextResponse.json({ error: 'Unable to create order.' }, { status: 500 });
+  }
+
   const { data: resultData, error: resultError } = await supabase
     .from('results')
     .select('id')
     .eq('id', parsed.data.resultId)
+    .eq('user_id', parsed.data.userId)
     .maybeSingle();
 
   if (resultError) {
@@ -65,7 +74,8 @@ export async function POST(request: Request) {
       amount_cents: getCheckoutAmountCents(),
       status: 'created',
       result_id: parsed.data.resultId,
-      report_access_token: reportAccessToken
+      report_access_token: reportAccessToken,
+      user_id: parsed.data.userId
     })
     .select('id, status, amount_cents, result_id, paddle_order_id, created_at')
     .single();

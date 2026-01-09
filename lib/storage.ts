@@ -15,7 +15,7 @@ const getReportBucket = () => {
   return process.env.SUPABASE_REPORTS_BUCKET ?? 'reports';
 };
 
-const getReportPath = (orderId: string) => `orders/${orderId}.pdf`;
+export const getReportPath = (orderId: string) => `orders/${orderId}.pdf`;
 
 const getReportStorageClient = async () => {
   const { getSupabaseAdminClient } = await import('./supabase');

@@ -43,6 +43,8 @@ const timingSafeCompareHex = (a: string, b: string): boolean => {
   const bBuffer = Buffer.from(b, 'hex');
 
   if (aBuffer.length !== bBuffer.length) {
+    // To prevent timing attacks on length, perform a dummy comparison.
+    crypto.timingSafeEqual(bBuffer, bBuffer);
     return false;
   }
 

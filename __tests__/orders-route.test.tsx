@@ -152,7 +152,8 @@ describe('orders API route', () => {
     expect(ordersInsertChainMock.insert).toHaveBeenCalledWith({
       amount_cents: expect.any(Number),
       status: 'created',
-      result_id: resultId
+      result_id: resultId,
+      report_access_token: expect.any(String)
     });
     expect(response.status).toBe(404);
     expect(payload).toEqual({ error: 'Result not found.' });
@@ -212,7 +213,8 @@ describe('orders API route', () => {
     expect(ordersInsertChainMock.insert).toHaveBeenCalledWith({
       amount_cents: 5000,
       status: 'created',
-      result_id: resultId
+      result_id: resultId,
+      report_access_token: expect.any(String)
     });
     expect(ordersInsertChainMock.select).toHaveBeenCalledWith(
       'id, status, amount_cents, result_id, paddle_order_id, created_at'
@@ -233,7 +235,8 @@ describe('orders API route', () => {
         paddleOrderId: null,
         createdAt: '2024-01-01T00:00:00.000Z'
       },
-      checkout: null
+      checkout: null,
+      reportAccessToken: expect.any(String)
     });
 
     consoleErrorSpy.mockRestore();

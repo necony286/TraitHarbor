@@ -37,10 +37,16 @@ export async function POST(request: Request) {
   const { answers } = parsed.data;
   const items = loadQuizItems();
   const allowedIds = new Set(items.map((item) => item.id));
-  const sanitizedAnswers = Object.fromEntries(
-    Object.entries(answers).filter(([id]) => allowedIds.has(id))
-  );
-  const extraIds = Object.keys(answers).filter((id) => !allowedIds.has(id));
+  const sanitizedAnswers: Record<string, number> = {};
+  const extraIds: string[] = [];
+
+  for (const [id, value] of Object.entries(answers)) {
+    if (allowedIds.has(id)) {
+      sanitizedAnswers[id] = value;
+    } else {
+      extraIds.push(id);
+    }
+  }
 
   if (extraIds.length > 0) {
     return NextResponse.json(

@@ -33,24 +33,29 @@ const resultSchema = z.object({
 
 export const runtime = 'nodejs';
 
-async function upsertReportAsset({
-  supabase,
-  orderId,
-  userId,
-  reportPath,
-  logMessage
-}: {
+interface UpsertReportAssetParams {
   supabase: ReturnType<typeof getSupabaseAdminClient>;
   orderId: string;
   userId: string;
   reportPath: string;
   logMessage: string;
-}) {
+  kind: 'report_pdf';
+}
+}
+
+async function upsertReportAsset({
+  supabase,
+  orderId,
+  userId,
+  reportPath,
+  logMessage,
+  kind
+}: UpsertReportAssetParams) {
   const { error: assetsError } = await supabase.from('assets').upsert(
     {
       user_id: userId,
       order_id: orderId,
-      kind: 'report_pdf',
+      kind,
       path: reportPath
     },
     { onConflict: 'order_id,kind' }
@@ -121,7 +126,8 @@ export async function POST(request: Request) {
       orderId: parsedOrder.data.id,
       userId: parsedOrder.data.user_id,
       reportPath,
-      logMessage: 'Failed to persist cached report metadata.'
+      logMessage: 'Failed to persist cached report metadata.',
+      kind: 'report_pdf'
     });
 
     logInfo('Using cached report PDF.', { orderId: parsedOrder.data.id });
@@ -168,7 +174,8 @@ export async function POST(request: Request) {
       orderId: parsedOrder.data.id,
       userId: parsedOrder.data.user_id,
       reportPath,
-      logMessage: 'Failed to persist report metadata.'
+      logMessage: 'Failed to persist report metadata.',
+      kind: 'report_pdf'
     });
 
     logInfo('Report generated and stored.', { orderId: parsedOrder.data.id, resultId: parsedOrder.data.result_id });

@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { trackEvent } from '../../lib/analytics';
+import { getOrCreateAnonymousUserId } from '../../lib/anonymous-user';
 import { z } from 'zod';
 import { checkoutConfigSchema } from '../../lib/payments';
 import { orderRecordSchema } from '../../lib/orders';
@@ -58,10 +59,14 @@ export function CheckoutButton({ resultId }: CheckoutButtonProps) {
     setIsLoading(true);
 
     try {
+      const userId = getOrCreateAnonymousUserId();
+      if (!userId) {
+        throw new Error('Unable to start checkout.');
+      }
       const response = await fetch('/api/orders', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ resultId })
+        body: JSON.stringify({ resultId, userId })
       });
       if (!response.ok) {
         throw new Error('Checkout unavailable.');

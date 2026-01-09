@@ -5,7 +5,8 @@ import { getMissingAnswerIds, scoreAnswers } from '../../../../lib/scoring';
 import { getSupabaseAdminClient } from '../../../../lib/supabase';
 
 const scoreRequestSchema = z.object({
-  answers: z.record(z.string(), z.number().int().min(1).max(5))
+  answers: z.record(z.string(), z.number().int().min(1).max(5)),
+  userId: z.string().uuid()
 });
 
 const isAnswerStorageError = (error?: { code?: string } | null) => {
@@ -34,7 +35,7 @@ export async function POST(request: Request) {
     );
   }
 
-  const { answers } = parsed.data;
+  const { answers, userId } = parsed.data;
   const items = loadQuizItems();
   const allowedIds = new Set(items.map((item) => item.id));
   const sanitizedAnswers: Record<string, number> = {};
@@ -71,9 +72,16 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Unable to process request.' }, { status: 500 });
   }
 
+  const { error: userError } = await supabase.from('users').upsert({ id: userId }, { onConflict: 'id' });
+  if (userError) {
+    console.error('Failed to ensure user record before scoring.', userError);
+    return NextResponse.json({ error: 'Unable to process request.' }, { status: 500 });
+  }
+
   const { data: createdResultId, error: rpcError } = await supabase.rpc(
     'create_result_with_answers',
     {
+      user_id: userId,
       traits: result.traits,
       answers: sanitizedAnswers,
       expected_count: items.length

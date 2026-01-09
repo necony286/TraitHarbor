@@ -5,6 +5,7 @@ export type PaddleWebhookEvent = {
   eventType: string;
   orderId?: string;
   paddleOrderId?: string;
+  customerEmail?: string;
   status?: Extract<OrderStatus, 'paid' | 'failed'>;
 };
 
@@ -51,6 +52,23 @@ export const extractOrderIds = (data: unknown): Pick<PaddleWebhookEvent, 'orderI
   return { orderId, paddleOrderId };
 };
 
+export const extractCustomerEmail = (data: unknown): PaddleWebhookEvent['customerEmail'] => {
+  if (!data || typeof data !== 'object') {
+    return undefined;
+  }
+
+  const record = data as Record<string, unknown>;
+  const customer = record.customer as Record<string, unknown> | undefined;
+  const billingDetails = record.billing_details as Record<string, unknown> | undefined;
+
+  return (
+    getStringValue(record.customer_email) ??
+    getStringValue(record.email) ??
+    getStringValue(customer?.email) ??
+    getStringValue(billingDetails?.email)
+  );
+};
+
 export const parsePaddleWebhook = (payload: unknown): PaddleWebhookEvent | null => {
   const parsed = paddleWebhookSchema.safeParse(payload);
   if (!parsed.success) return null;
@@ -58,12 +76,14 @@ export const parsePaddleWebhook = (payload: unknown): PaddleWebhookEvent | null 
   const { event_type, data } = parsed.data;
   const status = getWebhookEventStatus(event_type);
   const { orderId, paddleOrderId } = extractOrderIds(data);
+  const customerEmail = extractCustomerEmail(data);
 
   return {
     eventType: event_type,
     status,
     orderId,
-    paddleOrderId
+    paddleOrderId,
+    customerEmail
   };
 };
 

@@ -9,7 +9,8 @@ import { orderStatusSchema } from '../../../../../lib/orders';
 const orderLookupSchema = z.object({
   id: z.string().uuid(),
   status: orderStatusSchema,
-  paddle_order_id: z.string().nullable().optional()
+  paddle_order_id: z.string().nullable().optional(),
+  user_id: z.string().uuid()
 });
 
 const getWebhookSecret = () => {
@@ -80,7 +81,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Unable to process webhook.' }, { status: 500 });
   }
 
-  let lookupQuery = supabase.from('orders').select('id, status, paddle_order_id');
+  let lookupQuery = supabase.from('orders').select('id, status, paddle_order_id, user_id');
 
   if (parsedEvent.orderId) {
     lookupQuery = lookupQuery.eq('id', parsedEvent.orderId);
@@ -155,6 +156,40 @@ export async function POST(request: Request) {
   }
 
   if (parsedEvent.status === 'paid') {
+    if (parsedEvent.customerEmail) {
+      const normalizedEmail = parsedEvent.customerEmail.toLowerCase();
+      const { data: userData, error: userLookupError } = await supabase
+        .from('users')
+        .select('id, email')
+        .eq('id', parsedOrder.data.user_id)
+        .maybeSingle();
+
+      if (userLookupError) {
+        logWarn('Failed to lookup user for webhook email update.', {
+          orderId: parsedOrder.data.id,
+          error: userLookupError.message
+        });
+      } else if (!userData || !userData.email) {
+        const { error: userUpdateError } = await supabase
+          .from('users')
+          .update({ email: normalizedEmail })
+          .eq('id', parsedOrder.data.user_id);
+
+        if (userUpdateError) {
+          logWarn('Failed to update user email from webhook.', {
+            orderId: parsedOrder.data.id,
+            error: userUpdateError.message
+          });
+        }
+      } else if (userData.email !== normalizedEmail) {
+        logWarn('Webhook email mismatch for user.', {
+          orderId: parsedOrder.data.id,
+          existingEmail: userData.email,
+          webhookEmail: normalizedEmail
+        });
+      }
+    }
+
     requestPdfGeneration(parsedOrder.data.id);
   }
 

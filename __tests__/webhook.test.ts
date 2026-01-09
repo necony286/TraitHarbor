@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 import { OrderStatus } from '../lib/orders';
-import { extractOrderIds, parsePaddleWebhook, shouldUpdateOrder } from '../lib/paddle-webhook';
+import { extractCustomerEmail, extractOrderIds, parsePaddleWebhook, shouldUpdateOrder } from '../lib/paddle-webhook';
 import { createPaddleSignatureHeader, verifyPaddleSignature } from '../lib/signature';
 
 describe('paddle webhook helpers', () => {
@@ -19,7 +19,8 @@ describe('paddle webhook helpers', () => {
       event_type: 'payment_succeeded',
       data: {
         id: 'txn_456',
-        custom_data: { order_id: 'order_def' }
+        custom_data: { order_id: 'order_def' },
+        customer_email: 'buyer@example.com'
       }
     };
 
@@ -28,6 +29,7 @@ describe('paddle webhook helpers', () => {
     expect(event?.status).toBe('paid');
     expect(event?.orderId).toBe('order_def');
     expect(event?.paddleOrderId).toBe('txn_456');
+    expect(event?.customerEmail).toBe('buyer@example.com');
   });
 
   it('ignores unknown event types', () => {
@@ -38,6 +40,11 @@ describe('paddle webhook helpers', () => {
 
     const event = parsePaddleWebhook(payload);
     expect(event?.status).toBeUndefined();
+  });
+
+  it('extracts customer email from payload data', () => {
+    const email = extractCustomerEmail({ customer: { email: 'hello@example.com' } });
+    expect(email).toBe('hello@example.com');
   });
 });
 

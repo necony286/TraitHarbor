@@ -8,6 +8,7 @@ import CheckoutCallbackClient from '../src/app/checkout/callback/CheckoutCallbac
 
 const orderId = '0d2a9f23-1f52-4f7d-9b75-b9b21c0ef35d';
 const resultId = 'f7f0a8c1-7a7a-4fda-8ec1-2f4c6d1c9427';
+const userId = '5f394c07-2e3a-4b42-8e57-f9c527fa4cc8';
 const supabaseMock = { from: vi.fn() };
 
 vi.mock('../lib/analytics', () => ({
@@ -78,6 +79,9 @@ describe('orders API route', () => {
       eq: vi.fn().mockReturnThis(),
       maybeSingle: maybeSingleMock
     };
+    const usersUpsertChainMock = {
+      upsert: vi.fn().mockResolvedValue({ error: null })
+    };
     const insertMock = vi.fn().mockReturnThis();
     const ordersInsertChainMock = {
       insert: insertMock,
@@ -86,6 +90,9 @@ describe('orders API route', () => {
     };
 
     supabaseMock.from.mockImplementation((table: string) => {
+      if (table === 'users') {
+        return usersUpsertChainMock;
+      }
       if (table === 'results') {
         return resultsSelectChainMock;
       }
@@ -97,15 +104,18 @@ describe('orders API route', () => {
 
     const request = new Request('http://localhost/api/orders', {
       method: 'POST',
-      body: JSON.stringify({ resultId })
+      body: JSON.stringify({ resultId, userId })
     });
 
     const response = await POST(request);
     const payload = await response.json();
 
+    expect(supabaseMock.from).toHaveBeenCalledWith('users');
+    expect(usersUpsertChainMock.upsert).toHaveBeenCalledWith({ id: userId }, { onConflict: 'id' });
     expect(supabaseMock.from).toHaveBeenCalledWith('results');
     expect(resultsSelectChainMock.select).toHaveBeenCalledWith('id');
     expect(resultsSelectChainMock.eq).toHaveBeenCalledWith('id', resultId);
+    expect(resultsSelectChainMock.eq).toHaveBeenCalledWith('user_id', userId);
     expect(maybeSingleMock).toHaveBeenCalledTimes(1);
     expect(insertMock).not.toHaveBeenCalled();
     expect(response.status).toBe(404);
@@ -119,6 +129,9 @@ describe('orders API route', () => {
       eq: vi.fn().mockReturnThis(),
       maybeSingle: resultsMaybeSingleMock
     };
+    const usersUpsertChainMock = {
+      upsert: vi.fn().mockResolvedValue({ error: null })
+    };
     const insertError = { code: PG_FOREIGN_KEY_VIOLATION_ERROR_CODE };
     const ordersInsertChainMock = {
       insert: vi.fn().mockReturnThis(),
@@ -127,6 +140,9 @@ describe('orders API route', () => {
     };
 
     supabaseMock.from.mockImplementation((table: string) => {
+      if (table === 'users') {
+        return usersUpsertChainMock;
+      }
       if (table === 'results') {
         return resultsSelectChainMock;
       }
@@ -138,22 +154,26 @@ describe('orders API route', () => {
 
     const request = new Request('http://localhost/api/orders', {
       method: 'POST',
-      body: JSON.stringify({ resultId })
+      body: JSON.stringify({ resultId, userId })
     });
 
     const response = await POST(request);
     const payload = await response.json();
 
+    expect(supabaseMock.from).toHaveBeenCalledWith('users');
+    expect(usersUpsertChainMock.upsert).toHaveBeenCalledWith({ id: userId }, { onConflict: 'id' });
     expect(supabaseMock.from).toHaveBeenCalledWith('results');
     expect(resultsSelectChainMock.select).toHaveBeenCalledWith('id');
     expect(resultsSelectChainMock.eq).toHaveBeenCalledWith('id', resultId);
+    expect(resultsSelectChainMock.eq).toHaveBeenCalledWith('user_id', userId);
     expect(resultsMaybeSingleMock).toHaveBeenCalledTimes(1);
     expect(supabaseMock.from).toHaveBeenCalledWith('orders');
     expect(ordersInsertChainMock.insert).toHaveBeenCalledWith({
       amount_cents: expect.any(Number),
       status: 'created',
       result_id: resultId,
-      report_access_token: expect.any(String)
+      report_access_token: expect.any(String),
+      user_id: userId
     });
     expect(response.status).toBe(404);
     expect(payload).toEqual({ error: 'Result not found.' });
@@ -165,6 +185,9 @@ describe('orders API route', () => {
       select: vi.fn().mockReturnThis(),
       eq: vi.fn().mockReturnThis(),
       maybeSingle: resultsMaybeSingleMock
+    };
+    const usersUpsertChainMock = {
+      upsert: vi.fn().mockResolvedValue({ error: null })
     };
     const createdOrder = {
       id: orderId,
@@ -181,6 +204,9 @@ describe('orders API route', () => {
     };
 
     supabaseMock.from.mockImplementation((table: string) => {
+      if (table === 'users') {
+        return usersUpsertChainMock;
+      }
       if (table === 'results') {
         return resultsSelectChainMock;
       }
@@ -199,22 +225,26 @@ describe('orders API route', () => {
 
     const request = new Request('http://localhost/api/orders', {
       method: 'POST',
-      body: JSON.stringify({ resultId })
+      body: JSON.stringify({ resultId, userId })
     });
 
     const response = await POST(request);
     const payload = await response.json();
 
-    expect(supabaseMock.from).toHaveBeenNthCalledWith(1, 'results');
+    expect(supabaseMock.from).toHaveBeenNthCalledWith(1, 'users');
+    expect(usersUpsertChainMock.upsert).toHaveBeenCalledWith({ id: userId }, { onConflict: 'id' });
+    expect(supabaseMock.from).toHaveBeenNthCalledWith(2, 'results');
     expect(resultsSelectChainMock.select).toHaveBeenCalledWith('id');
     expect(resultsSelectChainMock.eq).toHaveBeenCalledWith('id', resultId);
+    expect(resultsSelectChainMock.eq).toHaveBeenCalledWith('user_id', userId);
     expect(resultsMaybeSingleMock).toHaveBeenCalledTimes(1);
-    expect(supabaseMock.from).toHaveBeenNthCalledWith(2, 'orders');
+    expect(supabaseMock.from).toHaveBeenNthCalledWith(3, 'orders');
     expect(ordersInsertChainMock.insert).toHaveBeenCalledWith({
       amount_cents: 5000,
       status: 'created',
       result_id: resultId,
-      report_access_token: expect.any(String)
+      report_access_token: expect.any(String),
+      user_id: userId
     });
     expect(ordersInsertChainMock.select).toHaveBeenCalledWith(
       'id, status, amount_cents, result_id, paddle_order_id, created_at'

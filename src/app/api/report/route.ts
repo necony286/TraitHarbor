@@ -3,7 +3,7 @@ import { z } from 'zod';
 import { logError, logInfo, logWarn } from '../../../../lib/logger';
 import { generateReportPdf } from '../../../../lib/pdf';
 import { getSupabaseAdminClient } from '../../../../lib/supabase';
-import { getReportSignedUrl, uploadReport } from '../../../../lib/storage';
+import { getReportPath, getReportSignedUrl, uploadReport } from '../../../../lib/storage';
 
 const requestSchema = z.object({
   orderId: z.string().uuid(),
@@ -16,7 +16,8 @@ const orderSchema = z.object({
   status: z.string(),
   result_id: z.string().uuid().nullable(),
   created_at: z.string().datetime(),
-  report_access_token: z.string().uuid().nullable().optional()
+  report_access_token: z.string().uuid().nullable().optional(),
+  user_id: z.string().uuid()
 });
 
 const resultSchema = z.object({
@@ -56,7 +57,7 @@ export async function POST(request: Request) {
 
   const { data: orderData, error: orderError } = await supabase
     .from('orders')
-    .select('id, status, result_id, created_at, report_access_token')
+    .select('id, status, result_id, created_at, report_access_token, user_id')
     .eq('id', parsed.data.orderId)
     .single();
 
@@ -84,8 +85,25 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Invalid report access token.' }, { status: 403 });
   }
 
+  const reportPath = getReportPath(parsedOrder.data.id);
   const existingUrl = await getReportSignedUrl(parsedOrder.data.id);
   if (existingUrl) {
+    const { error: assetsError } = await supabase.from('assets').upsert(
+      {
+        user_id: parsedOrder.data.user_id,
+        order_id: parsedOrder.data.id,
+        kind: 'report_pdf',
+        path: reportPath
+      },
+      { onConflict: 'order_id,kind' }
+    );
+    if (assetsError) {
+      logWarn('Failed to persist cached report metadata.', {
+        orderId: parsedOrder.data.id,
+        error: assetsError.message
+      });
+    }
+
     logInfo('Using cached report PDF.', { orderId: parsedOrder.data.id });
     return NextResponse.json({ url: existingUrl, cached: true });
   }
@@ -123,6 +141,20 @@ export async function POST(request: Request) {
     const signedUrl = await getReportSignedUrl(parsedOrder.data.id);
     if (!signedUrl) {
       throw new Error('Unable to create signed report URL.');
+    }
+
+    const { error: assetsError } = await supabase.from('assets').upsert(
+      {
+        user_id: parsedOrder.data.user_id,
+        order_id: parsedOrder.data.id,
+        kind: 'report_pdf',
+        path: reportPath
+      },
+      { onConflict: 'order_id,kind' }
+    );
+
+    if (assetsError) {
+      logWarn('Failed to persist report metadata.', { orderId: parsedOrder.data.id, error: assetsError.message });
     }
 
     logInfo('Report generated and stored.', { orderId: parsedOrder.data.id, resultId: parsedOrder.data.result_id });

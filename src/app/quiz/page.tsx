@@ -8,6 +8,7 @@ import { Progress } from '../../../components/quiz/Progress';
 import { QuestionCard } from '../../../components/quiz/QuestionCard';
 import { QuizEventName, trackQuizEvent } from '../../../lib/analytics';
 import { loadQuizItems, QuizItem } from '../../../lib/ipip';
+import { getOrCreateAnonymousUserId } from '../../../lib/anonymous-user';
 import { clearQuizState, loadQuizState, saveQuizState } from '../../../lib/storage';
 
 const PAGE_SIZE = 12;
@@ -43,6 +44,7 @@ export default function QuizPage() {
 
   useEffect(() => {
     trackQuizEvent('quiz_view');
+    getOrCreateAnonymousUserId();
     const saved = loadQuizState(items.length);
     if (saved) {
       setAnswers(filterAnswers(saved.answers, itemIds));
@@ -126,10 +128,16 @@ export default function QuizPage() {
     setSubmitError(null);
 
     try {
+      const userId = getOrCreateAnonymousUserId();
+      if (!userId) {
+        setSubmitError('We could not start your quiz session. Please refresh and try again.');
+        return;
+      }
+
       const response = await fetch('/api/score', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ answers: sanitizedAnswers })
+        body: JSON.stringify({ answers: sanitizedAnswers, userId })
       });
 
       const parsedPayload = scoreResponseSchema.safeParse(await response.json());

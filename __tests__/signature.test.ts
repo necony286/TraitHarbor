@@ -6,8 +6,8 @@ describe('timingSafeEquals', () => {
     expect(timingSafeEquals('deadbeef', 'deadbeef')).toBe(true);
   });
 
-  it('returns true for empty strings', () => {
-    expect(timingSafeEquals('', '')).toBe(true);
+  it('returns false for empty strings', () => {
+    expect(timingSafeEquals('', '')).toBe(false);
   });
 
   it('handles mixed-case hex strings correctly', () => {

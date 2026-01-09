@@ -41,20 +41,20 @@ const createHmac = (payload: string, secret: string) =>
 export const timingSafeEquals = (a: string, b: string): boolean => {
   const isValidHex = (value: string) => value.length % 2 === 0 && /^[0-9a-fA-F]*$/.test(value);
 
-  if (!isValidHex(a) || !isValidHex(b)) {
-    crypto.timingSafeEqual(Buffer.alloc(0), Buffer.alloc(0));
-    return false;
-  }
+  const aIsValid = isValidHex(a);
+  const bIsValid = isValidHex(b);
+  const aBuffer = aIsValid ? Buffer.from(a, 'hex') : Buffer.alloc(0);
+  const bBuffer = bIsValid ? Buffer.from(b, 'hex') : Buffer.alloc(0);
 
-  const aBuffer = Buffer.from(a, 'hex');
-  const bBuffer = Buffer.from(b, 'hex');
+  const maxLength = Math.max(aBuffer.length, bBuffer.length, 1);
+  const paddedA = Buffer.alloc(maxLength);
+  const paddedB = Buffer.alloc(maxLength);
 
-  if (aBuffer.length !== bBuffer.length) {
-    crypto.timingSafeEqual(bBuffer, bBuffer);
-    return false;
-  }
+  aBuffer.copy(paddedA);
+  bBuffer.copy(paddedB);
 
-  return crypto.timingSafeEqual(aBuffer, bBuffer);
+  const isEqual = crypto.timingSafeEqual(paddedA, paddedB);
+  return aIsValid && bIsValid && aBuffer.length === bBuffer.length && aBuffer.length > 0 && isEqual;
 };
 
 export const createPaddleSignatureHeader = (

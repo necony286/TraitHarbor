@@ -39,6 +39,13 @@ const createHmac = (payload: string, secret: string) =>
   crypto.createHmac('sha256', secret).update(payload, 'utf8').digest('hex');
 
 export const timingSafeEquals = (a: string, b: string): boolean => {
+  const isValidHex = (value: string) => value.length % 2 === 0 && /^[0-9a-fA-F]*$/.test(value);
+
+  if (!isValidHex(a) || !isValidHex(b)) {
+    crypto.timingSafeEqual(Buffer.alloc(0), Buffer.alloc(0));
+    return false;
+  }
+
   const aBuffer = Buffer.from(a, 'hex');
   const bBuffer = Buffer.from(b, 'hex');
 

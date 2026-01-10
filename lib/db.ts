@@ -300,7 +300,12 @@ export const updateOrderFromWebhook = async ({
         orderId: parsed.data.id,
         error: userLookupError
       });
-    } else if (!userData || !userData.email) {
+    } else if (!userData) {
+      logWarn('User not found for order during webhook processing.', {
+        orderId: parsed.data.id,
+        userId: parsed.data.user_id
+      });
+    } else if (!userData.email) {
       const { error: userUpdateError } = await supabase
         .from('users')
         .update({ email: normalizedEmail })

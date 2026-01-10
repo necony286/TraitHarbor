@@ -49,9 +49,14 @@ begin
     raise exception 'Traits payload is required.' using errcode = 'XXP01';
   end if;
 
-  insert into responses (user_id, answers)
-  values (user_id, answers)
-  returning id into response_id;
+  begin
+    insert into responses (user_id, answers)
+    values (user_id, answers)
+    returning id into response_id;
+  exception
+    when others then
+      raise exception 'Failed to insert response: %', SQLERRM using errcode = 'XXR01';
+  end;
 
   begin
     insert into scores (response_id, traits)

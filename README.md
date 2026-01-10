@@ -25,6 +25,10 @@ Follow [`docs/implementation-plan.md`](./docs/implementation-plan.md) for the st
    ```
    The site renders a BigFive shell with design token previews.
 
+For detailed environment setup, see:
+- [Local setup guide (Windows)](./docs/local-setup.md)
+- [Vercel deployment guide](./docs/vercel-deployment.md)
+
 ## Scripts
 - `pnpm lint` — Next.js ESLint rules
 - `pnpm build` — Next.js production build

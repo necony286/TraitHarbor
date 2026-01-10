@@ -60,8 +60,8 @@ create index if not exists orders_paddle_order_id_idx on orders(paddle_order_id)
 
 create or replace function create_response_with_scores(
   user_id uuid,
-  answers jsonb,
   traits jsonb,
+  answers jsonb,
   expected_count integer
 )
 returns uuid
@@ -91,7 +91,7 @@ begin
     raise exception 'Expected count is required.' using errcode = 'XXP01';
   end if;
 
-  actual_count := (select count(*) from jsonb_object_keys(answers));
+  actual_count := jsonb_object_length(answers);
   if actual_count <> expected_count then
     raise exception 'Answer count mismatch. Expected %, got %.', expected_count, actual_count using errcode = 'XXA01';
   end if;

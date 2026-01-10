@@ -16,8 +16,8 @@ ON CONFLICT DO NOTHING;
 
 SELECT create_response_with_scores(
   '11111111-1111-1111-1111-111111111111',
-  '{"q1": 1}'::jsonb,
   '{"O": 11, "C": 22, "E": 33, "A": 44, "N": 55}'::jsonb,
+  '{"q1": 1}'::jsonb,
   1
 ) AS response_id \gset
 

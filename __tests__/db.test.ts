@@ -143,12 +143,12 @@ describe('updateOrderFromWebhook', () => {
     const lookupError = { message: 'DB connection failed', code: '500' };
     usersSelectChain.maybeSingle.mockResolvedValue({ data: null, error: lookupError });
 
-    await updateOrderFromWebhook({
+    const result = await updateOrderFromWebhook({
       orderId: ORDER_ID,
       status: 'paid',
       customerEmail: 'any@example.com'
     });
-
+    expect(result.error).toBeNull();
     expect(ordersTable.update).toHaveBeenCalledWith({ status: 'paid' });
     expect(logWarnMock).toHaveBeenCalledWith('Failed to lookup user for webhook email update.', {
       orderId: ORDER_ID,

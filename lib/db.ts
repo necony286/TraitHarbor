@@ -294,8 +294,29 @@ export const updateOrderFromWebhook = async ({
       .eq('id', parsed.data.user_id)
       .maybeSingle();
 
-    if (!userLookupError && (!userData || !userData.email)) {
-      await supabase.from('users').update({ email: normalizedEmail }).eq('id', parsed.data.user_id);
+    if (userLookupError) {
+      console.warn('Failed to lookup user for webhook email update.', {
+        orderId: parsed.data.id,
+        error: userLookupError.message
+      });
+    } else if (!userData || !userData.email) {
+      const { error: userUpdateError } = await supabase
+        .from('users')
+        .update({ email: normalizedEmail })
+        .eq('id', parsed.data.user_id);
+
+      if (userUpdateError) {
+        console.warn('Failed to update user email from webhook.', {
+          orderId: parsed.data.id,
+          error: userUpdateError.message
+        });
+      }
+    } else if (userData.email !== normalizedEmail) {
+      console.warn('Webhook email mismatch for user.', {
+        orderId: parsed.data.id,
+        existingEmail: userData.email,
+        webhookEmail: normalizedEmail
+      });
     }
   }
 

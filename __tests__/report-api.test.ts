@@ -10,7 +10,10 @@ vi.mock('../lib/logger', () => ({
   logWarn: vi.fn()
 }));
 
-class PdfRenderConcurrencyError extends Error {}
+const { PdfRenderConcurrencyError } = vi.hoisted(() => {
+  class PdfRenderConcurrencyError extends Error {}
+  return { PdfRenderConcurrencyError };
+});
 
 vi.mock('../lib/pdf', () => ({
   generateReportPdf: vi.fn(),

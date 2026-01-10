@@ -162,12 +162,12 @@ describe('updateOrderFromWebhook', () => {
     const updateError = { message: 'Constraint violation', code: '23505' };
     usersUpdateChain.eq.mockResolvedValue({ error: updateError });
 
-    await updateOrderFromWebhook({
+    const result = await updateOrderFromWebhook({
       orderId: ORDER_ID,
       status: 'paid',
       customerEmail: 'newemail@example.com'
     });
-
+    expect(result.error).toBeNull();
     expect(ordersTable.update).toHaveBeenCalledWith({ status: 'paid' });
     expect(logWarnMock).toHaveBeenCalledWith('Failed to update user email from webhook.', {
       orderId: ORDER_ID,

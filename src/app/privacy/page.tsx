@@ -1,6 +1,6 @@
 export const metadata = {
-  title: 'Privacy Policy | BigFive',
-  description: 'Privacy policy for the BigFive personality assessment.'
+  title: 'Privacy Policy | TraitHarbor',
+  description: 'Privacy policy for the TraitHarbor personality assessment.'
 };
 
 export default function PrivacyPolicyPage() {

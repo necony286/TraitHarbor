@@ -1,6 +1,6 @@
 # Vercel deployment guide
 
-This guide covers deploying BigFive to Vercel using hosted Supabase, Upstash Redis, and Paddle (Production or Sandbox).
+This guide covers deploying TraitHarbor to Vercel using hosted Supabase, Upstash Redis, and Paddle (Production or Sandbox).
 
 ## 1) Prerequisites
 

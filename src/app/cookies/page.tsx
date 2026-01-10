@@ -1,6 +1,6 @@
 export const metadata = {
-  title: 'Cookie Policy | BigFive',
-  description: 'Cookie policy for the BigFive personality assessment.'
+  title: 'Cookie Policy | TraitHarbor',
+  description: 'Cookie policy for the TraitHarbor personality assessment.'
 };
 
 export default function CookiePolicyPage() {

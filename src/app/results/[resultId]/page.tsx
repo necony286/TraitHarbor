@@ -28,16 +28,16 @@ type ResultsPageProps = {
 export async function generateMetadata({ params }: ResultsPageProps) {
   const { resultId } = await params;
   return {
-    title: 'Results | BigFive',
-    description: 'Your Big Five personality results and next steps.',
+    title: 'Results | TraitHarbor',
+    description: 'Your TraitHarbor personality results and next steps.',
     alternates: {
       canonical: `/results/${resultId}`
     },
     openGraph: {
-      title: 'BigFive Results',
-      description: 'Your Big Five personality results and next steps.',
+      title: 'TraitHarbor Results',
+      description: 'Your TraitHarbor personality results and next steps.',
       url: `/results/${resultId}`,
-      siteName: 'BigFive'
+      siteName: 'TraitHarbor'
     }
   };
 }

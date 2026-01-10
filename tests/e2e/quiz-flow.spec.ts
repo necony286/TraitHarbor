@@ -93,7 +93,7 @@ test('quiz to paid flow with report download', async ({ page }) => {
 
   await page.getByRole('button', { name: 'Submit answers' }).click();
   await expect(page).toHaveURL(new RegExp(`/results/${FIXTURE_RESULT_ID}$`));
-  await expect(page.getByRole('heading', { name: 'Big Five personality snapshot' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'TraitHarbor personality snapshot' })).toBeVisible();
 
   await page.getByRole('button', { name: 'Unlock full report (PDF)' }).click();
 

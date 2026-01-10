@@ -4,7 +4,7 @@ export type QuizState = {
   itemCount: number;
 };
 
-const QUIZ_STATE_KEY = 'bigfive:quiz-state';
+const QUIZ_STATE_KEY = 'traitharbor:quiz-state';
 
 const isBrowser = typeof window !== 'undefined';
 

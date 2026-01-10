@@ -1,6 +1,6 @@
-# BigFive SaaS — Document Pack (v1, 2025-12-28)
+# TraitHarbor SaaS — Document Pack (v1, 2025-12-28)
 
-This pack contains all core documents to plan, build, launch and operate the Big Five personality test SaaS.
+This pack contains all core documents to plan, build, launch and operate the five-factor personality test SaaS.
 Files are grouped and numbered for easy navigation. Start with **01–04** (product), then **05–07** (design & content),
 **08–14** (tech), **15–17** (analytics & marketing), **18–20** (ops), and **21–24** (legal).
 

@@ -15,7 +15,7 @@ export default defineConfig({
     reuseExistingServer: !process.env.CI,
     env: {
       NEXT_PUBLIC_QUIZ_FIXTURE_MODE: '1',
-      NEXT_PUBLIC_PLAUSIBLE_DOMAIN: 'analytics.bigfive.example'
+      NEXT_PUBLIC_PLAUSIBLE_DOMAIN: 'analytics.traitharbor.example'
     }
   },
   use: {

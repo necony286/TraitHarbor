@@ -1,6 +1,6 @@
 export const metadata = {
-  title: 'Terms of Service | BigFive',
-  description: 'Terms of Service for the BigFive personality assessment.'
+  title: 'Terms of Service | TraitHarbor',
+  description: 'Terms of Service for the TraitHarbor personality assessment.'
 };
 
 export default function TermsPage() {

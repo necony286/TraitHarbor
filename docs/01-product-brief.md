@@ -13,7 +13,7 @@
 - Geography: Global (EU focus).
 
 ## 3. Value Proposition
-- Free accurate Big Five test + optional premium report in minutes.
+- Free accurate five-factor test + optional premium report in minutes.
 - Shareable results & personalized advice.
 
 ## 4. Unique Selling Points (USPs)

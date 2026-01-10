@@ -1,4 +1,4 @@
-# Implementation Plan — Big Five SaaS (Next.js 15)
+# Implementation Plan — TraitHarbor SaaS (Next.js 15)
 
 This plan converts the MVP flow (Landing → Quiz → Free result → Paywall → Paid → PDF) into sequential GitHub issues and small PRs. It respects the product brief, user flow, roadmap, scoring, payments, PDF, and analytics specs in `/docs`.
 
@@ -13,7 +13,7 @@ This plan converts the MVP flow (Landing → Quiz → Free result → Paywall �
   - CI workflow includes `pnpm install`, `pnpm exec playwright install --with-deps`, and runs `pnpm lint`, `pnpm build`, `pnpm test`, and `pnpm test:e2e` on every PR and on `main` (Playwright enabled by default).
 - **Acceptance Criteria:**
   - `pnpm lint`, `pnpm build`, `pnpm test` (unit via Vitest only), and `pnpm test:e2e` (Playwright) succeed locally and in CI with browsers installed.
-  - Base layout renders “BigFive” shell with design tokens placeholder from `05-design-system.md`.
+  - Base layout renders “TraitHarbor” shell with design tokens placeholder from `05-design-system.md`.
 - **Quick Tests:**
   - `pnpm install`
   - `pnpm lint`

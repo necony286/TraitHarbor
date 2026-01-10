@@ -85,7 +85,7 @@ const getUpstashLimiter = (limit: number, window: RateLimitConfig['window']): Li
     redis,
     limiter: Ratelimit.fixedWindow(limit, window),
     analytics: true,
-    prefix: 'bigfive:rate-limit'
+    prefix: 'traitharbor:rate-limit'
   });
 
   const limiter: Limiter = {

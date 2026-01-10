@@ -1,6 +1,6 @@
 # Local setup guide (Windows)
 
-This guide focuses on running the BigFive app locally on Windows, including Supabase via Docker, Paddle Sandbox, and optional Upstash Redis.
+This guide focuses on running the TraitHarbor app locally on Windows, including Supabase via Docker, Paddle Sandbox, and optional Upstash Redis.
 
 ## 1) Prerequisites
 

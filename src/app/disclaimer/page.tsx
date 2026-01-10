@@ -1,6 +1,6 @@
 export const metadata = {
-  title: 'Disclaimer | BigFive',
-  description: 'Non-clinical disclaimer for the BigFive personality assessment.'
+  title: 'Disclaimer | TraitHarbor',
+  description: 'Non-clinical disclaimer for the TraitHarbor personality assessment.'
 };
 
 export default function DisclaimerPage() {

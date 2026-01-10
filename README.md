@@ -1,7 +1,7 @@
-# BigFive
+# TraitHarbor
 
 ## Overview
-BigFive is a personality-test SaaS built around the IPIP-120 questionnaire, offering a free interactive quiz and an optional premium PDF report. The product targets primarily women 18–34 who are self-help and career curious, with a global EU-first audience, delivering credible, shareable insights with a privacy-first approach.
+TraitHarbor is a personality-test SaaS built around the IPIP-120 questionnaire, offering a free interactive quiz and an optional premium PDF report. The product targets primarily women 18–34 who are self-help and career curious, with a global EU-first audience, delivering credible, shareable insights with a privacy-first approach.
 
 ## Implementation plan source of truth
 Follow [`docs/implementation-plan.md`](./docs/implementation-plan.md) for the step-by-step issue and PR sequence. Create one GitHub issue per step (1–10) before coding; each PR should map to the matching issue and acceptance criteria.
@@ -23,7 +23,7 @@ Follow [`docs/implementation-plan.md`](./docs/implementation-plan.md) for the st
    ```bash
    pnpm dev
    ```
-   The site renders a BigFive shell with design token previews.
+   The site renders a TraitHarbor shell with design token previews.
 
 For detailed environment setup, see:
 - [Local setup guide (Windows)](./docs/local-setup.md)

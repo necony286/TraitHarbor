@@ -1,5 +1,5 @@
-const ANONYMOUS_USER_COOKIE = 'bigfive_anon_user_id';
-const ANONYMOUS_USER_STORAGE_KEY = 'bigfive:anon-user-id';
+const ANONYMOUS_USER_COOKIE = 'traitharbor_anon_user_id';
+const ANONYMOUS_USER_STORAGE_KEY = 'traitharbor:anon-user-id';
 const COOKIE_MAX_AGE_SECONDS = 60 * 60 * 24 * 365;
 
 const isBrowser = typeof window !== 'undefined';

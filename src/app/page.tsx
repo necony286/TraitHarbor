@@ -5,7 +5,7 @@ export default function HomePage() {
     <div className="hero">
       <section className="hero__content">
         <p className="eyebrow">Personality, made clear</p>
-        <h1>BigFive experience</h1>
+        <h1>TraitHarbor experience</h1>
         <p className="muted">
           A calm, research-backed flow for the IPIP-120 questionnaire with accessible controls, progress feedback, and
           privacy-first defaults.
@@ -15,7 +15,7 @@ export default function HomePage() {
             View design tokens
           </a>
           <a className="button button--ghost" href="https://ipip.ori.org/" target="_blank" rel="noopener noreferrer">
-            Read about the Big Five
+            Read about the five-factor model
           </a>
         </div>
       </section>

@@ -7,17 +7,17 @@ import '../app/globals.css';
 const inter = Inter({ subsets: ['latin'], display: 'swap' });
 
 export const metadata: Metadata = {
-  title: 'BigFive',
-  description: 'BigFive personality assessment experience',
+  title: 'TraitHarbor',
+  description: 'TraitHarbor personality assessment experience',
   metadataBase: new URL('https://example.com'),
   alternates: {
     canonical: '/'
   },
   openGraph: {
-    title: 'BigFive',
-    description: 'Modern Big Five personality quiz and insights',
+    title: 'TraitHarbor',
+    description: 'Modern five-factor personality quiz and insights',
     url: 'https://example.com',
-    siteName: 'BigFive'
+    siteName: 'TraitHarbor'
   }
 };
 
@@ -32,7 +32,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         ) : null}
         <div className="shell">
           <header className="shell__header">
-            <Link href="/" className="brand">BigFive</Link>
+            <Link href="/" className="brand">TraitHarbor</Link>
             <nav aria-label="Primary">
               <Link className="nav-link" href="/quiz">
                 Quiz

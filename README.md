@@ -48,3 +48,4 @@ GitHub Actions (`.github/workflows/ci.yml`) runs on `main` and pull requests:
 - Quiz data will be stored in `src/data/ipip120.json` and loaded directly (no `/public` fetch).
 - Shared UI/utilities belong in top-level `components/**` and `lib/**`.
 - Fixture mode for the quiz will use `src/data/ipip120.fixture.json` when `NEXT_PUBLIC_QUIZ_FIXTURE_MODE=1` (implemented in later steps).
+- PDF generation uses the Node.js runtime (Playwright is not supported in Edge); see `src/app/api/report/route.ts` for the runtime declaration.

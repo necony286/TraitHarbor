@@ -1,15 +1,18 @@
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
 import { logError, logInfo, logWarn } from '../../../../lib/logger';
-import { generateReportPdf } from '../../../../lib/pdf';
+import { PdfRenderConcurrencyError, generateReportPdf } from '../../../../lib/pdf';
+import { enforceRateLimit } from '../../../../lib/rate-limit';
 import { getOrderById, getReportAsset, getScoresByResultId, storeReportAsset } from '../../../../lib/db';
 import { getReportPath, getReportSignedUrl, uploadReport } from '../../../../lib/storage';
 
-const requestSchema = z.object({
-  orderId: z.string().uuid(),
-  reportAccessToken: z.string().uuid(),
-  name: z.string().max(80).optional()
-});
+const requestSchema = z
+  .object({
+    orderId: z.string().uuid(),
+    reportAccessToken: z.string().uuid(),
+    name: z.string().trim().min(1).max(80).optional()
+  })
+  .strict();
 
 const resultSchema = z.object({
   id: z.string().uuid(),
@@ -25,6 +28,17 @@ const resultSchema = z.object({
 export const runtime = 'nodejs';
 
 export async function POST(request: Request) {
+  const rateLimitResponse = await enforceRateLimit({
+    request,
+    route: 'report',
+    limit: 5,
+    window: '1 m',
+    mode: 'fail-closed'
+  });
+  if (rateLimitResponse) {
+    return rateLimitResponse;
+  }
+
   let payload: unknown;
 
   try {
@@ -136,6 +150,9 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ url: signedUrl, cached: false });
   } catch (error) {
+    if (error instanceof PdfRenderConcurrencyError) {
+      return NextResponse.json({ error: 'Report generation busy. Try again shortly.' }, { status: 429 });
+    }
     logError('Report generation failed.', { orderId: order.id, error });
     return NextResponse.json({ error: 'Unable to generate report.' }, { status: 500 });
   }

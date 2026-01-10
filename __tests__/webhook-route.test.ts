@@ -18,6 +18,11 @@ vi.mock('../lib/logger', () => ({
   logWarn: vi.fn()
 }));
 
+vi.mock('../lib/rate-limit', () => ({
+  enforceRateLimit: vi.fn().mockResolvedValue(null),
+  getClientIdentifier: vi.fn().mockReturnValue('test-client')
+}));
+
 describe('paddle webhook route', () => {
   const env = process.env;
 
@@ -84,5 +89,34 @@ describe('paddle webhook route', () => {
       paddleOrderId: 'txn_123',
       customerEmail: 'Customer@example.com'
     });
+  });
+
+  it('does not allow webhook bypass in production', async () => {
+    process.env = {
+      ...env,
+      NODE_ENV: 'production',
+      ALLOW_WEBHOOK_TEST_BYPASS: '1',
+      PADDLE_WEBHOOK_SECRET: 'secret'
+    };
+
+    const payload = {
+      event_type: 'payment_succeeded',
+      data: {
+        id: 'txn_123',
+        custom_data: { order_id: orderId }
+      }
+    };
+
+    const response = await POST(
+      new Request('http://localhost/api/paddle/webhook', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      })
+    );
+
+    expect(response.status).toBe(400);
+    expect(getOrderByIdMock).not.toHaveBeenCalled();
+    expect(updateOrderFromWebhookMock).not.toHaveBeenCalled();
   });
 });

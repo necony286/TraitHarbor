@@ -3,6 +3,7 @@ import path from 'path';
 
 type SetContentOptions = {
   waitUntil: 'networkidle';
+  timeout?: number;
 };
 
 type EmulateMediaOptions = {
@@ -26,9 +27,17 @@ type ChromiumPage = {
   setContent: (html: string, options: SetContentOptions) => Promise<void>;
   emulateMedia: (options: EmulateMediaOptions) => Promise<void>;
   pdf: (options: PdfOptions) => Promise<Uint8Array>;
+  setDefaultTimeout: (timeout: number) => void;
+  setDefaultNavigationTimeout: (timeout: number) => void;
+  close: () => Promise<void>;
 };
 
 type ChromiumBrowser = {
+  newContext: () => Promise<ChromiumContext>;
+  close: () => Promise<void>;
+};
+
+type ChromiumContext = {
   newPage: () => Promise<ChromiumPage>;
   close: () => Promise<void>;
 };
@@ -52,6 +61,14 @@ export type ReportPayload = {
 };
 
 const MAX_PDF_BYTES = 700 * 1024;
+const MAX_CONCURRENT_PDF = 2;
+const PDF_TIMEOUT_MS = 15_000;
+
+export class PdfRenderConcurrencyError extends Error {
+  constructor() {
+    super('PDF generation is busy.');
+  }
+}
 
 const templatePath = (filename: string) => path.join(process.cwd(), 'templates', filename);
 
@@ -69,6 +86,20 @@ const formatDate = (date: Date) =>
   new Intl.DateTimeFormat('en-US', { month: 'long', day: 'numeric', year: 'numeric' }).format(date);
 
 let chromiumPromise: Promise<Chromium> | undefined;
+let activePdfRenders = 0;
+
+const withPdfConcurrencyGuard = async <T>(task: () => Promise<T>) => {
+  if (activePdfRenders >= MAX_CONCURRENT_PDF) {
+    throw new PdfRenderConcurrencyError();
+  }
+
+  activePdfRenders += 1;
+  try {
+    return await task();
+  } finally {
+    activePdfRenders = Math.max(0, activePdfRenders - 1);
+  }
+};
 
 const getChromium = () => {
   if (!chromiumPromise) {
@@ -105,27 +136,40 @@ export async function buildReportHtml(payload: ReportPayload) {
 }
 
 export async function generateReportPdf(payload: ReportPayload) {
-  const html = await buildReportHtml(payload);
-  const chromium = await getChromium();
-  const browser = await chromium.launch();
+  return withPdfConcurrencyGuard(async () => {
+    const html = await buildReportHtml(payload);
+    const chromium = await getChromium();
+    const browser = await chromium.launch();
+    let context: ChromiumContext | null = null;
+    let page: ChromiumPage | null = null;
 
-  try {
-    const page = await browser.newPage();
-    await page.setContent(html, { waitUntil: 'networkidle' });
-    await page.emulateMedia({ media: 'screen' });
+    try {
+      context = await browser.newContext();
+      page = await context.newPage();
+      page.setDefaultTimeout(PDF_TIMEOUT_MS);
+      page.setDefaultNavigationTimeout(PDF_TIMEOUT_MS);
+      await page.setContent(html, { waitUntil: 'networkidle', timeout: PDF_TIMEOUT_MS });
+      await page.emulateMedia({ media: 'screen' });
 
-    const pdf = await page.pdf({
-      format: 'A4',
-      printBackground: true,
-      margin: { top: '24px', bottom: '24px', left: '24px', right: '24px' }
-    });
+      const pdf = await page.pdf({
+        format: 'A4',
+        printBackground: true,
+        margin: { top: '24px', bottom: '24px', left: '24px', right: '24px' }
+      });
 
-    if (pdf.byteLength > MAX_PDF_BYTES) {
-      throw new Error(`PDF too large (${pdf.byteLength} bytes).`);
+      if (pdf.byteLength > MAX_PDF_BYTES) {
+        throw new Error(`PDF too large (${pdf.byteLength} bytes).`);
+      }
+
+      return pdf;
+    } finally {
+      if (page) {
+        await page.close();
+      }
+      if (context) {
+        await context.close();
+      }
+      await browser.close();
     }
-
-    return pdf;
-  } finally {
-    await browser.close();
-  }
+  });
 }

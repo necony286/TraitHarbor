@@ -3,6 +3,7 @@ import { z } from 'zod';
 import { loadQuizItems } from '../../../../lib/ipip';
 import { getMissingAnswerIds, scoreAnswers } from '../../../../lib/scoring';
 import { createResponseAndScores } from '../../../../lib/db';
+import { enforceRateLimit } from '../../../../lib/rate-limit';
 
 const scoreRequestSchema = z.object({
   answers: z.record(z.string(), z.number().int().min(1).max(5)),
@@ -15,6 +16,17 @@ const isAnswerStorageError = (error?: { code?: string } | null) => {
 };
 
 export async function POST(request: Request) {
+  const rateLimitResponse = await enforceRateLimit({
+    request,
+    route: 'score',
+    limit: 10,
+    window: '1 m',
+    mode: 'fail-open'
+  });
+  if (rateLimitResponse) {
+    return rateLimitResponse;
+  }
+
   let payload: unknown;
 
   try {

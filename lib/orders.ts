@@ -19,6 +19,7 @@ export const orderSchema = z.object({
   amount_cents: z.number().int().nonnegative(),
   response_id: z.string().uuid().nullable().optional(),
   paddle_order_id: z.string().nullable().optional(),
+  paddle_transaction_id: z.string().nullable().optional(),
   created_at: z.string().datetime()
 });
 

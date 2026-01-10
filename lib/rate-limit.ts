@@ -119,15 +119,15 @@ const getLimiter = (limit: number, window: RateLimitConfig['window']): Limiter |
 };
 
 export const getClientIdentifier = (request: Request) => {
+  const realIp = request.headers.get('x-real-ip');
+  if (realIp?.trim()) {
+    return realIp.trim();
+  }
+
   const forwardedFor = request.headers.get('x-forwarded-for');
   if (forwardedFor) {
     const [first] = forwardedFor.split(',');
     if (first?.trim()) return first.trim();
-  }
-
-  const realIp = request.headers.get('x-real-ip');
-  if (realIp?.trim()) {
-    return realIp.trim();
   }
 
   return 'unknown';

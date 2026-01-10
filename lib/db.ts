@@ -58,6 +58,7 @@ type WebhookUpdateParams = {
   orderId: string;
   status: 'paid' | 'failed';
   paddleOrderId?: string;
+  paddleTransactionId?: string;
   customerEmail?: string;
 };
 
@@ -262,13 +263,18 @@ export const updateOrderFromWebhook = async ({
   orderId,
   status,
   paddleOrderId,
+  paddleTransactionId,
   customerEmail
 }: WebhookUpdateParams): Promise<DbResult<z.infer<typeof orderDetailSchema>>> => {
   const supabase = getSupabaseAdminClient();
-  const updates: { status: typeof status; paddle_order_id?: string } = { status };
+  const updates: { status: typeof status; paddle_order_id?: string; paddle_transaction_id?: string } = { status };
 
   if (paddleOrderId) {
     updates.paddle_order_id = paddleOrderId;
+  }
+
+  if (paddleTransactionId) {
+    updates.paddle_transaction_id = paddleTransactionId;
   }
 
   const { data, error } = await supabase

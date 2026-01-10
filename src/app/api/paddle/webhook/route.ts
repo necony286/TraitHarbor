@@ -4,6 +4,7 @@ import { logError, logInfo, logWarn } from '../../../../../lib/logger';
 import { parsePaddleWebhook, shouldUpdateOrder } from '../../../../../lib/paddle-webhook';
 import { verifyPaddleSignature } from '../../../../../lib/signature';
 import { orderStatusSchema } from '../../../../../lib/orders';
+import { enforceRateLimit, getClientIdentifier } from '../../../../../lib/rate-limit';
 
 const getWebhookSecret = () => {
   const secret = process.env.PADDLE_WEBHOOK_SECRET;
@@ -13,8 +14,16 @@ const getWebhookSecret = () => {
   return secret;
 };
 
-const shouldBypassSignature = () =>
-  process.env.NODE_ENV === 'development' && process.env.ALLOW_WEBHOOK_TEST_BYPASS === '1';
+const shouldBypassSignature = () => {
+  if (process.env.NODE_ENV !== 'development') {
+    if (process.env.ALLOW_WEBHOOK_TEST_BYPASS === '1') {
+      logWarn('Webhook signature bypass ignored outside development.');
+    }
+    return false;
+  }
+
+  return process.env.ALLOW_WEBHOOK_TEST_BYPASS === '1';
+};
 
 const requestPdfGeneration = (orderId: string) => {
   logInfo('PDF generation queued for paid order.', { orderId });
@@ -51,6 +60,19 @@ export async function POST(request: Request) {
   const parsedEvent = parsePaddleWebhook(payload);
   if (!parsedEvent) {
     return NextResponse.json({ error: 'Invalid webhook payload.' }, { status: 400 });
+  }
+
+  const webhookIdentifier = `${getClientIdentifier(request)}:${parsedEvent.eventId ?? parsedEvent.paddleTransactionId ?? 'unknown'}`;
+  const rateLimitResponse = await enforceRateLimit({
+    request,
+    route: 'paddle-webhook',
+    limit: 30,
+    window: '1 m',
+    mode: 'fail-closed',
+    identifier: webhookIdentifier
+  });
+  if (rateLimitResponse) {
+    return rateLimitResponse;
   }
 
   if (!parsedEvent.status) {
@@ -113,6 +135,7 @@ export async function POST(request: Request) {
     orderId: order.id,
     status: parsedEvent.status,
     paddleOrderId: parsedEvent.paddleOrderId,
+    paddleTransactionId: parsedEvent.paddleTransactionId,
     customerEmail: parsedEvent.customerEmail
   });
 

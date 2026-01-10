@@ -3,8 +3,10 @@ import { OrderStatus } from './orders';
 
 export type PaddleWebhookEvent = {
   eventType: string;
+  eventId?: string;
   orderId?: string;
   paddleOrderId?: string;
+  paddleTransactionId?: string;
   customerEmail?: string;
   status?: Extract<OrderStatus, 'paid' | 'failed'>;
 };
@@ -52,6 +54,33 @@ export const extractOrderIds = (data: unknown): Pick<PaddleWebhookEvent, 'orderI
   return { orderId, paddleOrderId };
 };
 
+export const extractTransactionId = (data: unknown, eventType: string): string | undefined => {
+  if (!data || typeof data !== 'object') {
+    return undefined;
+  }
+
+  const record = data as Record<string, unknown>;
+  const transactionId = getStringValue(record.transaction_id);
+  if (transactionId) {
+    return transactionId;
+  }
+
+  if (eventType.startsWith('transaction.')) {
+    return getStringValue(record.id);
+  }
+
+  return undefined;
+};
+
+export const extractEventId = (payload: unknown): string | undefined => {
+  if (!payload || typeof payload !== 'object') {
+    return undefined;
+  }
+
+  const record = payload as Record<string, unknown>;
+  return getStringValue(record.event_id) ?? getStringValue(record.id);
+};
+
 export const extractCustomerEmail = (data: unknown): PaddleWebhookEvent['customerEmail'] => {
   if (!data || typeof data !== 'object') {
     return undefined;
@@ -76,13 +105,17 @@ export const parsePaddleWebhook = (payload: unknown): PaddleWebhookEvent | null 
   const { event_type, data } = parsed.data;
   const status = getWebhookEventStatus(event_type);
   const { orderId, paddleOrderId } = extractOrderIds(data);
+  const paddleTransactionId = extractTransactionId(data, event_type);
+  const eventId = extractEventId(payload);
   const customerEmail = extractCustomerEmail(data);
 
   return {
     eventType: event_type,
+    eventId,
     status,
     orderId,
     paddleOrderId,
+    paddleTransactionId,
     customerEmail
   };
 };

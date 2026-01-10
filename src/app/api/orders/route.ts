@@ -4,6 +4,7 @@ import { z } from 'zod';
 import { getCheckoutAmountCents, getCheckoutConfig } from '../../../../lib/payments';
 import { mapOrderRecord, orderStatusSchema } from '../../../../lib/orders';
 import { createProvisionalOrder, getOrderById, updateOrderStatus } from '../../../../lib/db';
+import { enforceRateLimit } from '../../../../lib/rate-limit';
 
 const createOrderBodySchema = z.object({
   resultId: z.string().uuid(),
@@ -21,6 +22,17 @@ const updateOrderSchema = z.object({
 });
 
 export async function POST(request: Request) {
+  const rateLimitResponse = await enforceRateLimit({
+    request,
+    route: 'orders',
+    limit: 10,
+    window: '1 m',
+    mode: 'fail-open'
+  });
+  if (rateLimitResponse) {
+    return rateLimitResponse;
+  }
+
   let payload: unknown;
 
   try {
@@ -75,6 +87,17 @@ export async function POST(request: Request) {
 }
 
 export async function GET(request: Request) {
+  const rateLimitResponse = await enforceRateLimit({
+    request,
+    route: 'orders',
+    limit: 10,
+    window: '1 m',
+    mode: 'fail-open'
+  });
+  if (rateLimitResponse) {
+    return rateLimitResponse;
+  }
+
   const { searchParams } = new URL(request.url);
   const orderId = searchParams.get('orderId');
 
@@ -106,6 +129,17 @@ export async function GET(request: Request) {
 }
 
 export async function PATCH(request: Request) {
+  const rateLimitResponse = await enforceRateLimit({
+    request,
+    route: 'orders',
+    limit: 10,
+    window: '1 m',
+    mode: 'fail-open'
+  });
+  if (rateLimitResponse) {
+    return rateLimitResponse;
+  }
+
   let payload: unknown;
 
   try {

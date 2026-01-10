@@ -10,8 +10,11 @@ vi.mock('../lib/logger', () => ({
   logWarn: vi.fn()
 }));
 
+class PdfRenderConcurrencyError extends Error {}
+
 vi.mock('../lib/pdf', () => ({
-  generateReportPdf: vi.fn()
+  generateReportPdf: vi.fn(),
+  PdfRenderConcurrencyError
 }));
 
 vi.mock('../lib/storage', () => ({
@@ -37,12 +40,19 @@ import { getReportSignedUrl, uploadReport } from '../lib/storage';
 import { POST } from '../src/app/api/report/route';
 
 describe('/api/report', () => {
+  const env = process.env;
+
   beforeEach(() => {
     vi.clearAllMocks();
+    process.env = { ...env, NODE_ENV: 'development' };
     storeReportAssetMock.mockResolvedValue({ data: null, error: null });
     getReportAssetMock.mockResolvedValue({ data: null, error: null });
     vi.mocked(generateReportPdf).mockResolvedValue(new Uint8Array([1]));
     vi.mocked(uploadReport).mockResolvedValue(undefined);
+  });
+
+  afterEach(() => {
+    process.env = env;
   });
 
   it('fails when the report access token is invalid', async () => {

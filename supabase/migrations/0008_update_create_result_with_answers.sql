@@ -29,9 +29,7 @@ begin
     raise exception 'Expected count is required.' using errcode = 'XXP01';
   end if;
 
-  select count(*)
-    into actual_count
-    from jsonb_object_keys(answers);
+  actual_count := (select count(*) from jsonb_object_keys(answers));
   if actual_count <> expected_count then
     raise exception 'Answer count mismatch. Expected %, got %.', expected_count, actual_count using errcode = 'XXA01';
   end if;

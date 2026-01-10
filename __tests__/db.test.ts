@@ -82,6 +82,7 @@ describe('updateOrderFromWebhook', () => {
     });
 
     expect(result.error).toBeNull();
+    expect(ordersTable.update).toHaveBeenCalledWith({ status: 'paid', paddle_order_id: 'paddle-123' });
     expect(logWarnMock).toHaveBeenCalledWith('User not found for order during webhook processing.', {
       orderId: ORDER_ID,
       userId: USER_ID
@@ -99,6 +100,7 @@ describe('updateOrderFromWebhook', () => {
     });
 
     expect(result.error).toBeNull();
+    expect(ordersTable.update).toHaveBeenCalledWith({ status: 'paid' });
     expect(usersTable.update).toHaveBeenCalledWith({ email: 'newemail@example.com' });
     expect(usersUpdateChain.eq).toHaveBeenCalledWith('id', USER_ID);
     expect(logWarnMock).not.toHaveBeenCalled();
@@ -114,6 +116,7 @@ describe('updateOrderFromWebhook', () => {
     });
 
     expect(result.error).toBeNull();
+    expect(ordersTable.update).toHaveBeenCalledWith({ status: 'paid' });
     expect(usersTable.update).not.toHaveBeenCalled();
     expect(logWarnMock).not.toHaveBeenCalled();
   });
@@ -128,10 +131,47 @@ describe('updateOrderFromWebhook', () => {
     });
 
     expect(result.error).toBeNull();
+    expect(ordersTable.update).toHaveBeenCalledWith({ status: 'paid' });
     expect(logWarnMock).toHaveBeenCalledWith('Webhook email mismatch for user.', {
       orderId: ORDER_ID,
       existingEmail: 'stored@example.com',
       webhookEmail: 'different@example.com'
+    });
+  });
+
+  it('logs a warning when user lookup fails', async () => {
+    const lookupError = { message: 'DB connection failed', code: '500' };
+    usersSelectChain.maybeSingle.mockResolvedValue({ data: null, error: lookupError });
+
+    const result = await updateOrderFromWebhook({
+      orderId: ORDER_ID,
+      status: 'paid',
+      customerEmail: 'any@example.com'
+    });
+    expect(result.error).toBeNull();
+    expect(ordersTable.update).toHaveBeenCalledWith({ status: 'paid' });
+    expect(logWarnMock).toHaveBeenCalledWith('Failed to lookup user for webhook email update.', {
+      orderId: ORDER_ID,
+      error: lookupError
+    });
+    expect(usersTable.update).not.toHaveBeenCalled();
+  });
+
+  it('logs a warning when user email update fails', async () => {
+    usersSelectChain.maybeSingle.mockResolvedValue({ data: { id: USER_ID, email: null }, error: null });
+    const updateError = { message: 'Constraint violation', code: '23505' };
+    usersUpdateChain.eq.mockResolvedValue({ error: updateError });
+
+    const result = await updateOrderFromWebhook({
+      orderId: ORDER_ID,
+      status: 'paid',
+      customerEmail: 'newemail@example.com'
+    });
+    expect(result.error).toBeNull();
+    expect(ordersTable.update).toHaveBeenCalledWith({ status: 'paid' });
+    expect(logWarnMock).toHaveBeenCalledWith('Failed to update user email from webhook.', {
+      orderId: ORDER_ID,
+      error: updateError
     });
   });
 });

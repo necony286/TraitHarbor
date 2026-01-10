@@ -41,7 +41,6 @@ interface UpsertReportAssetParams {
   logMessage: string;
   kind: 'report_pdf';
 }
-}
 
 async function upsertReportAsset({
   supabase,

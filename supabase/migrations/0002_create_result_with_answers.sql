@@ -18,6 +18,10 @@ begin
     raise exception 'Answers payload is required.' using errcode = 'XXP01';
   end if;
 
+  if jsonb_typeof(answers) <> 'object' then
+    raise exception 'Answers payload must be a JSON object.' using errcode = 'XXP02';
+  end if;
+
   if expected_count is null then
     raise exception 'Expected count is required.' using errcode = 'XXP01';
   end if;

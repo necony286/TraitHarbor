@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import { z } from 'zod';
 import { loadQuizItems } from '../../../../lib/ipip';
 import { getMissingAnswerIds, scoreAnswers } from '../../../../lib/scoring';
-import { getSupabaseAdminClient } from '../../../../lib/supabase';
+import { createResponseAndScores } from '../../../../lib/db';
 
 const scoreRequestSchema = z.object({
   answers: z.record(z.string(), z.number().int().min(1).max(5)),
@@ -64,35 +64,28 @@ export async function POST(request: Request) {
 
   const result = scoreAnswers(sanitizedAnswers, items);
 
-  let supabase;
+  let createdResultId: string | null = null;
+  let createError: { code?: string; message?: string } | null = null;
+
   try {
-    supabase = getSupabaseAdminClient();
+    const response = await createResponseAndScores({
+      userId,
+      answers: sanitizedAnswers,
+      traits: result.traits,
+      expectedCount: items.length
+    });
+    createdResultId = response.data;
+    createError = response.error;
   } catch (error) {
     console.error('Failed to initialize Supabase admin client in score route.', error);
     return NextResponse.json({ error: 'Unable to process request.' }, { status: 500 });
   }
 
-  const { error: userError } = await supabase.from('users').upsert({ id: userId }, { onConflict: 'id' });
-  if (userError) {
-    console.error('Failed to ensure user record before scoring.', userError);
-    return NextResponse.json({ error: 'Unable to process request.' }, { status: 500 });
-  }
-
-  const { data: createdResultId, error: rpcError } = await supabase.rpc(
-    'create_result_with_answers',
-    {
-      user_id: userId,
-      traits: result.traits,
-      answers: sanitizedAnswers,
-      expected_count: items.length
+  if (createError || !createdResultId) {
+    if (createError) {
+      console.error('Failed to store response via RPC.', createError);
     }
-  );
-
-  if (rpcError || !createdResultId) {
-    if (rpcError) {
-      console.error('Failed to store result answers via RPC.', rpcError);
-    }
-    const errorMessage = isAnswerStorageError(rpcError)
+    const errorMessage = isAnswerStorageError(createError)
       ? 'Failed to store answers.'
       : 'Failed to store results.';
     return NextResponse.json({ error: errorMessage }, { status: 500 });

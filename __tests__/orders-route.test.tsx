@@ -1,7 +1,6 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { describe, expect, it, beforeEach, vi } from 'vitest';
-import { PG_FOREIGN_KEY_VIOLATION_ERROR_CODE } from '../lib/db/constants';
 import { getCheckoutConfig } from '../lib/payments';
 import { PATCH, POST } from '../src/app/api/orders/route';
 import CheckoutCallbackClient from '../src/app/checkout/callback/CheckoutCallbackClient';
@@ -9,14 +8,17 @@ import CheckoutCallbackClient from '../src/app/checkout/callback/CheckoutCallbac
 const orderId = '0d2a9f23-1f52-4f7d-9b75-b9b21c0ef35d';
 const resultId = 'f7f0a8c1-7a7a-4fda-8ec1-2f4c6d1c9427';
 const userId = '5f394c07-2e3a-4b42-8e57-f9c527fa4cc8';
-const supabaseMock = { from: vi.fn() };
+const createProvisionalOrderMock = vi.fn();
+const updateOrderStatusMock = vi.fn();
 
 vi.mock('../lib/analytics', () => ({
   trackEvent: vi.fn()
 }));
 
-vi.mock('../lib/supabase', () => ({
-  getSupabaseAdminClient: () => supabaseMock
+vi.mock('../lib/db', () => ({
+  createProvisionalOrder: (...args: unknown[]) => createProvisionalOrderMock(...args),
+  updateOrderStatus: (...args: unknown[]) => updateOrderStatusMock(...args),
+  getOrderById: vi.fn()
 }));
 
 vi.mock('../lib/payments', () => ({
@@ -44,15 +46,7 @@ describe('orders API route', () => {
   });
 
   it('returns 409 when attempting to update a non-created order', async () => {
-    const maybeSingleMock = vi.fn().mockResolvedValue({ data: null, error: null });
-    const supabaseUpdateChainMock = {
-      update: vi.fn().mockReturnThis(),
-      eq: vi.fn().mockReturnThis(),
-      select: vi.fn().mockReturnThis(),
-      maybeSingle: maybeSingleMock
-    };
-
-    supabaseMock.from.mockReturnValue(supabaseUpdateChainMock);
+    updateOrderStatusMock.mockResolvedValue({ data: null, error: null });
 
     const request = new Request('http://localhost/api/orders', {
       method: 'PATCH',
@@ -62,44 +56,15 @@ describe('orders API route', () => {
     const response = await PATCH(request);
     const payload = await response.json();
 
-    expect(supabaseMock.from).toHaveBeenCalledWith('orders');
-    expect(supabaseUpdateChainMock.update).toHaveBeenCalledWith({ status: 'pending_webhook' });
-    expect(supabaseUpdateChainMock.eq).toHaveBeenCalledWith('id', orderId);
-    expect(supabaseUpdateChainMock.eq).toHaveBeenCalledWith('status', 'created');
-    expect(supabaseUpdateChainMock.select).toHaveBeenCalledWith('id, status, amount_cents, result_id, paddle_order_id, created_at');
-    expect(supabaseUpdateChainMock.maybeSingle).toHaveBeenCalledTimes(1);
+    expect(updateOrderStatusMock).toHaveBeenCalledWith({ orderId, status: 'pending_webhook' });
     expect(response.status).toBe(409);
     expect(payload).toEqual({ error: 'Order status conflict.' });
   });
 
   it('returns 404 when creating an order with a missing result', async () => {
-    const maybeSingleMock = vi.fn().mockResolvedValue({ data: null, error: null });
-    const resultsSelectChainMock = {
-      select: vi.fn().mockReturnThis(),
-      eq: vi.fn().mockReturnThis(),
-      maybeSingle: maybeSingleMock
-    };
-    const usersUpsertChainMock = {
-      upsert: vi.fn().mockResolvedValue({ error: null })
-    };
-    const insertMock = vi.fn().mockReturnThis();
-    const ordersInsertChainMock = {
-      insert: insertMock,
-      select: vi.fn().mockReturnThis(),
-      single: vi.fn()
-    };
-
-    supabaseMock.from.mockImplementation((table: string) => {
-      if (table === 'users') {
-        return usersUpsertChainMock;
-      }
-      if (table === 'results') {
-        return resultsSelectChainMock;
-      }
-      if (table === 'orders') {
-        return ordersInsertChainMock;
-      }
-      return undefined;
+    createProvisionalOrderMock.mockResolvedValue({
+      data: null,
+      error: { message: 'Response not found.', code: 'NOT_FOUND' }
     });
 
     const request = new Request('http://localhost/api/orders', {
@@ -110,46 +75,20 @@ describe('orders API route', () => {
     const response = await POST(request);
     const payload = await response.json();
 
-    expect(supabaseMock.from).toHaveBeenCalledWith('users');
-    expect(usersUpsertChainMock.upsert).toHaveBeenCalledWith({ id: userId }, { onConflict: 'id' });
-    expect(supabaseMock.from).toHaveBeenCalledWith('results');
-    expect(resultsSelectChainMock.select).toHaveBeenCalledWith('id');
-    expect(resultsSelectChainMock.eq).toHaveBeenCalledWith('id', resultId);
-    expect(resultsSelectChainMock.eq).toHaveBeenCalledWith('user_id', userId);
-    expect(maybeSingleMock).toHaveBeenCalledTimes(1);
-    expect(insertMock).not.toHaveBeenCalled();
+    expect(createProvisionalOrderMock).toHaveBeenCalledWith({
+      userId,
+      responseId: resultId,
+      amountCents: 5000,
+      reportAccessToken: expect.any(String)
+    });
     expect(response.status).toBe(404);
     expect(payload).toEqual({ error: 'Result not found.' });
   });
 
   it('returns 404 when the result disappears before order creation', async () => {
-    const resultsMaybeSingleMock = vi.fn().mockResolvedValue({ data: { id: resultId }, error: null });
-    const resultsSelectChainMock = {
-      select: vi.fn().mockReturnThis(),
-      eq: vi.fn().mockReturnThis(),
-      maybeSingle: resultsMaybeSingleMock
-    };
-    const usersUpsertChainMock = {
-      upsert: vi.fn().mockResolvedValue({ error: null })
-    };
-    const insertError = { code: PG_FOREIGN_KEY_VIOLATION_ERROR_CODE };
-    const ordersInsertChainMock = {
-      insert: vi.fn().mockReturnThis(),
-      select: vi.fn().mockReturnThis(),
-      single: vi.fn().mockResolvedValue({ data: null, error: insertError })
-    };
-
-    supabaseMock.from.mockImplementation((table: string) => {
-      if (table === 'users') {
-        return usersUpsertChainMock;
-      }
-      if (table === 'results') {
-        return resultsSelectChainMock;
-      }
-      if (table === 'orders') {
-        return ordersInsertChainMock;
-      }
-      return undefined;
+    createProvisionalOrderMock.mockResolvedValue({
+      data: null,
+      error: { message: 'Response not found.', code: 'NOT_FOUND' }
     });
 
     const request = new Request('http://localhost/api/orders', {
@@ -160,61 +99,26 @@ describe('orders API route', () => {
     const response = await POST(request);
     const payload = await response.json();
 
-    expect(supabaseMock.from).toHaveBeenCalledWith('users');
-    expect(usersUpsertChainMock.upsert).toHaveBeenCalledWith({ id: userId }, { onConflict: 'id' });
-    expect(supabaseMock.from).toHaveBeenCalledWith('results');
-    expect(resultsSelectChainMock.select).toHaveBeenCalledWith('id');
-    expect(resultsSelectChainMock.eq).toHaveBeenCalledWith('id', resultId);
-    expect(resultsSelectChainMock.eq).toHaveBeenCalledWith('user_id', userId);
-    expect(resultsMaybeSingleMock).toHaveBeenCalledTimes(1);
-    expect(supabaseMock.from).toHaveBeenCalledWith('orders');
-    expect(ordersInsertChainMock.insert).toHaveBeenCalledWith({
-      amount_cents: expect.any(Number),
-      status: 'created',
-      result_id: resultId,
-      report_access_token: expect.any(String),
-      user_id: userId
+    expect(createProvisionalOrderMock).toHaveBeenCalledWith({
+      userId,
+      responseId: resultId,
+      amountCents: 5000,
+      reportAccessToken: expect.any(String)
     });
     expect(response.status).toBe(404);
     expect(payload).toEqual({ error: 'Result not found.' });
   });
 
   it('returns checkout null when checkout config loading fails', async () => {
-    const resultsMaybeSingleMock = vi.fn().mockResolvedValue({ data: { id: resultId }, error: null });
-    const resultsSelectChainMock = {
-      select: vi.fn().mockReturnThis(),
-      eq: vi.fn().mockReturnThis(),
-      maybeSingle: resultsMaybeSingleMock
-    };
-    const usersUpsertChainMock = {
-      upsert: vi.fn().mockResolvedValue({ error: null })
-    };
     const createdOrder = {
       id: orderId,
       status: 'created',
       amount_cents: 5000,
-      result_id: resultId,
+      response_id: resultId,
       paddle_order_id: null,
       created_at: '2024-01-01T00:00:00.000Z'
     };
-    const ordersInsertChainMock = {
-      insert: vi.fn().mockReturnThis(),
-      select: vi.fn().mockReturnThis(),
-      single: vi.fn().mockResolvedValue({ data: createdOrder, error: null })
-    };
-
-    supabaseMock.from.mockImplementation((table: string) => {
-      if (table === 'users') {
-        return usersUpsertChainMock;
-      }
-      if (table === 'results') {
-        return resultsSelectChainMock;
-      }
-      if (table === 'orders') {
-        return ordersInsertChainMock;
-      }
-      return undefined;
-    });
+    createProvisionalOrderMock.mockResolvedValue({ data: createdOrder, error: null });
 
     const checkoutConfigError = new Error('Checkout config unavailable');
     const getCheckoutConfigMock = vi.mocked(getCheckoutConfig);
@@ -231,25 +135,12 @@ describe('orders API route', () => {
     const response = await POST(request);
     const payload = await response.json();
 
-    expect(supabaseMock.from).toHaveBeenNthCalledWith(1, 'users');
-    expect(usersUpsertChainMock.upsert).toHaveBeenCalledWith({ id: userId }, { onConflict: 'id' });
-    expect(supabaseMock.from).toHaveBeenNthCalledWith(2, 'results');
-    expect(resultsSelectChainMock.select).toHaveBeenCalledWith('id');
-    expect(resultsSelectChainMock.eq).toHaveBeenCalledWith('id', resultId);
-    expect(resultsSelectChainMock.eq).toHaveBeenCalledWith('user_id', userId);
-    expect(resultsMaybeSingleMock).toHaveBeenCalledTimes(1);
-    expect(supabaseMock.from).toHaveBeenNthCalledWith(3, 'orders');
-    expect(ordersInsertChainMock.insert).toHaveBeenCalledWith({
-      amount_cents: 5000,
-      status: 'created',
-      result_id: resultId,
-      report_access_token: expect.any(String),
-      user_id: userId
+    expect(createProvisionalOrderMock).toHaveBeenCalledWith({
+      userId,
+      responseId: resultId,
+      amountCents: 5000,
+      reportAccessToken: expect.any(String)
     });
-    expect(ordersInsertChainMock.select).toHaveBeenCalledWith(
-      'id, status, amount_cents, result_id, paddle_order_id, created_at'
-    );
-    expect(ordersInsertChainMock.single).toHaveBeenCalledTimes(1);
     expect(getCheckoutConfigMock).toHaveBeenCalledTimes(1);
     expect(consoleErrorSpy).toHaveBeenCalledWith(
       'Failed to load checkout config for order creation.',

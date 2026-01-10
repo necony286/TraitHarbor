@@ -20,51 +20,16 @@ vi.mock('../lib/storage', () => ({
   uploadReport: vi.fn()
 }));
 
-const assetsUpsertMock = vi.fn();
-const ordersSelectSingleMock = vi.fn();
-const resultsSelectSingleMock = vi.fn();
+const getOrderByIdMock = vi.fn();
+const getScoresByResultIdMock = vi.fn();
+const storeReportAssetMock = vi.fn();
+const getReportAssetMock = vi.fn();
 
-vi.mock('../lib/supabase', () => ({
-  getSupabaseAdminClient: () => ({
-    from: (table: string) => {
-      if (table === 'orders') {
-        return {
-          select: () => ({
-            eq: () => ({
-              single: ordersSelectSingleMock
-            })
-          })
-        };
-      }
-
-      if (table === 'results') {
-        return {
-          select: () => ({
-            eq: () => ({
-              single: resultsSelectSingleMock
-            })
-          })
-        };
-      }
-
-      if (table === 'assets') {
-        return {
-          upsert: assetsUpsertMock
-        };
-      }
-
-      return {
-        select: () => ({
-          eq: () => ({
-            single: async () => ({
-              data: null,
-              error: null
-            })
-          })
-        })
-      };
-    }
-  })
+vi.mock('../lib/db', () => ({
+  getOrderById: (...args: unknown[]) => getOrderByIdMock(...args),
+  getScoresByResultId: (...args: unknown[]) => getScoresByResultIdMock(...args),
+  storeReportAsset: (...args: unknown[]) => storeReportAssetMock(...args),
+  getReportAsset: (...args: unknown[]) => getReportAssetMock(...args)
 }));
 
 import { generateReportPdf } from '../lib/pdf';
@@ -74,17 +39,20 @@ import { POST } from '../src/app/api/report/route';
 describe('/api/report', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    assetsUpsertMock.mockResolvedValue({ error: null });
+    storeReportAssetMock.mockResolvedValue({ data: null, error: null });
+    getReportAssetMock.mockResolvedValue({ data: null, error: null });
     vi.mocked(generateReportPdf).mockResolvedValue(new Uint8Array([1]));
     vi.mocked(uploadReport).mockResolvedValue(undefined);
   });
 
   it('fails when the report access token is invalid', async () => {
-    ordersSelectSingleMock.mockResolvedValue({
+    getOrderByIdMock.mockResolvedValue({
       data: {
         id: ORDER_ID,
         status: 'paid',
-        result_id: RESULT_ID,
+        amount_cents: 5000,
+        response_id: RESULT_ID,
+        paddle_order_id: null,
         created_at: new Date().toISOString(),
         report_access_token: REPORT_ACCESS_TOKEN,
         user_id: 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa'
@@ -109,20 +77,21 @@ describe('/api/report', () => {
   });
 
   it('creates an asset row after generating a report', async () => {
-    ordersSelectSingleMock.mockResolvedValue({
+    getOrderByIdMock.mockResolvedValue({
       data: {
         id: ORDER_ID,
         status: 'paid',
-        result_id: RESULT_ID,
+        amount_cents: 5000,
+        response_id: RESULT_ID,
+        paddle_order_id: null,
         created_at: new Date().toISOString(),
         report_access_token: REPORT_ACCESS_TOKEN,
         user_id: 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb'
       },
       error: null
     });
-
-    resultsSelectSingleMock.mockResolvedValue({
-      data: { id: RESULT_ID, traits: { O: 50, C: 40, E: 60, A: 70, N: 30 } },
+    getScoresByResultIdMock.mockResolvedValue({
+      data: { O: 50, C: 40, E: 60, A: 70, N: 30 },
       error: null
     });
 
@@ -141,14 +110,11 @@ describe('/api/report', () => {
     );
 
     expect(response.status).toBe(200);
-    expect(assetsUpsertMock).toHaveBeenCalledWith(
-      {
-        user_id: 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb',
-        order_id: ORDER_ID,
-        kind: 'report_pdf',
-        path: `orders/${ORDER_ID}.pdf`
-      },
-      { onConflict: 'order_id,kind' }
-    );
+    expect(storeReportAssetMock).toHaveBeenCalledWith({
+      userId: 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb',
+      orderId: ORDER_ID,
+      kind: 'report_pdf',
+      reportPath: `orders/${ORDER_ID}.pdf`
+    });
   });
 });

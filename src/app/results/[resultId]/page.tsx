@@ -2,7 +2,7 @@ import React from 'react';
 import { redirect } from 'next/navigation';
 import { z } from 'zod';
 import { ResultsDisplay } from '../../../../components/results/ResultsDisplay';
-import { getSupabaseAdminClient } from '../../../../lib/supabase';
+import { getScoresByResultId } from '../../../../lib/db';
 import resultsFixture from '../../../data/results.fixture.json';
 
 const resultIdSchema = z.string().uuid();
@@ -61,32 +61,37 @@ export default async function ResultsPage({ params }: ResultsPageProps) {
     return <ResultsDisplay traits={traits} resultId={resultId} />;
   }
 
-  let supabase: ReturnType<typeof getSupabaseAdminClient>;
   try {
-    supabase = getSupabaseAdminClient();
+    const { data, error } = await getScoresByResultId(resultId);
+
+    if (error) {
+      console.error('Failed to load scores for results page.', {
+        message: error.message
+      });
+      redirect('/quiz');
+    }
+
+    if (data) {
+      const parsed = resultSchema.safeParse({ id: resultId, traits: data });
+      if (parsed.success) {
+        return <ResultsDisplay traits={parsed.data.traits} resultId={resultId} />;
+      }
+    }
+
+    redirect('/quiz');
   } catch (error) {
     console.error('Failed to initialize Supabase admin client for results page.', {
       message: error instanceof Error ? error.message : 'Unknown error'
     });
-
-    return (
-      <div className="results">
-        <header className="results__header">
-          <p className="eyebrow">Results unavailable</p>
-          <h1>We couldn&apos;t load your results</h1>
-          <p className="muted">Please return to the quiz and try again in a moment.</p>
-        </header>
-      </div>
-    );
-  }
-  const { data, error } = await supabase.from('results').select('id, traits').eq('id', resultId).single();
-
-  const parsed = resultSchema.safeParse(data);
-  if (error || !parsed.success) {
-    redirect('/quiz');
   }
 
-  const { traits } = parsed.data;
-
-  return <ResultsDisplay traits={traits} resultId={resultId} />;
+  return (
+    <div className="results">
+      <header className="results__header">
+        <p className="eyebrow">Results unavailable</p>
+        <h1>We couldn&apos;t load your results</h1>
+        <p className="muted">Please return to the quiz and try again in a moment.</p>
+      </header>
+    </div>
+  );
 }

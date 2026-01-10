@@ -20,56 +20,17 @@ begin
     raise exception 'Expected count is required.' using errcode = 'XXP01';
   end if;
 
-  actual_count := (select count(*) from jsonb_object_keys(answers));
+  actual_count := jsonb_object_length(answers);
   if actual_count <> expected_count then
     raise exception 'Answer count mismatch. Expected %, got %.', expected_count, actual_count using errcode = 'XXA01';
   end if;
 end;
 $$;
 
-create or replace function create_result_with_answers(
-  user_id uuid,
-  traits jsonb,
-  answers jsonb,
-  expected_count integer
-)
-returns uuid
-language plpgsql
-as $$
-declare
-  result_id uuid;
-begin
-  if user_id is null then
-    raise exception 'User id is required.' using errcode = 'XXU01';
-  end if;
-
-  if traits is null then
-    raise exception 'Traits payload is required.' using errcode = 'XXP01';
-  end if;
-
-  perform validate_answers_payload(answers, expected_count);
-
-  insert into results (user_id, traits)
-  values (user_id, traits)
-  returning id into result_id;
-
-  begin
-    insert into result_answers (result_id, question_id, answer)
-    select result_id, key, value::integer
-    from jsonb_each_text(answers);
-  exception
-    when others then
-      raise exception 'Failed to insert answers: %', SQLERRM using errcode = 'XXA02';
-  end;
-
-  return result_id;
-end;
-$$;
-
 create or replace function create_response_with_scores(
   user_id uuid,
-  answers jsonb,
   traits jsonb,
+  answers jsonb,
   expected_count integer
 )
 returns uuid

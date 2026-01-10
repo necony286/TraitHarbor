@@ -1,9 +1,9 @@
 import { z } from 'zod';
+import { PG_FOREIGN_KEY_VIOLATION_ERROR_CODE } from './db/constants';
+import { logWarn } from './logger';
 import { OrderStatus, orderDetailSchema, orderSchema } from './orders';
 import { TraitScores } from './scoring';
 import { getSupabaseAdminClient } from './supabase';
-import { PG_FOREIGN_KEY_VIOLATION_ERROR_CODE } from './db/constants';
-import { logWarn } from './logger';
 
 const traitSchema = z.object({
   O: z.number(),
@@ -298,7 +298,7 @@ export const updateOrderFromWebhook = async ({
     if (userLookupError) {
       logWarn('Failed to lookup user for webhook email update.', {
         orderId: parsed.data.id,
-        error: userLookupError.message
+        error: userLookupError
       });
     } else if (!userData || !userData.email) {
       const { error: userUpdateError } = await supabase
@@ -309,7 +309,7 @@ export const updateOrderFromWebhook = async ({
       if (userUpdateError) {
         logWarn('Failed to update user email from webhook.', {
           orderId: parsed.data.id,
-          error: userUpdateError.message
+          error: userUpdateError
         });
       }
     } else if (userData.email !== normalizedEmail) {

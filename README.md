@@ -13,6 +13,13 @@ Follow [`docs/implementation-plan.md`](./docs/implementation-plan.md) for the st
 - Testing: Vitest + Testing Library for unit tests, Playwright for end-to-end
 - Package manager: pnpm
 
+## Project layout
+- `src/app` — App Router pages, layouts, and API routes
+- `components` — Shared UI building blocks
+- `lib` — Shared utilities and helpers
+- `docs` — Product, implementation, and deployment documentation
+- `tests` / `__tests__` — E2E and unit tests
+
 ## Getting started
 1. Install dependencies:
    ```bash
@@ -29,6 +36,12 @@ For detailed environment setup, see:
 - [Local setup guide (Windows)](./docs/local-setup.md)
 - [Vercel deployment guide](./docs/vercel-deployment.md)
 
+## Environment variables
+Create a `.env.local` file for local development. Common variables referenced in the docs and code:
+- `NEXT_PUBLIC_SUPABASE_URL`
+- `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+- `NEXT_PUBLIC_QUIZ_FIXTURE_MODE=1` (optional, for fixture data)
+
 ## Scripts
 - `pnpm lint` — Next.js ESLint rules
 - `pnpm build` — Next.js production build
@@ -37,6 +50,7 @@ For detailed environment setup, see:
 - `pnpm test:e2e` — Playwright tests
 
 For Vitest filtering, use `pnpm test:unit -- -t "pattern"` or `pnpm test:unit -- <test-file-path>`.
+For Playwright UI mode, use `pnpm test:e2e -- --ui`.
 
 ## CI
 GitHub Actions (`.github/workflows/ci.yml`) runs on `main` and pull requests:

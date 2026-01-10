@@ -2,22 +2,13 @@ import { NextResponse } from 'next/server';
 import { z } from 'zod';
 import { logError, logInfo, logWarn } from '../../../../lib/logger';
 import { generateReportPdf } from '../../../../lib/pdf';
-import { getSupabaseAdminClient } from '../../../../lib/supabase';
+import { getOrderById, getReportAsset, getScoresByResultId, storeReportAsset } from '../../../../lib/db';
 import { getReportPath, getReportSignedUrl, uploadReport } from '../../../../lib/storage';
 
 const requestSchema = z.object({
   orderId: z.string().uuid(),
   reportAccessToken: z.string().uuid(),
   name: z.string().max(80).optional()
-});
-
-const orderSchema = z.object({
-  id: z.string().uuid(),
-  status: z.string(),
-  result_id: z.string().uuid().nullable(),
-  created_at: z.string().datetime(),
-  report_access_token: z.string().uuid().nullable().optional(),
-  user_id: z.string().uuid()
 });
 
 const resultSchema = z.object({
@@ -33,38 +24,6 @@ const resultSchema = z.object({
 
 export const runtime = 'nodejs';
 
-interface UpsertReportAssetParams {
-  supabase: ReturnType<typeof getSupabaseAdminClient>;
-  orderId: string;
-  userId: string;
-  reportPath: string;
-  logMessage: string;
-  kind: 'report_pdf';
-}
-
-async function upsertReportAsset({
-  supabase,
-  orderId,
-  userId,
-  reportPath,
-  logMessage,
-  kind
-}: UpsertReportAssetParams) {
-  const { error: assetsError } = await supabase.from('assets').upsert(
-    {
-      user_id: userId,
-      order_id: orderId,
-      kind,
-      path: reportPath
-    },
-    { onConflict: 'order_id,kind' }
-  );
-
-  if (assetsError) {
-    logWarn(logMessage, { orderId, error: assetsError.message });
-  }
-}
-
 export async function POST(request: Request) {
   let payload: unknown;
 
@@ -79,109 +38,105 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Invalid request body.' }, { status: 400 });
   }
 
-  let supabase;
+  let order;
   try {
-    supabase = getSupabaseAdminClient();
+    const { data, error: orderError } = await getOrderById({ orderId: parsed.data.orderId });
+    if (orderError) {
+      logWarn('Unable to find order for report generation.', { orderId: parsed.data.orderId, error: orderError });
+      return NextResponse.json({ error: 'Order not found.' }, { status: 404 });
+    }
+    if (!data) {
+      logWarn('Unable to find order for report generation.', { orderId: parsed.data.orderId });
+      return NextResponse.json({ error: 'Order not found.' }, { status: 404 });
+    }
+    order = data;
   } catch (error) {
     logError('Failed to initialize Supabase admin client for report generation.', { error });
     return NextResponse.json({ error: 'Unable to generate report.' }, { status: 500 });
   }
 
-  const { data: orderData, error: orderError } = await supabase
-    .from('orders')
-    .select('id, status, result_id, created_at, report_access_token, user_id')
-    .eq('id', parsed.data.orderId)
-    .single();
-
-  if (orderError || !orderData) {
-    logWarn('Unable to find order for report generation.', { orderId: parsed.data.orderId, error: orderError });
-    return NextResponse.json({ error: 'Order not found.' }, { status: 404 });
-  }
-
-  const parsedOrder = orderSchema.safeParse(orderData);
-  if (!parsedOrder.success) {
-    logError('Order payload invalid for report generation.', { orderId: parsed.data.orderId });
-    return NextResponse.json({ error: 'Unable to generate report.' }, { status: 500 });
-  }
-
-  if (parsedOrder.data.status !== 'paid') {
+  if (order.status !== 'paid') {
     return NextResponse.json({ error: 'Order not paid.' }, { status: 403 });
   }
 
-  if (!parsedOrder.data.result_id) {
+  if (!order.response_id) {
     return NextResponse.json({ error: 'Result not attached to order.' }, { status: 400 });
   }
 
-  if (parsedOrder.data.report_access_token !== parsed.data.reportAccessToken) {
-    logWarn('Invalid report access token for report generation.', { orderId: parsedOrder.data.id });
+  if (order.report_access_token !== parsed.data.reportAccessToken) {
+    logWarn('Invalid report access token for report generation.', { orderId: order.id });
     return NextResponse.json({ error: 'Invalid report access token.' }, { status: 403 });
   }
 
-  const reportPath = getReportPath(parsedOrder.data.id);
-  const existingUrl = await getReportSignedUrl(parsedOrder.data.id);
+  const reportPath = getReportPath(order.id);
+  const existingUrl = await getReportSignedUrl(order.id);
   if (existingUrl) {
-    await upsertReportAsset({
-      supabase,
-      orderId: parsedOrder.data.id,
-      userId: parsedOrder.data.user_id,
-      reportPath,
-      logMessage: 'Failed to persist cached report metadata.',
-      kind: 'report_pdf'
-    });
+    const { data: existingAsset, error: assetLookupError } = await getReportAsset(order.id, 'report_pdf');
+    if (assetLookupError) {
+      logWarn('Failed to lookup cached report metadata.', { orderId: order.id, error: assetLookupError.message });
+    }
 
-    logInfo('Using cached report PDF.', { orderId: parsedOrder.data.id });
+    if (!existingAsset) {
+      const { error: assetError } = await storeReportAsset({
+        orderId: order.id,
+        userId: order.user_id,
+        reportPath,
+        kind: 'report_pdf'
+      });
+      if (assetError) {
+        logWarn('Failed to persist cached report metadata.', { orderId: order.id, error: assetError.message });
+      }
+    }
+
+    logInfo('Using cached report PDF.', { orderId: order.id });
     return NextResponse.json({ url: existingUrl, cached: true });
   }
 
-  const { data: resultData, error: resultError } = await supabase
-    .from('results')
-    .select('id, traits')
-    .eq('id', parsedOrder.data.result_id)
-    .single();
-
-  if (resultError || !resultData) {
+  const { data: traits, error: resultError } = await getScoresByResultId(order.response_id);
+  if (resultError || !traits) {
     logWarn('Unable to fetch result for report generation.', {
-      orderId: parsedOrder.data.id,
-      resultId: parsedOrder.data.result_id,
+      orderId: order.id,
+      resultId: order.response_id,
       error: resultError
     });
     return NextResponse.json({ error: 'Result not found.' }, { status: 404 });
   }
 
-  const parsedResult = resultSchema.safeParse(resultData);
+  const parsedResult = resultSchema.safeParse({ id: order.response_id, traits });
   if (!parsedResult.success) {
-    logError('Result payload invalid for report generation.', { orderId: parsedOrder.data.id });
+    logError('Result payload invalid for report generation.', { orderId: order.id });
     return NextResponse.json({ error: 'Unable to generate report.' }, { status: 500 });
   }
 
   try {
     const pdfBuffer = await generateReportPdf({
       name: parsed.data.name ?? 'You',
-      date: new Date(parsedOrder.data.created_at),
+      date: new Date(order.created_at),
       traits: parsedResult.data.traits
     });
 
-    await uploadReport(parsedOrder.data.id, pdfBuffer);
+    await uploadReport(order.id, pdfBuffer);
 
-    const signedUrl = await getReportSignedUrl(parsedOrder.data.id);
+    const signedUrl = await getReportSignedUrl(order.id);
     if (!signedUrl) {
       throw new Error('Unable to create signed report URL.');
     }
 
-    await upsertReportAsset({
-      supabase,
-      orderId: parsedOrder.data.id,
-      userId: parsedOrder.data.user_id,
+    const { error: assetError } = await storeReportAsset({
+      orderId: order.id,
+      userId: order.user_id,
       reportPath,
-      logMessage: 'Failed to persist report metadata.',
       kind: 'report_pdf'
     });
+    if (assetError) {
+      logWarn('Failed to persist report metadata.', { orderId: order.id, error: assetError.message });
+    }
 
-    logInfo('Report generated and stored.', { orderId: parsedOrder.data.id, resultId: parsedOrder.data.result_id });
+    logInfo('Report generated and stored.', { orderId: order.id, resultId: order.response_id });
 
     return NextResponse.json({ url: signedUrl, cached: false });
   } catch (error) {
-    logError('Report generation failed.', { orderId: parsedOrder.data.id, error });
+    logError('Report generation failed.', { orderId: order.id, error });
     return NextResponse.json({ error: 'Unable to generate report.' }, { status: 500 });
   }
 }

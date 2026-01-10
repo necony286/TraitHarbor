@@ -1,17 +1,9 @@
 import { NextResponse } from 'next/server';
-import { z } from 'zod';
-import { getSupabaseAdminClient } from '../../../../../lib/supabase';
+import { getOrderById, updateOrderFromWebhook } from '../../../../../lib/db';
 import { logError, logInfo, logWarn } from '../../../../../lib/logger';
 import { parsePaddleWebhook, shouldUpdateOrder } from '../../../../../lib/paddle-webhook';
 import { verifyPaddleSignature } from '../../../../../lib/signature';
 import { orderStatusSchema } from '../../../../../lib/orders';
-
-const orderLookupSchema = z.object({
-  id: z.string().uuid(),
-  status: orderStatusSchema,
-  paddle_order_id: z.string().nullable().optional(),
-  user_id: z.string().uuid()
-});
 
 const getWebhookSecret = () => {
   const secret = process.env.PADDLE_WEBHOOK_SECRET;
@@ -71,9 +63,27 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Order identifiers missing.' }, { status: 400 });
   }
 
-  let supabase;
+  let order;
   try {
-    supabase = getSupabaseAdminClient();
+    const { data, error: lookupError } = await getOrderById({
+      orderId: parsedEvent.orderId,
+      paddleOrderId: parsedEvent.paddleOrderId
+    });
+
+    if (lookupError) {
+      logError('Failed to lookup order for webhook.', { error: lookupError.message });
+      return NextResponse.json({ error: 'Unable to reconcile order.' }, { status: 500 });
+    }
+
+    if (!data) {
+      logWarn('Order not found for webhook.', {
+        orderId: parsedEvent.orderId,
+        paddleOrderId: parsedEvent.paddleOrderId
+      });
+      return NextResponse.json({ error: 'Order not found.' }, { status: 404 });
+    }
+
+    order = data;
   } catch (error) {
     logError('Failed to initialize Supabase admin client for webhook.', {
       message: error instanceof Error ? error.message : 'unknown'
@@ -81,116 +91,41 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Unable to process webhook.' }, { status: 500 });
   }
 
-  let lookupQuery = supabase.from('orders').select('id, status, paddle_order_id, user_id');
-
-  if (parsedEvent.orderId) {
-    lookupQuery = lookupQuery.eq('id', parsedEvent.orderId);
-  } else {
-    lookupQuery = lookupQuery.eq('paddle_order_id', parsedEvent.paddleOrderId!);
-  }
-
-  const { data: order, error: lookupError } = await lookupQuery.maybeSingle();
-
-  if (lookupError) {
-    logError('Failed to lookup order for webhook.', { error: lookupError.message });
-    return NextResponse.json({ error: 'Unable to reconcile order.' }, { status: 500 });
-  }
-
-  if (!order) {
-    logWarn('Order not found for webhook.', {
-      orderId: parsedEvent.orderId,
-      paddleOrderId: parsedEvent.paddleOrderId
-    });
-    return NextResponse.json({ error: 'Order not found.' }, { status: 404 });
-  }
-
-  const parsedOrder = orderLookupSchema.safeParse(order);
-  if (!parsedOrder.success) {
-    logError('Order lookup returned invalid data.', {
-      error: parsedOrder.error.message,
-      orderId: parsedEvent.orderId,
-      paddleOrderId: parsedEvent.paddleOrderId
-    });
-    return NextResponse.json({ error: 'Invalid order status.' }, { status: 500 });
-  }
-
-  const parsedStatus = orderStatusSchema.safeParse(parsedOrder.data.status);
+  const parsedStatus = orderStatusSchema.safeParse(order.status);
   if (!parsedStatus.success) {
     logError('Order has invalid status.', {
-      orderId: parsedOrder.data.id,
-      status: parsedOrder.data.status
+      orderId: order.id,
+      status: order.status
     });
     return NextResponse.json({ error: 'Invalid order status.' }, { status: 500 });
   }
 
   if (!shouldUpdateOrder(parsedStatus.data, parsedEvent.status)) {
     logInfo('Webhook received for already processed order.', {
-      orderId: parsedOrder.data.id,
+      orderId: order.id,
       status: parsedStatus.data,
       eventType: parsedEvent.eventType
     });
     return NextResponse.json({ received: true, ignored: true });
   }
 
-  const updates: { status: typeof parsedEvent.status; paddle_order_id?: string } = {
-    status: parsedEvent.status
-  };
-
-  if (parsedEvent.paddleOrderId && parsedEvent.paddleOrderId !== parsedOrder.data.paddle_order_id) {
-    updates.paddle_order_id = parsedEvent.paddleOrderId;
-  }
-
-  const { error: updateError } = await supabase
-    .from('orders')
-    .update(updates)
-    .eq('id', parsedOrder.data.id)
-    .select('id')
-    .single();
+  const { error: updateError } = await updateOrderFromWebhook({
+    orderId: order.id,
+    status: parsedEvent.status,
+    paddleOrderId: parsedEvent.paddleOrderId,
+    customerEmail: parsedEvent.customerEmail
+  });
 
   if (updateError) {
     logError('Failed to update order from webhook.', {
       error: updateError.message,
-      orderId: parsedOrder.data.id
+      orderId: order.id
     });
     return NextResponse.json({ error: 'Unable to update order.' }, { status: 500 });
   }
 
   if (parsedEvent.status === 'paid') {
-    if (parsedEvent.customerEmail) {
-      const normalizedEmail = parsedEvent.customerEmail.toLowerCase();
-      const { data: userData, error: userLookupError } = await supabase
-        .from('users')
-        .select('id, email')
-        .eq('id', parsedOrder.data.user_id)
-        .maybeSingle();
-
-      if (userLookupError) {
-        logWarn('Failed to lookup user for webhook email update.', {
-          orderId: parsedOrder.data.id,
-          error: userLookupError.message
-        });
-      } else if (!userData || !userData.email) {
-        const { error: userUpdateError } = await supabase
-          .from('users')
-          .update({ email: normalizedEmail })
-          .eq('id', parsedOrder.data.user_id);
-
-        if (userUpdateError) {
-          logWarn('Failed to update user email from webhook.', {
-            orderId: parsedOrder.data.id,
-            error: userUpdateError.message
-          });
-        }
-      } else if (userData.email !== normalizedEmail) {
-        logWarn('Webhook email mismatch for user.', {
-          orderId: parsedOrder.data.id,
-          existingEmail: userData.email,
-          webhookEmail: normalizedEmail
-        });
-      }
-    }
-
-    requestPdfGeneration(parsedOrder.data.id);
+    requestPdfGeneration(order.id);
   }
 
   return NextResponse.json({ received: true });

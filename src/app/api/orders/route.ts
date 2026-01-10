@@ -2,9 +2,8 @@ import { randomUUID } from 'crypto';
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
 import { getCheckoutAmountCents, getCheckoutConfig } from '../../../../lib/payments';
-import { mapOrderRecord, orderSchema, orderStatusSchema } from '../../../../lib/orders';
-import { PG_FOREIGN_KEY_VIOLATION_ERROR_CODE } from '../../../../lib/db/constants';
-import { getSupabaseAdminClient } from '../../../../lib/supabase';
+import { mapOrderRecord, orderStatusSchema } from '../../../../lib/orders';
+import { createProvisionalOrder, getOrderById, updateOrderStatus } from '../../../../lib/db';
 
 const createOrderBodySchema = z.object({
   resultId: z.string().uuid(),
@@ -36,61 +35,28 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Invalid request body.' }, { status: 400 });
   }
 
-  let supabase;
-  try {
-    supabase = getSupabaseAdminClient();
-  } catch (error) {
-    console.error('Failed to initialize Supabase admin client for orders.', error);
-    return NextResponse.json({ error: 'Unable to create order.' }, { status: 500 });
-  }
-
-  const { error: userError } = await supabase.from('users').upsert({ id: parsed.data.userId }, { onConflict: 'id' });
-
-  if (userError) {
-    console.error('Failed to ensure user record before order creation.', userError);
-    return NextResponse.json({ error: 'Unable to create order.' }, { status: 500 });
-  }
-
-  const { data: resultData, error: resultError } = await supabase
-    .from('results')
-    .select('id')
-    .eq('id', parsed.data.resultId)
-    .eq('user_id', parsed.data.userId)
-    .maybeSingle();
-
-  if (resultError) {
-    console.error('Failed to confirm result before order creation.', resultError);
-    return NextResponse.json({ error: 'Unable to create order.' }, { status: 500 });
-  }
-
-  if (!resultData) {
-    return NextResponse.json({ error: 'Result not found.' }, { status: 404 });
-  }
-
   const reportAccessToken = randomUUID();
-  const { data, error } = await supabase
-    .from('orders')
-    .insert({
-      amount_cents: getCheckoutAmountCents(),
-      status: 'created',
-      result_id: parsed.data.resultId,
-      report_access_token: reportAccessToken,
-      user_id: parsed.data.userId
-    })
-    .select('id, status, amount_cents, result_id, paddle_order_id, created_at')
-    .single();
+  let data;
+  let error;
+  try {
+    const response = await createProvisionalOrder({
+      userId: parsed.data.userId,
+      responseId: parsed.data.resultId,
+      amountCents: getCheckoutAmountCents(),
+      reportAccessToken
+    });
+    data = response.data;
+    error = response.error;
+  } catch (errorResponse) {
+    console.error('Failed to initialize Supabase admin client for orders.', errorResponse);
+    return NextResponse.json({ error: 'Unable to create order.' }, { status: 500 });
+  }
 
   if (error || !data) {
-    console.error('Failed to create provisional order.', error);
-    if (error?.code === PG_FOREIGN_KEY_VIOLATION_ERROR_CODE) {
+    if (error?.code === 'NOT_FOUND') {
       return NextResponse.json({ error: 'Result not found.' }, { status: 404 });
     }
-    return NextResponse.json({ error: 'Unable to create order.' }, { status: 500 });
-  }
-
-  const parsedOrder = orderSchema.safeParse(data);
-  if (!parsedOrder.success) {
-    console.error('Failed to parse created order payload.', parsedOrder.error);
+    console.error('Failed to create provisional order.', error);
     return NextResponse.json({ error: 'Unable to create order.' }, { status: 500 });
   }
 
@@ -102,7 +68,7 @@ export async function POST(request: Request) {
   }
 
   return NextResponse.json({
-    order: mapOrderRecord(parsedOrder.data),
+    order: mapOrderRecord(data),
     checkout: checkoutConfig,
     reportAccessToken
   });
@@ -116,25 +82,19 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: 'Invalid order id.' }, { status: 400 });
   }
 
-  let supabase;
+  let data;
+  let error;
   try {
-    supabase = getSupabaseAdminClient();
-  } catch (error) {
-    console.error('Failed to initialize Supabase admin client for order lookup.', error);
+    const response = await getOrderById({ orderId });
+    data = response.data;
+    error = response.error;
+  } catch (errorResponse) {
+    console.error('Failed to initialize Supabase admin client for order lookup.', errorResponse);
     return NextResponse.json({ error: 'Unable to fetch order.' }, { status: 500 });
   }
 
-  const { data, error } = await supabase
-    .from('orders')
-    .select('id, status, amount_cents, result_id, paddle_order_id, created_at')
-    .eq('id', orderId)
-    .single();
-
   if (error) {
     console.error('Failed to fetch order.', error);
-    if (error.code === 'PGRST116') {
-      return NextResponse.json({ error: 'Order not found.' }, { status: 404 });
-    }
     return NextResponse.json({ error: 'Unable to fetch order.' }, { status: 500 });
   }
 
@@ -142,13 +102,7 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: 'Order not found.' }, { status: 404 });
   }
 
-  const parsedOrder = orderSchema.safeParse(data);
-  if (!parsedOrder.success) {
-    console.error('Failed to parse order lookup payload.', parsedOrder.error);
-    return NextResponse.json({ error: 'Unable to fetch order.' }, { status: 500 });
-  }
-
-  return NextResponse.json({ order: mapOrderRecord(parsedOrder.data) });
+  return NextResponse.json({ order: mapOrderRecord(data) });
 }
 
 export async function PATCH(request: Request) {
@@ -172,27 +126,22 @@ export async function PATCH(request: Request) {
     );
   }
 
-  let supabase;
+  let data;
+  let error;
   try {
-    supabase = getSupabaseAdminClient();
-  } catch (error) {
-    console.error('Failed to initialize Supabase admin client for order update.', error);
+    const response = await updateOrderStatus({
+      orderId: parsed.data.orderId,
+      status: parsed.data.status
+    });
+    data = response.data;
+    error = response.error;
+  } catch (errorResponse) {
+    console.error('Failed to initialize Supabase admin client for order update.', errorResponse);
     return NextResponse.json({ error: 'Unable to update order.' }, { status: 500 });
   }
 
-  const { data, error } = await supabase
-    .from('orders')
-    .update({ status: parsed.data.status })
-    .eq('id', parsed.data.orderId)
-    .eq('status', 'created')
-    .select('id, status, amount_cents, result_id, paddle_order_id, created_at')
-    .maybeSingle();
-
   if (error) {
     console.error('Failed to update order.', error);
-    if (error.code === 'PGRST116') {
-      return NextResponse.json({ error: 'Order not found.' }, { status: 404 });
-    }
     return NextResponse.json({ error: 'Unable to update order.' }, { status: 500 });
   }
 
@@ -200,11 +149,5 @@ export async function PATCH(request: Request) {
     return NextResponse.json({ error: 'Order status conflict.' }, { status: 409 });
   }
 
-  const parsedOrder = orderSchema.safeParse(data);
-  if (!parsedOrder.success) {
-    console.error('Failed to parse updated order payload.', parsedOrder.error);
-    return NextResponse.json({ error: 'Unable to update order.' }, { status: 500 });
-  }
-
-  return NextResponse.json({ order: mapOrderRecord(parsedOrder.data) });
+  return NextResponse.json({ order: mapOrderRecord(data) });
 }

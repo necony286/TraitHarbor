@@ -20,6 +20,7 @@ describe('ResultsPage', () => {
   });
 
   it('renders a fallback when Supabase configuration is missing', async () => {
+    const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
     const { default: ResultsPage } = await import('../src/app/results/[resultId]/page');
     const ui = await ResultsPage({ params: Promise.resolve({ resultId: validResultId }) });
 
@@ -27,5 +28,6 @@ describe('ResultsPage', () => {
 
     expect(screen.getByText(/results unavailable/i)).toBeInTheDocument();
     expect(screen.getByText(/couldn'?t load your results/i)).toBeInTheDocument();
+    consoleErrorSpy.mockRestore();
   });
 });

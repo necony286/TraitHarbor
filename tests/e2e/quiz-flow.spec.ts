@@ -85,10 +85,16 @@ test('quiz to paid flow with report download', async ({ page }) => {
   await page.goto('/quiz');
 
   const nextPageButton = page.getByRole('button', { name: 'Next page' });
+  const MAX_PAGES = 20;
+  let pagesProcessed = 0;
 
   while (true) {
+    if (pagesProcessed >= MAX_PAGES) {
+      throw new Error('Exceeded max pages, possible infinite loop in quiz pagination.');
+    }
+    pagesProcessed++;
+
     const questionCards = page.locator('.question-card');
-    const questionCount = await questionCards.count();
 
     for (const card of await questionCards.all()) {
       await card.getByRole('radio', { name: AGREE_LABEL, exact: true }).check();

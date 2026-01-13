@@ -12,7 +12,7 @@ type ButtonProps = React.ButtonHTMLAttributes<HTMLButtonElement> & {
 
 const variantMap: Record<ButtonVariant, VariantProps<typeof buttonVariants>['variant']> = {
   primary: 'default',
-  secondary: 'secondary',
+  secondary: 'outline',
   ghost: 'ghost'
 };
 

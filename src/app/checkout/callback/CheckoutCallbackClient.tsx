@@ -6,6 +6,9 @@ import { useSearchParams } from 'next/navigation';
 import { trackEvent } from '../../../../lib/analytics';
 import { orderRecordSchema, type OrderRecord } from '../../../../lib/orders';
 import { getReportAccessTokenKey } from '../../../../lib/report-access-token';
+import { Button } from '../../../../components/ui/Button';
+import { Card } from '../../../../components/ui/Card';
+import { Container } from '../../../../components/ui/Container';
 
 const ORDER_STATUS_POLL_INTERVAL_MS = 3000;
 
@@ -165,14 +168,14 @@ export default function CheckoutCallbackClient() {
   };
 
   return (
-    <div className="checkout">
+    <Container className="checkout">
       <header className="checkout__header">
         <p className="eyebrow">Checkout complete</p>
         <h1>Processing your payment</h1>
         <p className="muted">We&apos;re confirming your order and preparing your premium report.</p>
       </header>
 
-      <div className="checkout__card">
+      <Card className="checkout__card">
         {errorMessage ? <p className="checkout__error">{errorMessage}</p> : null}
 
         {isLoading ? <p className="muted">Checking payment status…</p> : null}
@@ -194,32 +197,27 @@ export default function CheckoutCallbackClient() {
                 Download report PDF
               </a>
             ) : (
-              <button className="button" type="button" onClick={handleReportDownload} disabled={isGeneratingReport}>
+              <Button type="button" onClick={handleReportDownload} disabled={isGeneratingReport}>
                 {isGeneratingReport ? 'Preparing report…' : 'Generate report PDF'}
-              </button>
+              </Button>
             )}
             {reportError ? <p className="checkout__error">{reportError}</p> : null}
           </div>
         ) : null}
 
         <div className="checkout__actions">
-          <button
-            className="button button--ghost"
-            type="button"
-            onClick={() => refreshStatus()}
-            disabled={!orderId || isLoading}
-          >
+          <Button type="button" variant="ghost" onClick={() => refreshStatus()} disabled={!orderId || isLoading}>
             Retry status check
-          </button>
-          <Link className="button" href="/quiz">
+          </Button>
+          <Button as={Link} href="/quiz" variant="secondary">
             Retake quiz
-          </Link>
+          </Button>
         </div>
 
         <p className="muted checkout__note">
           If this takes more than a few minutes, refresh this page or contact support for a resend link.
         </p>
-      </div>
-    </div>
+      </Card>
+    </Container>
   );
 }

@@ -3,6 +3,7 @@ import { Inter } from 'next/font/google';
 import Link from 'next/link';
 import Script from 'next/script';
 import '../app/globals.css';
+import { Container } from '../../components/ui/Container';
 
 const inter = Inter({ subsets: ['latin'], display: 'swap' });
 
@@ -31,20 +32,34 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <Script defer data-domain={plausibleDomain} src="https://plausible.io/js/script.js" strategy="afterInteractive" />
         ) : null}
         <div className="shell">
-          <header className="shell__header">
-            <Link href="/" className="brand">TraitHarbor</Link>
-            <nav aria-label="Primary">
-              <Link className="nav-link" href="/quiz">
-                Quiz
-              </Link>
-              <a className="nav-link" href="#tokens">Design system</a>
-              <a className="nav-link" href="#get-started">Get started</a>
-            </nav>
+          <header className="site-header">
+            <Container className="site-header__content">
+              <Link href="/" className="brand">TraitHarbor</Link>
+              <nav className="site-nav" aria-label="Primary">
+                <Link className="nav-link" href="/quiz">
+                  Quiz
+                </Link>
+                <a className="nav-link" href="#questions">
+                  Questions
+                </a>
+                <a className="nav-link" href="#tokens">
+                  Design system
+                </a>
+              </nav>
+              <div className="site-header__cta">
+                <Link className="ui-button ui-button--secondary" href="/quiz">
+                  Start quiz
+                </Link>
+              </div>
+            </Container>
           </header>
           <main className="shell__main">{children}</main>
           <footer className="shell__footer">
-            <div className="footer__content">
-              <p className="muted">Built with accessibility, privacy, and research-backed scoring.</p>
+            <Container className="footer__content">
+              <div>
+                <p className="muted">Built with accessibility, privacy, and research-backed scoring.</p>
+                <p className="muted footer__note">Your answers stay private and can be cleared anytime.</p>
+              </div>
               <nav className="footer__links" aria-label="Legal">
                 <Link href="/terms" className="footer__link">
                   Terms
@@ -59,7 +74,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                   Disclaimer
                 </Link>
               </nav>
-            </div>
+            </Container>
           </footer>
         </div>
       </body>

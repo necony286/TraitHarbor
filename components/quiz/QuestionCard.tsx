@@ -1,6 +1,7 @@
 import React from 'react';
 import { Likert } from './Likert';
 import { QuizItem } from '../../lib/ipip';
+import { Card } from '../ui/Card';
 
 type QuestionCardProps = {
   item: QuizItem;
@@ -10,7 +11,7 @@ type QuestionCardProps = {
 
 export function QuestionCard({ item, value, onChange }: QuestionCardProps) {
   return (
-    <article className="question-card" aria-labelledby={`${item.id}-label`}>
+    <Card as="article" className="question-card" aria-labelledby={`${item.id}-label`}>
       <div className="question-card__header">
         <p className="eyebrow">{item.id}</p>
         <p id={`${item.id}-label`} className="question-card__prompt">
@@ -23,6 +24,6 @@ export function QuestionCard({ item, value, onChange }: QuestionCardProps) {
         onChange={onChange}
         ariaLabelledby={`${item.id}-label`}
       />
-    </article>
+    </Card>
   );
 }

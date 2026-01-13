@@ -1,4 +1,5 @@
 import { TRAIT_DETAILS, TRAIT_ORDER, TraitScores } from './traitData';
+import { Card } from '../ui/Card';
 
 type TraitChartProps = {
   scores: TraitScores;
@@ -6,7 +7,7 @@ type TraitChartProps = {
 
 export function TraitChart({ scores }: TraitChartProps) {
   return (
-    <section className="trait-chart" aria-label="Your TraitHarbor scores">
+    <Card as="section" className="trait-chart" aria-label="Your TraitHarbor scores">
       {TRAIT_ORDER.map((trait) => {
         const details = TRAIT_DETAILS[trait];
         const score = scores[trait] ?? 0;
@@ -23,6 +24,6 @@ export function TraitChart({ scores }: TraitChartProps) {
           </div>
         );
       })}
-    </section>
+    </Card>
   );
 }

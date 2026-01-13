@@ -1,4 +1,5 @@
 import { TRAIT_DETAILS, TRAIT_ORDER, TraitScores } from './traitData';
+import { Card } from '../ui/Card';
 
 type TraitSummaryProps = {
   scores: TraitScores;
@@ -12,7 +13,7 @@ export function TraitSummary({ scores }: TraitSummaryProps) {
         const score = scores[trait] ?? 0;
 
         return (
-          <article key={trait} className="trait-summary__card">
+          <Card as="article" key={trait} className="trait-summary__card">
             <header>
               <p className="eyebrow">{details.label}</p>
               <h3>
@@ -25,7 +26,7 @@ export function TraitSummary({ scores }: TraitSummaryProps) {
                 <li key={index}>{tip}</li>
               ))}
             </ul>
-          </article>
+          </Card>
         );
       })}
     </section>

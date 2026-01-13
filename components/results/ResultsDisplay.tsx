@@ -1,7 +1,8 @@
 import { PaywallCTA } from './PaywallCTA';
 import { TraitChart } from './TraitChart';
 import { TraitSummary } from './TraitSummary';
-import { TraitKey, TraitScores } from './traitData';
+import { TraitScores } from './traitData';
+import { Container } from '../ui/Container';
 
 type ResultsDisplayProps = {
   traits: TraitScores;
@@ -10,7 +11,7 @@ type ResultsDisplayProps = {
 
 export function ResultsDisplay({ traits, resultId }: ResultsDisplayProps) {
   return (
-    <div className="results">
+    <Container className="results">
       <header className="results__header">
         <p className="eyebrow">Your results</p>
         <h1>TraitHarbor personality snapshot</h1>
@@ -24,6 +25,6 @@ export function ResultsDisplay({ traits, resultId }: ResultsDisplayProps) {
       <PaywallCTA resultId={resultId} />
 
       <TraitSummary scores={traits} />
-    </div>
+    </Container>
   );
 }

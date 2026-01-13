@@ -168,19 +168,19 @@ export default function QuizPage() {
   };
 
   return (
-    <Container>
-      <Card className="quiz">
-        <header className="quiz__header">
-          <p className="eyebrow">IPIP-120</p>
-          <h1>Personality questionnaire</h1>
-          <p className="muted">
+    <Container className="py-12">
+      <Card className="gap-6 border-slate-200/80 bg-white/90 p-8 shadow-xl shadow-indigo-100/40">
+        <header className="space-y-3">
+          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">IPIP-120</p>
+          <h1 className="text-3xl font-bold text-slate-900 sm:text-4xl">Personality questionnaire</h1>
+          <p className="text-base text-slate-600">
             Rate how much you agree with each statement. Your answers autosave locally so you can pick up where you left off.
           </p>
         </header>
 
         <Progress answered={answeredCount} total={items.length} currentPage={currentPage} totalPages={totalPages} />
 
-        <div className="question-grid" aria-live="polite">
+        <div className="grid gap-4 md:grid-cols-2" aria-live="polite">
           {pageItems.map((item) => (
             <QuestionCard
               key={item.id}
@@ -198,12 +198,12 @@ export default function QuizPage() {
           onNext={goToNextPage}
         />
 
-        <div className="quiz__footer">
+        <div className="flex flex-col gap-3 rounded-2xl border border-indigo-100 bg-indigo-50/70 p-4 text-sm text-slate-600">
           <Button type="button" onClick={handleSubmit} disabled={answeredCount !== items.length || isSubmitting}>
             {isSubmitting ? 'Scoring...' : 'Submit answers'}
           </Button>
-          <p className="muted">Submit your answers to generate your free results.</p>
-          {submitError ? <p className="quiz__error">{submitError}</p> : null}
+          <p>Submit your answers to generate your free results.</p>
+          {submitError ? <p className="text-sm font-medium text-red-600">{submitError}</p> : null}
         </div>
       </Card>
     </Container>

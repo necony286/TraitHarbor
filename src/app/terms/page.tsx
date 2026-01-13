@@ -1,27 +1,25 @@
 export const metadata = {
   title: 'Terms of Service | TraitHarbor',
-  description: 'Terms of Service for the TraitHarbor personality assessment.'
+  description: 'Terms of service for the TraitHarbor personality assessment.'
 };
 
 export default function TermsPage() {
   return (
-    <section className="legal">
-      <header>
-        <p className="eyebrow">Terms of Service</p>
-        <h1>Terms of Service</h1>
-        <p className="muted">Draft outline for review. Please consult counsel before launch.</p>
+    <section className="mx-auto flex max-w-3xl flex-col gap-6 px-4 py-12 sm:px-6">
+      <header className="space-y-3">
+        <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">Terms of service</p>
+        <h1 className="text-3xl font-bold text-slate-900">Terms of Service</h1>
+        <p className="text-base text-slate-600">Draft outline for review. Summarizes acceptable use and purchasing terms.</p>
       </header>
-      <ol className="legal__list">
-        <li>Agreement</li>
-        <li>Services</li>
-        <li>Accounts &amp; eligibility</li>
-        <li>Purchases &amp; refunds</li>
-        <li>Intellectual property</li>
-        <li>Acceptable use</li>
-        <li>Disclaimers (non-clinical)</li>
+      <ol className="list-decimal space-y-2 pl-5 text-sm text-slate-600">
+        <li>Eligibility</li>
+        <li>Account responsibilities</li>
+        <li>Payment terms</li>
+        <li>Refund policy</li>
+        <li>Prohibited use</li>
+        <li>Disclaimers</li>
         <li>Limitation of liability</li>
-        <li>Governing law &amp; disputes</li>
-        <li>Contact</li>
+        <li>Governing law</li>
       </ol>
     </section>
   );

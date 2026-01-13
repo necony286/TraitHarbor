@@ -10,7 +10,7 @@ type PaginationControlsProps = {
 
 export function PaginationControls({ canGoBack, canGoForward, onPrevious, onNext }: PaginationControlsProps) {
   return (
-    <div className="pagination-controls">
+    <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
       <Button type="button" variant="ghost" onClick={onPrevious} disabled={!canGoBack}>
         Previous page
       </Button>

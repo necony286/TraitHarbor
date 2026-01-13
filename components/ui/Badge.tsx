@@ -1,10 +1,18 @@
 import React from 'react';
+import { cn } from '../../src/components/figma/ui/utils';
 
 type BadgeProps = React.HTMLAttributes<HTMLSpanElement> & {
   as?: React.ElementType;
 };
 
 export function Badge({ as: Component = 'span', className, ...props }: BadgeProps) {
-  const classes = ['ui-badge', className].filter(Boolean).join(' ');
-  return <Component className={classes} {...props} />;
+  return (
+    <Component
+      className={cn(
+        'inline-flex items-center gap-2 rounded-full border border-indigo-200/60 bg-white/80 px-4 py-1 text-xs font-semibold text-slate-700 shadow-sm',
+        className
+      )}
+      {...props}
+    />
+  );
 }

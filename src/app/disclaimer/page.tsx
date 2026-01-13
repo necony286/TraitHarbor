@@ -1,21 +1,20 @@
 export const metadata = {
   title: 'Disclaimer | TraitHarbor',
-  description: 'Non-clinical disclaimer for the TraitHarbor personality assessment.'
+  description: 'Disclaimer for the TraitHarbor personality assessment.'
 };
 
 export default function DisclaimerPage() {
   return (
-    <section className="legal">
-      <header>
-        <p className="eyebrow">Disclaimer</p>
-        <h1>Disclaimer</h1>
-        <p className="muted">Draft outline for review. The assessment is not medical advice.</p>
+    <section className="mx-auto flex max-w-3xl flex-col gap-6 px-4 py-12 sm:px-6">
+      <header className="space-y-3">
+        <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">Disclaimer</p>
+        <h1 className="text-3xl font-bold text-slate-900">Disclaimer</h1>
+        <p className="text-base text-slate-600">Draft outline for review. This assessment provides informational results only.</p>
       </header>
-      <ol className="legal__list">
-        <li>Informational purposes only</li>
-        <li>Not a diagnostic tool</li>
-        <li>No guarantees of outcomes</li>
-        <li>Seek professional guidance when needed</li>
+      <ol className="list-decimal space-y-2 pl-5 text-sm text-slate-600">
+        <li>Not medical advice</li>
+        <li>Informational use only</li>
+        <li>No guarantees</li>
         <li>Contact</li>
       </ol>
     </section>

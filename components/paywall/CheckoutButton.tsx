@@ -118,11 +118,11 @@ export function CheckoutButton({ resultId }: CheckoutButtonProps) {
   };
 
   return (
-    <div>
-      <Button type="button" onClick={handleCheckout} disabled={isLoading}>
+    <div className="space-y-2">
+      <Button type="button" onClick={handleCheckout} disabled={isLoading} size="lg">
         {isLoading ? 'Loading checkout…' : 'Unlock full report (PDF)'}
       </Button>
-      {errorMessage ? <p className="muted">{errorMessage}</p> : null}
+      {errorMessage ? <p className="text-sm text-red-600">{errorMessage}</p> : null}
     </div>
   );
 }

@@ -87,12 +87,12 @@ export default async function ResultsPage({ params }: ResultsPageProps) {
   }
 
   return (
-    <Container className="results">
-      <header className="results__header">
-        <p className="eyebrow">Results unavailable</p>
-        <h1>We couldn&apos;t load your results</h1>
-        <p className="muted">Please return to the quiz and try again in a moment.</p>
-      </header>
+    <Container className="py-16">
+      <div className="rounded-3xl border border-slate-200 bg-white/90 p-10 text-center shadow-xl shadow-indigo-100/40">
+        <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">Results unavailable</p>
+        <h1 className="mt-4 text-3xl font-bold text-slate-900">We couldn&apos;t load your results</h1>
+        <p className="mt-3 text-base text-slate-600">Please return to the quiz and try again in a moment.</p>
+      </div>
     </Container>
   );
 }

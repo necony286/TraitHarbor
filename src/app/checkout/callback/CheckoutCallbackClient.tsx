@@ -168,32 +168,32 @@ export default function CheckoutCallbackClient() {
   };
 
   return (
-    <Container className="checkout">
-      <header className="checkout__header">
-        <p className="eyebrow">Checkout complete</p>
-        <h1>Processing your payment</h1>
-        <p className="muted">We&apos;re confirming your order and preparing your premium report.</p>
+    <Container className="py-12">
+      <header className="space-y-3">
+        <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">Checkout complete</p>
+        <h1 className="text-3xl font-bold text-slate-900 sm:text-4xl">Processing your payment</h1>
+        <p className="text-base text-slate-600">We&apos;re confirming your order and preparing your premium report.</p>
       </header>
 
-      <Card className="checkout__card">
-        {errorMessage ? <p className="checkout__error">{errorMessage}</p> : null}
+      <Card className="mt-8 gap-6 border-slate-200/80 bg-white/90 p-6 shadow-lg shadow-indigo-100/40">
+        {errorMessage ? <p className="text-sm font-medium text-red-600">{errorMessage}</p> : null}
 
-        {isLoading ? <p className="muted">Checking payment status…</p> : null}
+        {isLoading ? <p className="text-sm text-slate-500">Checking payment status…</p> : null}
 
         {!isLoading && order ? (
-          <div className="checkout__status">
+          <div className="space-y-1 text-sm">
             <p>
-              Order <span className="checkout__order">{order.id}</span>
+              Order <span className="font-semibold text-slate-900">{order.id}</span>
             </p>
-            <p className="muted">Status: {order.status.replace('_', ' ')}</p>
+            <p className="text-slate-500">Status: {order.status.replace('_', ' ')}</p>
           </div>
         ) : null}
 
         {order?.status === 'paid' ? (
-          <div className="checkout__report">
-            <p className="muted">Your payment is confirmed. Download your premium report below.</p>
+          <div className="space-y-3">
+            <p className="text-sm text-slate-600">Your payment is confirmed. Download your premium report below.</p>
             {reportUrl ? (
-              <a className="checkout__download" href={reportUrl} target="_blank" rel="noopener noreferrer">
+              <a className="text-sm font-semibold text-indigo-600 hover:text-indigo-700" href={reportUrl} target="_blank" rel="noopener noreferrer">
                 Download report PDF
               </a>
             ) : (
@@ -201,20 +201,20 @@ export default function CheckoutCallbackClient() {
                 {isGeneratingReport ? 'Preparing report…' : 'Generate report PDF'}
               </Button>
             )}
-            {reportError ? <p className="checkout__error">{reportError}</p> : null}
+            {reportError ? <p className="text-sm font-medium text-red-600">{reportError}</p> : null}
           </div>
         ) : null}
 
-        <div className="checkout__actions">
+        <div className="flex flex-col gap-3 sm:flex-row">
           <Button type="button" variant="ghost" onClick={() => refreshStatus()} disabled={!orderId || isLoading}>
             Retry status check
           </Button>
-          <Link className="ui-button ui-button--secondary" href="/quiz">
+          <Link href="/quiz" className="inline-flex items-center justify-center rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition-colors hover:border-indigo-200 hover:text-indigo-700">
             Retake quiz
           </Link>
         </div>
 
-        <p className="muted checkout__note">
+        <p className="text-sm text-slate-500">
           If this takes more than a few minutes, refresh this page or contact support for a resend link.
         </p>
       </Card>

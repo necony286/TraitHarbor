@@ -1,12 +1,21 @@
 import React from 'react';
+import { Button as FigmaButton } from '../../src/components/figma/ui/button';
+import type { buttonVariants } from '../../src/components/figma/ui/button';
+import type { VariantProps } from 'class-variance-authority';
 
 type ButtonVariant = 'primary' | 'secondary' | 'ghost';
 
 type ButtonProps = React.ButtonHTMLAttributes<HTMLButtonElement> & {
   variant?: ButtonVariant;
+  size?: VariantProps<typeof buttonVariants>['size'];
 };
 
-export function Button({ variant = 'primary', className = '', ...props }: ButtonProps) {
-  const classes = `ui-button ui-button--${variant} ${className}`.trim();
-  return <button className={classes} {...props} />;
+const variantMap: Record<ButtonVariant, VariantProps<typeof buttonVariants>['variant']> = {
+  primary: 'default',
+  secondary: 'secondary',
+  ghost: 'ghost'
+};
+
+export function Button({ variant = 'primary', size, className, ...props }: ButtonProps) {
+  return <FigmaButton variant={variantMap[variant]} size={size} className={className} {...props} />;
 }

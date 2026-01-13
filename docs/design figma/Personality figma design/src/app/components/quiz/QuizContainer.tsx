@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { QuizPage } from './QuizPage';
-import { getQuestionsForPage, getCategoryForPage, TOTAL_PAGES } from '@/app/data/quizQuestions';
+import { getQuestionsForPage, getCategoryForPage, TOTAL_PAGES } from '../../data/quizQuestions';
 
 interface QuizContainerProps {
   onComplete?: (answers: Record<number, number>) => void;

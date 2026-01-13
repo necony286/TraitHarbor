@@ -209,9 +209,9 @@ export default function CheckoutCallbackClient() {
           <Button type="button" variant="ghost" onClick={() => refreshStatus()} disabled={!orderId || isLoading}>
             Retry status check
           </Button>
-          <Button as={Link} href="/quiz" variant="secondary">
+          <Link className="ui-button ui-button--secondary" href="/quiz">
             Retake quiz
-          </Button>
+          </Link>
         </div>
 
         <p className="muted checkout__note">

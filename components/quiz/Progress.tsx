@@ -9,8 +9,8 @@ interface ProgressProps {
 }
 
 export function Progress({ answered, total, currentPage, totalPages }: ProgressProps) {
-  const percent = total === 0 ? 0 : Math.round((answered / total) * 100);
   const current = Math.min(total, Math.max(0, answered));
+  const percent = total === 0 ? 0 : Math.round((current / total) * 100);
 
   return (
     <section aria-label="Quiz progress" className="rounded-2xl border border-slate-200 bg-white/80 p-6 shadow-sm">

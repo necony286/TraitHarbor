@@ -89,9 +89,10 @@ test('quiz to paid flow with report download', async ({ page }) => {
   let pagesProcessed = 0;
 
   while (true) {
-    if (pagesProcessed++ >= MAX_PAGES) {
+    if (pagesProcessed >= MAX_PAGES) {
       throw new Error('Exceeded max pages, possible infinite loop in quiz pagination.');
     }
+    pagesProcessed++;
 
     const questionCards = page.locator('.question-card');
 

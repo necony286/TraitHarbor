@@ -8,8 +8,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "test": "vitest",
-    "test:unit": "vitest",
+    "test": "pnpm test:unit",
+    "test:unit": "vitest run",
     "test:e2e": "playwright test"
   },
   "dependencies": {

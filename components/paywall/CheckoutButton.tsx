@@ -8,6 +8,7 @@ import { z } from 'zod';
 import { checkoutConfigSchema } from '../../lib/payments';
 import { orderRecordSchema } from '../../lib/orders';
 import { getReportAccessTokenKey } from '../../lib/report-access-token';
+import { Button } from '../ui/Button';
 
 const createOrderResponseSchema = z.object({
   order: orderRecordSchema,
@@ -118,9 +119,9 @@ export function CheckoutButton({ resultId }: CheckoutButtonProps) {
 
   return (
     <div>
-      <button className="button" type="button" onClick={handleCheckout} disabled={isLoading}>
+      <Button type="button" onClick={handleCheckout} disabled={isLoading}>
         {isLoading ? 'Loading checkout…' : 'Unlock full report (PDF)'}
-      </button>
+      </Button>
       {errorMessage ? <p className="muted">{errorMessage}</p> : null}
     </div>
   );

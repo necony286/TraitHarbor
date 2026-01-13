@@ -2,6 +2,7 @@ import React from 'react';
 import { redirect } from 'next/navigation';
 import { z } from 'zod';
 import { ResultsDisplay } from '../../../../components/results/ResultsDisplay';
+import { Container } from '../../../../components/ui/Container';
 import { getScoresByResultId } from '../../../../lib/db';
 import resultsFixture from '../../../data/results.fixture.json';
 
@@ -86,12 +87,12 @@ export default async function ResultsPage({ params }: ResultsPageProps) {
   }
 
   return (
-    <div className="results">
+    <Container className="results">
       <header className="results__header">
         <p className="eyebrow">Results unavailable</p>
         <h1>We couldn&apos;t load your results</h1>
         <p className="muted">Please return to the quiz and try again in a moment.</p>
       </header>
-    </div>
+    </Container>
   );
 }

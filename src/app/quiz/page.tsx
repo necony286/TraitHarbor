@@ -6,6 +6,9 @@ import { z } from 'zod';
 import { PaginationControls } from '../../../components/quiz/PaginationControls';
 import { Progress } from '../../../components/quiz/Progress';
 import { QuestionCard } from '../../../components/quiz/QuestionCard';
+import { Button } from '../../../components/ui/Button';
+import { Card } from '../../../components/ui/Card';
+import { Container } from '../../../components/ui/Container';
 import { QuizEventName, trackQuizEvent } from '../../../lib/analytics';
 import { loadQuizItems, QuizItem } from '../../../lib/ipip';
 import { getOrCreateAnonymousUserId } from '../../../lib/anonymous-user';
@@ -165,42 +168,44 @@ export default function QuizPage() {
   };
 
   return (
-    <div className="quiz">
-      <header className="quiz__header">
-        <p className="eyebrow">IPIP-120</p>
-        <h1>Personality questionnaire</h1>
-        <p className="muted">
-          Rate how much you agree with each statement. Your answers autosave locally so you can pick up where you left off.
-        </p>
-      </header>
+    <Container>
+      <Card className="quiz">
+        <header className="quiz__header">
+          <p className="eyebrow">IPIP-120</p>
+          <h1>Personality questionnaire</h1>
+          <p className="muted">
+            Rate how much you agree with each statement. Your answers autosave locally so you can pick up where you left off.
+          </p>
+        </header>
 
-      <Progress answered={answeredCount} total={items.length} currentPage={currentPage} totalPages={totalPages} />
+        <Progress answered={answeredCount} total={items.length} currentPage={currentPage} totalPages={totalPages} />
 
-      <div className="question-grid" aria-live="polite">
-        {pageItems.map((item) => (
-          <QuestionCard
-            key={item.id}
-            item={item}
-            value={sanitizedAnswers[item.id]}
-            onChange={(value) => updateAnswer(item.id, value)}
-          />
-        ))}
-      </div>
+        <div className="question-grid" aria-live="polite">
+          {pageItems.map((item) => (
+            <QuestionCard
+              key={item.id}
+              item={item}
+              value={sanitizedAnswers[item.id]}
+              onChange={(value) => updateAnswer(item.id, value)}
+            />
+          ))}
+        </div>
 
-      <PaginationControls
-        canGoBack={currentPage > 0}
-        canGoForward={currentPage < totalPages - 1}
-        onPrevious={goToPrevPage}
-        onNext={goToNextPage}
-      />
+        <PaginationControls
+          canGoBack={currentPage > 0}
+          canGoForward={currentPage < totalPages - 1}
+          onPrevious={goToPrevPage}
+          onNext={goToNextPage}
+        />
 
-      <div className="quiz__footer">
-        <button className="button" type="button" onClick={handleSubmit} disabled={answeredCount !== items.length || isSubmitting}>
-          {isSubmitting ? 'Scoring...' : 'Submit answers'}
-        </button>
-        <p className="muted">Submit your answers to generate your free results.</p>
-        {submitError ? <p className="quiz__error">{submitError}</p> : null}
-      </div>
-    </div>
+        <div className="quiz__footer">
+          <Button type="button" onClick={handleSubmit} disabled={answeredCount !== items.length || isSubmitting}>
+            {isSubmitting ? 'Scoring...' : 'Submit answers'}
+          </Button>
+          <p className="muted">Submit your answers to generate your free results.</p>
+          {submitError ? <p className="quiz__error">{submitError}</p> : null}
+        </div>
+      </Card>
+    </Container>
   );
 }

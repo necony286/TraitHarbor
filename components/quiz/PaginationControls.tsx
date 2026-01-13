@@ -1,4 +1,5 @@
 import React from 'react';
+import { Button } from '../ui/Button';
 
 type PaginationControlsProps = {
   canGoBack: boolean;
@@ -10,12 +11,12 @@ type PaginationControlsProps = {
 export function PaginationControls({ canGoBack, canGoForward, onPrevious, onNext }: PaginationControlsProps) {
   return (
     <div className="pagination-controls">
-      <button type="button" className="button button--ghost" onClick={onPrevious} disabled={!canGoBack}>
+      <Button type="button" variant="ghost" onClick={onPrevious} disabled={!canGoBack}>
         Previous page
-      </button>
-      <button type="button" className="button" onClick={onNext} disabled={!canGoForward}>
+      </Button>
+      <Button type="button" onClick={onNext} disabled={!canGoForward}>
         Next page
-      </button>
+      </Button>
     </div>
   );
 }

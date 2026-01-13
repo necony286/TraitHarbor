@@ -13,7 +13,7 @@ export function Hero() {
 
           <h1 className="mt-8 text-4xl font-bold leading-tight text-slate-900 sm:text-5xl lg:text-6xl">
             <span className="bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 bg-clip-text text-transparent">
-              Meet the TraitHarbor
+              Meet the TraitHarbor{' '}
             </span>
             <br />
             personality quiz

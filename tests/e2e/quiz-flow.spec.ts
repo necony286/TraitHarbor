@@ -84,11 +84,21 @@ test('quiz to paid flow with report download', async ({ page }) => {
 
   await page.goto('/quiz');
 
-  const questionCards = page.locator('.question-card');
-  const questionCount = await questionCards.count();
+  const nextPageButton = page.getByRole('button', { name: 'Next page' });
 
-  for (let i = 0; i < questionCount; i += 1) {
-    await questionCards.nth(i).getByRole('radio', { name: AGREE_LABEL, exact: true }).check();
+  while (true) {
+    const questionCards = page.locator('.question-card');
+    const questionCount = await questionCards.count();
+
+    for (const card of await questionCards.all()) {
+      await card.getByRole('radio', { name: AGREE_LABEL, exact: true }).check();
+    }
+
+    if (!(await nextPageButton.isEnabled())) {
+      break;
+    }
+
+    await nextPageButton.click();
   }
 
   await page.getByRole('button', { name: 'Submit answers' }).click();

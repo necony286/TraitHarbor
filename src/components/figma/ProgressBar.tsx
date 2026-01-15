@@ -5,9 +5,9 @@ interface ProgressBarProps {
 
 export function ProgressBar({ current, total }: ProgressBarProps) {
   const safeTotal = Number.isFinite(total) && total > 0 ? total : 0;
-  const safeCurrent = Number.isFinite(current) ? current : 0;
-  const rawPercentage = safeTotal > 0 ? Math.round((safeCurrent / safeTotal) * 100) : 0;
-  const percentage = Math.min(100, Math.max(0, rawPercentage));
+  const finiteCurrent = Number.isFinite(current) ? current : 0;
+  const safeCurrent = Math.max(0, Math.min(finiteCurrent, safeTotal));
+  const percentage = safeTotal > 0 ? Math.round((safeCurrent / safeTotal) * 100) : 0;
 
   return (
     <div

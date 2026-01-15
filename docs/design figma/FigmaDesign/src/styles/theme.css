@@ -39,22 +39,6 @@
   --sidebar-accent-foreground: oklch(0.205 0 0);
   --sidebar-border: oklch(0.922 0 0);
   --sidebar-ring: oklch(0.708 0 0);
-  
-  /* Quiz-specific tokens */
-  --quiz-surface: #fafafa;
-  --quiz-surface-elevated: #ffffff;
-  --quiz-border-subtle: #e5e7eb;
-  --quiz-border-medium: #d1d5db;
-  --quiz-text-primary: #111827;
-  --quiz-text-secondary: #6b7280;
-  --quiz-text-muted: #9ca3af;
-  --quiz-accent: #4f46e5;
-  --quiz-accent-hover: #4338ca;
-  --quiz-accent-light: #eef2ff;
-  --quiz-error: #ef4444;
-  --quiz-error-light: #fef2f2;
-  --quiz-success: #10b981;
-  --quiz-focus-ring: #4f46e5;
 }
 
 .dark {
@@ -193,59 +177,5 @@
     font-size: var(--text-base);
     font-weight: var(--font-weight-normal);
     line-height: 1.5;
-  }
-
-  @keyframes fadeIn {
-    from {
-      opacity: 0;
-      transform: translateY(10px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
-  }
-
-  .animate-fadeIn {
-    animation: fadeIn 0.5s ease-out;
-  }
-
-  @keyframes blob {
-    0%, 100% {
-      transform: translate(0, 0) scale(1);
-    }
-    25% {
-      transform: translate(20px, -20px) scale(1.1);
-    }
-    50% {
-      transform: translate(-20px, 20px) scale(0.9);
-    }
-    75% {
-      transform: translate(20px, 20px) scale(1.05);
-    }
-  }
-
-  .animate-blob {
-    animation: blob 10s infinite;
-  }
-
-  .animation-delay-2000 {
-    animation-delay: 2s;
-  }
-
-  .animation-delay-4000 {
-    animation-delay: 4s;
-  }
-  
-  /* Reduced Motion Support */
-  @media (prefers-reduced-motion: reduce) {
-    *,
-    *::before,
-    *::after {
-      animation-duration: 0.01ms !important;
-      animation-iteration-count: 1 !important;
-      transition-duration: 0.01ms !important;
-      scroll-behavior: auto !important;
-    }
   }
 }

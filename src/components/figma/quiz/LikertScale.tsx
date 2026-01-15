@@ -37,16 +37,6 @@ export function LikertScale({ name, value, onChange, questionId }: LikertScalePr
               focus-within:outline focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-ring
             `}
           >
-            <input
-              type="radio"
-              name={name}
-              value={option.value}
-              checked={isSelected}
-              onChange={() => onChange(option.value)}
-              aria-label={option.label}
-              className="sr-only"
-            />
-
             <div
               className={`
                 w-4 h-4 rounded-full border-2 flex items-center justify-center
@@ -61,6 +51,15 @@ export function LikertScale({ name, value, onChange, questionId }: LikertScalePr
               {option.shortLabel}
             </span>
 
+            <input
+              type="radio"
+              name={name}
+              value={option.value}
+              checked={isSelected}
+              onChange={() => onChange(option.value)}
+              aria-label={option.label}
+              className="absolute inset-0 z-10 cursor-pointer opacity-0"
+            />
           </label>
         );
       })}

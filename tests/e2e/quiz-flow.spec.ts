@@ -86,6 +86,8 @@ test('quiz to paid flow with report download', async ({ page }) => {
 
   const MAX_PAGES = 20;
   let pagesProcessed = 0;
+  const submitButton = page.getByRole('button', { name: 'Submit', exact: true });
+  const nextButton = page.getByRole('button', { name: 'Next', exact: true });
 
   while (true) {
     if (pagesProcessed >= MAX_PAGES) {
@@ -99,13 +101,11 @@ test('quiz to paid flow with report download', async ({ page }) => {
       await group.getByRole('radio', { name: AGREE_LABEL, exact: true }).check();
     }
 
-    const submitButton = page.getByRole('button', { name: 'Submit', exact: true });
     if ((await submitButton.count()) > 0) {
       await submitButton.click();
       break;
     }
 
-    const nextButton = page.getByRole('button', { name: 'Next', exact: true });
     await nextButton.click();
   }
 

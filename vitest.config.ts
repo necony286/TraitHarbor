@@ -1,9 +1,11 @@
-import react from '@vitejs/plugin-react';
 import { defineConfig } from 'vitest/config';
 
 export default defineConfig(async () => {
-  // `vite-tsconfig-paths` is ESM-only, so it must be imported dynamically.
-  const { default: tsconfigPaths } = await import('vite-tsconfig-paths');
+  // `@vitejs/plugin-react` and `vite-tsconfig-paths` are ESM-only, so they must be imported dynamically.
+  const [{ default: react }, { default: tsconfigPaths }] = await Promise.all([
+    import('@vitejs/plugin-react'),
+    import('vite-tsconfig-paths')
+  ]);
 
   return {
     plugins: [react(), tsconfigPaths()],

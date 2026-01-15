@@ -43,6 +43,7 @@ export function LikertScale({ name, value, onChange, questionId }: LikertScalePr
               value={option.value}
               checked={isSelected}
               onChange={() => onChange(option.value)}
+              aria-label={option.label}
               className="sr-only"
             />
 

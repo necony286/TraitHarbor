@@ -84,7 +84,6 @@ test('quiz to paid flow with report download', async ({ page }) => {
 
   await page.goto('/quiz');
 
-  const nextPageButton = page.getByRole('button', { name: 'Next page' });
   const MAX_PAGES = 20;
   let pagesProcessed = 0;
 
@@ -94,20 +93,21 @@ test('quiz to paid flow with report download', async ({ page }) => {
     }
     pagesProcessed++;
 
-    const questionCards = page.locator('.question-card');
+    const questionGroups = page.getByRole('radiogroup');
 
-    for (const card of await questionCards.all()) {
-      await card.getByRole('radio', { name: AGREE_LABEL, exact: true }).check();
+    for (const group of await questionGroups.all()) {
+      await group.getByRole('radio', { name: AGREE_LABEL, exact: true }).check();
     }
 
-    if (!(await nextPageButton.isEnabled())) {
+    const submitButton = page.getByRole('button', { name: 'Submit', exact: true });
+    if ((await submitButton.count()) > 0) {
+      await submitButton.click();
       break;
     }
 
-    await nextPageButton.click();
+    await page.getByRole('button', { name: 'Next', exact: true }).click();
   }
 
-  await page.getByRole('button', { name: 'Submit answers' }).click();
   await expect(page).toHaveURL(new RegExp(`/results/${FIXTURE_RESULT_ID}$`));
   await expect(page.getByRole('heading', { name: 'TraitHarbor personality snapshot' })).toBeVisible();
 

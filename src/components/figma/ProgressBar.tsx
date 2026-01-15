@@ -7,8 +7,7 @@ export function ProgressBar({ current, total }: ProgressBarProps) {
   const safeTotal = Number.isFinite(total) && total > 0 ? total : 0;
   const finiteCurrent = Number.isFinite(current) ? current : 0;
   const clampedCurrent = Math.max(0, Math.min(finiteCurrent, safeTotal));
-  const percentage =
-    safeTotal > 0 ? Math.min(100, Math.max(0, Math.round((clampedCurrent / safeTotal) * 100))) : 0;
+  const percentage = safeTotal > 0 ? Math.round((clampedCurrent / safeTotal) * 100) : 0;
 
   return (
     <div

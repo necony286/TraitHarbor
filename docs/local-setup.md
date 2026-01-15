@@ -4,8 +4,8 @@ This guide focuses on running the TraitHarbor app locally on Windows, including 
 
 ## 1) Prerequisites
 
-- **Node.js 20.17.0** (matches `.nvmrc`)
-  - If you use `nvm-windows`, install and select `20.17.0`.
+- **Node.js 20.19.0** (matches `.nvmrc`)
+  - If you use `nvm-windows`, install and select `20.19.0`.
 - **pnpm 9.12.3** (matches `package.json`).
 - **Docker Desktop** (required for Supabase CLI local stack).
 - **Supabase CLI** (`supabase` command available).

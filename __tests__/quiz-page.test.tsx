@@ -44,7 +44,7 @@ describe('QuizPage autosave', () => {
     });
     saveQuizStateMock.mockClear();
 
-    const agreeOptions = screen.getAllByRole('radio', { name: /A\s*Agree/ });
+    const agreeOptions = screen.getAllByRole('radio', { name: /^Agree$/i });
     fireEvent.click(agreeOptions[0]);
     fireEvent.click(agreeOptions[1]);
 

@@ -51,7 +51,7 @@ export function WhatYouGet() {
                   </div>
                   <div className="h-3 bg-muted rounded-full overflow-hidden">
                     <div
-                      className="h-full bg-[#2563eb] rounded-full transition-all duration-500"
+                      className="h-full bg-brand rounded-full transition-all duration-500"
                       style={{ width: `${trait.score}%` }}
                     />
                   </div>
@@ -74,12 +74,12 @@ export function WhatYouGet() {
                 >
                   <div className="flex items-start gap-4">
                     <div className="flex-shrink-0">
-                      <div className="w-10 h-10 bg-[#2563eb]/10 rounded-lg flex items-center justify-center">
-                        <Icon className="w-5 h-5 text-[#2563eb]" />
+                      <div className="w-10 h-10 bg-brand/10 rounded-lg flex items-center justify-center">
+                        <Icon className="w-5 h-5 text-brand" />
                       </div>
                     </div>
                     <div className="space-y-1">
-                      <div className="inline-block px-2 py-0.5 bg-[#2563eb]/10 text-[#2563eb] text-xs font-medium rounded mb-2">
+                      <div className="inline-block px-2 py-0.5 bg-brand/10 text-brand text-xs font-medium rounded mb-2">
                         {insight.tag}
                       </div>
                       <h4 className="font-medium text-foreground">{insight.headline}</h4>

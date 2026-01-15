@@ -1,5 +1,4 @@
 import React from 'react';
-
 import { ProgressBar } from '@/components/figma/ProgressBar';
 
 interface QuizHeaderProps {

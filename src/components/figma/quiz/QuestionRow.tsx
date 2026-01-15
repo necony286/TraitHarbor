@@ -1,5 +1,4 @@
 import React from 'react';
-
 import { LikertScale } from '@/components/figma/quiz/LikertScale';
 
 interface QuestionRowProps {

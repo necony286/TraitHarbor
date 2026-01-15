@@ -32,11 +32,9 @@ export function Likert({ name, value, onChange, ariaLabelledby }: LikertProps) {
             name={name}
             value={option.value}
             checked={value === option.value}
-            aria-label={option.label}
             onChange={() => onChange(option.value)}
             className="h-4 w-4 appearance-none rounded-full border-2 border-indigo-300 shadow-inner checked:border-indigo-600 checked:bg-indigo-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500"
           />
-          <span className="font-semibold">{option.value}</span>
           <span>{option.label}</span>
         </label>
       ))}

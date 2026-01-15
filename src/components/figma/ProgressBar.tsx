@@ -6,14 +6,15 @@ interface ProgressBarProps {
 export function ProgressBar({ current, total }: ProgressBarProps) {
   const safeTotal = Number.isFinite(total) && total > 0 ? total : 0;
   const finiteCurrent = Number.isFinite(current) ? current : 0;
-  const safeCurrent = Math.max(0, Math.min(finiteCurrent, safeTotal));
-  const percentage = safeTotal > 0 ? Math.round((safeCurrent / safeTotal) * 100) : 0;
+  const clampedCurrent = Math.max(0, Math.min(finiteCurrent, safeTotal));
+  const percentage =
+    safeTotal > 0 ? Math.min(100, Math.max(0, Math.round((clampedCurrent / safeTotal) * 100))) : 0;
 
   return (
     <div
       className="w-full"
       role="progressbar"
-      aria-valuenow={safeCurrent}
+      aria-valuenow={clampedCurrent}
       aria-valuemin={0}
       aria-valuemax={safeTotal}
     >

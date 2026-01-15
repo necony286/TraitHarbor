@@ -1,3 +1,5 @@
+import React from 'react';
+
 interface LikertOption {
   value: number;
   label: string;

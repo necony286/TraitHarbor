@@ -252,3 +252,18 @@
     }
   }
 }
+
+@layer components {
+  .question-card {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: start;
+    gap: 1rem;
+  }
+
+  @media (max-width: 640px) {
+    .question-card {
+      grid-template-columns: 1fr;
+    }
+  }
+}

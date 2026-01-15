@@ -105,7 +105,8 @@ test('quiz to paid flow with report download', async ({ page }) => {
       break;
     }
 
-    await page.getByRole('button', { name: 'Next', exact: true }).click();
+    const nextButton = page.getByRole('button', { name: 'Next', exact: true });
+    await nextButton.click();
   }
 
   await expect(page).toHaveURL(new RegExp(`/results/${FIXTURE_RESULT_ID}$`));

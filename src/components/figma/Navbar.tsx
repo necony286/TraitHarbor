@@ -22,11 +22,14 @@ export function Navbar({ onStartQuiz }: NavbarProps) {
         </div>
 
         <div className="hidden items-center gap-8 md:flex">
-          <a href="#questions" className="text-sm font-medium text-slate-600 transition-colors hover:text-slate-900">
-            Questions
+          <a href="#how-it-works" className="text-sm font-medium text-slate-600 transition-colors hover:text-slate-900">
+            How it works
           </a>
-          <a href="#tokens" className="text-sm font-medium text-slate-600 transition-colors hover:text-slate-900">
-            Design system
+          <a href="#what-you-get" className="text-sm font-medium text-slate-600 transition-colors hover:text-slate-900">
+            What you get
+          </a>
+          <a href="#faq" className="text-sm font-medium text-slate-600 transition-colors hover:text-slate-900">
+            FAQ
           </a>
           <Link href="/quiz" className="text-sm font-medium text-slate-600 transition-colors hover:text-slate-900">
             Quiz
@@ -56,11 +59,14 @@ export function Navbar({ onStartQuiz }: NavbarProps) {
       {isMenuOpen ? (
         <div className="border-t border-white/50 bg-white/90 px-4 py-4 md:hidden">
           <div className="space-y-3">
-            <a href="#questions" className="block text-sm font-medium text-slate-700">
-              Questions
+            <a href="#how-it-works" className="block text-sm font-medium text-slate-700">
+              How it works
             </a>
-            <a href="#tokens" className="block text-sm font-medium text-slate-700">
-              Design system
+            <a href="#what-you-get" className="block text-sm font-medium text-slate-700">
+              What you get
+            </a>
+            <a href="#faq" className="block text-sm font-medium text-slate-700">
+              FAQ
             </a>
             <Link href="/quiz" className="block text-sm font-medium text-slate-700">
               Quiz

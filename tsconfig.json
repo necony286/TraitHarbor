@@ -17,6 +17,12 @@
     "isolatedModules": true,
     "jsx": "preserve",
     "forceConsistentCasingInFileNames": true,
+    "baseUrl": ".",
+    "paths": {
+      "@/*": [
+        "src/*"
+      ]
+    },
     "types": [
       "vitest/globals",
       "@testing-library/jest-dom"

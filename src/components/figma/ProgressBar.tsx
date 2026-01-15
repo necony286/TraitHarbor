@@ -1,25 +1,20 @@
-import React from "react";
-
 interface ProgressBarProps {
   current: number;
   total: number;
 }
 
 export function ProgressBar({ current, total }: ProgressBarProps) {
-  const percentage = total === 0 ? 0 : (current / total) * 100;
+  const percentage = total > 0 ? Math.round((current / total) * 100) : 0;
 
   return (
-    <div className="w-full">
-      <div className="mb-3 flex flex-wrap items-center justify-between gap-2 text-sm">
-        <span className="text-slate-500">Question {current} of {total}</span>
-        <span className="font-medium text-indigo-600">{Math.round(percentage)}%</span>
-      </div>
-      <div className="h-2 w-full overflow-hidden rounded-full bg-slate-200">
+    <div className="w-full" role="progressbar" aria-valuenow={current} aria-valuemin={0} aria-valuemax={total}>
+      <div className="h-1.5 bg-muted rounded-full overflow-hidden">
         <div
-          className="h-full bg-gradient-to-r from-indigo-500 to-purple-500 transition-all duration-500 ease-out"
+          className="h-full bg-primary transition-all duration-300 ease-out motion-reduce:transition-none"
           style={{ width: `${percentage}%` }}
         />
       </div>
+      <span className="sr-only">{percentage}% complete</span>
     </div>
   );
 }

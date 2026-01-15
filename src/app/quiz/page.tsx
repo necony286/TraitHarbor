@@ -3,12 +3,9 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { z } from 'zod';
-import { PaginationControls } from '../../../components/quiz/PaginationControls';
-import { Progress } from '../../../components/quiz/Progress';
-import { QuestionCard } from '../../../components/quiz/QuestionCard';
-import { Button } from '../../../components/ui/Button';
-import { Card } from '../../../components/ui/Card';
-import { Container } from '../../../components/ui/Container';
+import { QuestionRow } from '@/components/figma/quiz/QuestionRow';
+import { QuizHeader } from '@/components/figma/quiz/QuizHeader';
+import { StickyNavigation } from '@/components/figma/quiz/StickyNavigation';
 import { QuizEventName, trackQuizEvent } from '../../../lib/analytics';
 import { loadQuizItems, QuizItem } from '../../../lib/ipip';
 import { getOrCreateAnonymousUserId } from '../../../lib/anonymous-user';
@@ -167,45 +164,44 @@ export default function QuizPage() {
     }
   };
 
+  const isLastPage = currentPage === totalPages - 1;
+  const pageStartIndex = currentPage * PAGE_SIZE;
+
   return (
-    <Container className="py-12">
-      <Card className="gap-6 border-slate-200/80 bg-white/90 p-8 shadow-xl shadow-indigo-100/40">
-        <header className="space-y-3">
-          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">IPIP-120</p>
-          <h1 className="text-3xl font-bold text-slate-900 sm:text-4xl">Personality questionnaire</h1>
-          <p className="text-base text-slate-600">
-            Rate how much you agree with each statement. Your answers autosave locally so you can pick up where you left off.
-          </p>
-        </header>
+    <div className="min-h-screen bg-background pb-28">
+      <div className="container max-w-4xl mx-auto px-4 py-8 lg:py-12">
+        <QuizHeader
+          title="Personality questionnaire"
+          subtitle="IPIP-120"
+          currentPage={currentPage + 1}
+          totalPages={totalPages}
+          answeredCount={answeredCount}
+          totalQuestions={items.length}
+        />
 
-        <Progress answered={answeredCount} total={items.length} currentPage={currentPage} totalPages={totalPages} />
-
-        <div className="grid gap-4 md:grid-cols-2" aria-live="polite">
-          {pageItems.map((item) => (
-            <QuestionCard
+        <main className="mt-8 lg:mt-12 space-y-4" aria-live="polite">
+          {pageItems.map((item, index) => (
+            <QuestionRow
               key={item.id}
-              item={item}
-              value={sanitizedAnswers[item.id]}
+              questionId={item.id}
+              questionNumber={pageStartIndex + index + 1}
+              questionText={item.prompt}
+              value={sanitizedAnswers[item.id] ?? null}
               onChange={(value) => updateAnswer(item.id, value)}
             />
           ))}
-        </div>
+        </main>
+      </div>
 
-        <PaginationControls
-          canGoBack={currentPage > 0}
-          canGoForward={currentPage < totalPages - 1}
-          onPrevious={goToPrevPage}
-          onNext={goToNextPage}
-        />
-
-        <div className="flex flex-col gap-3 rounded-2xl border border-indigo-100 bg-indigo-50/70 p-4 text-sm text-slate-600">
-          <Button type="button" onClick={handleSubmit} disabled={answeredCount !== items.length || isSubmitting}>
-            {isSubmitting ? 'Scoring...' : 'Submit answers'}
-          </Button>
-          <p>Submit your answers to generate your free results.</p>
-          {submitError ? <p className="text-sm font-medium text-red-600">{submitError}</p> : null}
-        </div>
-      </Card>
-    </Container>
+      <StickyNavigation
+        currentPage={currentPage + 1}
+        totalPages={totalPages}
+        onPrevious={goToPrevPage}
+        onNext={isLastPage ? handleSubmit : goToNextPage}
+        canGoPrevious={currentPage > 0}
+        isLastPage={isLastPage}
+        errorMessage={submitError ?? (isSubmitting ? 'Scoring your answers...' : undefined)}
+      />
+    </div>
   );
 }

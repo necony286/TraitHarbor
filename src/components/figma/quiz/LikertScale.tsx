@@ -61,7 +61,6 @@ export function LikertScale({ name, value, onChange, questionId }: LikertScalePr
               {option.shortLabel}
             </span>
 
-            <span className="sr-only">{option.label}</span>
           </label>
         );
       })}

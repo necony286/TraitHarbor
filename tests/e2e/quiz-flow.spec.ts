@@ -96,11 +96,14 @@ test('quiz to paid flow with report download', async ({ page }) => {
     pagesProcessed++;
 
     const questionGroups = page.getByRole('radiogroup');
+    await expect(questionGroups.first()).toBeVisible();
+    const groupCount = await questionGroups.count();
 
-    for (const group of await questionGroups.all()) {
-      const agreeOption = group.getByText(AGREE_LABEL, { exact: true });
+    for (let index = 0; index < groupCount; index += 1) {
+      const group = questionGroups.nth(index);
+      const agreeOption = group.getByRole('radio', { name: AGREE_LABEL, exact: true });
       await agreeOption.scrollIntoViewIfNeeded();
-      await agreeOption.click();
+      await agreeOption.check();
     }
 
     if ((await submitButton.count()) > 0) {

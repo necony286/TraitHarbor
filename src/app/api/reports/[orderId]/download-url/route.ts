@@ -12,7 +12,7 @@ const SIGNED_URL_TTL_SECONDS = 300;
 
 export const runtime = 'nodejs';
 
-export async function POST(request: NextRequest, { params }: { params: Promise<{ orderId?: string }> }) {
+export async function POST(request: NextRequest, { params }: { params: { orderId: string } }) {
   const rateLimitResponse = await enforceRateLimit({
     request,
     route: 'report-download-url',

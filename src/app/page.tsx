@@ -1,10 +1,17 @@
-'use client';
+import type { Metadata } from 'next';
 
-import { useRouter } from 'next/navigation';
-import { HomePage } from '@/components/figma/home/HomePage';
+import { HomePageClient } from '@/components/figma/home/HomePageClient';
+import { canonicalUrl, ogUrl } from '@/lib/siteUrl';
+
+export const metadata: Metadata = {
+  alternates: {
+    canonical: canonicalUrl('/')
+  },
+  openGraph: {
+    url: ogUrl('/')
+  }
+};
 
 export default function Page() {
-  const router = useRouter();
-
-  return <HomePage onStartTest={() => router.push('/quiz')} />;
+  return <HomePageClient />;
 }

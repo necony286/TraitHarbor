@@ -5,6 +5,7 @@ import { ResultsDisplay } from '../../../../components/results/ResultsDisplay';
 import { Container } from '../../../../components/ui/Container';
 import { getScoresByResultId } from '../../../../lib/db';
 import resultsFixture from '../../../data/results.fixture.json';
+import { canonicalUrl, ogUrl } from '@/lib/siteUrl';
 
 const resultIdSchema = z.string().uuid();
 const traitSchema = z.object({
@@ -32,12 +33,12 @@ export async function generateMetadata({ params }: ResultsPageProps) {
     title: 'Results | TraitHarbor',
     description: 'Your TraitHarbor personality results and next steps.',
     alternates: {
-      canonical: `/results/${resultId}`
+      canonical: canonicalUrl(`/results/${resultId}`)
     },
     openGraph: {
       title: 'TraitHarbor Results',
       description: 'Your TraitHarbor personality results and next steps.',
-      url: `/results/${resultId}`,
+      url: ogUrl(`/results/${resultId}`),
       siteName: 'TraitHarbor'
     }
   };

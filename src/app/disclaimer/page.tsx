@@ -1,6 +1,18 @@
-export const metadata = {
+import type { Metadata } from 'next';
+import { canonicalUrl, ogUrl } from '@/lib/siteUrl';
+
+export const metadata: Metadata = {
   title: 'Disclaimer | TraitHarbor',
-  description: 'Disclaimer for the TraitHarbor personality assessment.'
+  description: 'Disclaimer for the TraitHarbor personality assessment.',
+  alternates: {
+    canonical: canonicalUrl('/disclaimer')
+  },
+  openGraph: {
+    title: 'Disclaimer | TraitHarbor',
+    description: 'Disclaimer for the TraitHarbor personality assessment.',
+    url: ogUrl('/disclaimer'),
+    siteName: 'TraitHarbor'
+  }
 };
 
 export default function DisclaimerPage() {

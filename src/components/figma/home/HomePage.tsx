@@ -1,3 +1,5 @@
+'use client';
+
 import { FAQ } from '@/components/figma/home/FAQ';
 import { Footer } from '@/components/figma/home/Footer';
 import { Hero } from '@/components/figma/home/Hero';

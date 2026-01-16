@@ -83,11 +83,9 @@ export default async function ResultsPage({ params }: ResultsPageProps) {
     redirect('/quiz');
   } catch (error) {
     if (
-      error &&
-      typeof error === 'object' &&
-      'digest' in error &&
-      typeof (error as { digest?: string }).digest === 'string' &&
-      (error as { digest: string }).digest.startsWith('NEXT_REDIRECT')
+      error instanceof Error &&
+      typeof (error as any).digest === 'string' &&
+      (error as any).digest.startsWith('NEXT_REDIRECT')
     ) {
       throw error;
     }

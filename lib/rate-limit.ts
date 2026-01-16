@@ -24,6 +24,8 @@ type Limiter = {
   limit: (key: string) => Promise<RateLimitResult>;
 };
 
+const RATE_LIMIT_DISABLED_MESSAGE = 'RATE_LIMIT_DISABLED: Upstash rate limiting is unavailable.';
+
 const parseWindowMs = (window: RateLimitConfig['window']) => {
   const [amountRaw, unit] = window.split(' ') as [string, string];
   const amount = Number(amountRaw);
@@ -70,6 +72,28 @@ const createDevLimiter = (limit: number, window: RateLimitConfig['window']): Lim
 };
 
 const upstashLimiters = new Map<string, Limiter>();
+const loggedRateLimitIssues = new Set<string>();
+
+const isProductionLike = () => process.env.NODE_ENV === 'production' || process.env.VERCEL_ENV === 'preview';
+
+const allowFailOpen = () => process.env.RATE_LIMIT_ALLOW_FAIL_OPEN === 'true';
+
+const logRateLimitOnce = (
+  level: 'warn' | 'error',
+  message: string,
+  context: { route: string; mode: RateLimitMode }
+) => {
+  const key = `${level}:${message}:${context.route}:${context.mode}`;
+  if (loggedRateLimitIssues.has(key)) {
+    return;
+  }
+  loggedRateLimitIssues.add(key);
+  if (level === 'warn') {
+    logWarn(message, context);
+  } else {
+    logError(message, context);
+  }
+};
 
 const getUpstashLimiter = (limit: number, window: RateLimitConfig['window']): Limiter => {
   const key = `${limit}:${window}`;
@@ -145,12 +169,13 @@ export const enforceRateLimit = async ({
 }: RateLimitConfig): Promise<Response | null> => {
   const limiter = getLimiter(limit, window);
   if (!limiter) {
-    if (mode === 'fail-open') {
-      logWarn('Rate limiter unavailable; allowing request.', { route });
+    const shouldAllowFailOpen = mode === 'fail-open' && (!isProductionLike() || allowFailOpen());
+    if (shouldAllowFailOpen) {
+      logRateLimitOnce('warn', RATE_LIMIT_DISABLED_MESSAGE, { route, mode });
       return null;
     }
 
-    logError('Rate limiter unavailable; blocking request.', { route });
+    logRateLimitOnce('error', RATE_LIMIT_DISABLED_MESSAGE, { route, mode });
     return NextResponse.json({ error: 'Rate limiter unavailable.' }, { status: 503 });
   }
 

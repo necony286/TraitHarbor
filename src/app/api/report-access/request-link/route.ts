@@ -108,5 +108,9 @@ export async function POST(request: Request) {
     logWarn('Failed to send report access email.', { email: normalizedEmail, error });
   }
 
+  if (process.env.NODE_ENV === 'test' || process.env.PLAYWRIGHT === '1') {
+    return NextResponse.json({ ...GENERIC_RESPONSE, accessUrl });
+  }
+
   return NextResponse.json(GENERIC_RESPONSE);
 }

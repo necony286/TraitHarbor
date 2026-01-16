@@ -65,7 +65,13 @@ describe('/api/reports/:orderId/download-url', () => {
     });
 
     expect(response.status).toBe(200);
-    await expect(response.json()).resolves.toMatchObject({ url: 'https://example.com/report.pdf' });
+    await expect(response.json()).resolves.toMatchObject({ url: 'https://example.com/report.pdf', expiresInSeconds: 300 });
+    expect(getOrCreateReportDownloadUrlMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        ttlSeconds: 300,
+        order: expect.objectContaining({ id: ORDER_ID })
+      })
+    );
   });
 
   it('denies refunded orders even when authorized', async () => {

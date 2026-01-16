@@ -127,6 +127,7 @@ test('paid report download works without session storage', async ({ page, browse
   await expect(page).toHaveURL(new RegExp(`/results/${FIXTURE_RESULT_ID}$`));
   await expect(page.getByRole('heading', { name: 'TraitHarbor personality snapshot' })).toBeVisible();
 
+  await page.getByLabel(EMAIL_INPUT_LABEL).fill(BUYER_EMAIL);
   await page.getByRole('button', { name: 'Unlock full report (PDF)' }).click();
 
   await expect(page).toHaveURL(new RegExp(`/checkout/callback\\?session_id=${SESSION_ID}$`));

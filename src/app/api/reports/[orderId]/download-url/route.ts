@@ -46,7 +46,7 @@ export async function POST(request: NextRequest, { params }: { params: { orderId
     return NextResponse.json({ error: 'Unable to fetch order.' }, { status: 500 });
   }
 
-  const isAuthorized = isAuthorizedForOrder(request, order);
+  const isAuthorized = await isAuthorizedForOrder(request, order);
   if (!isAuthorized) {
     return NextResponse.json({ error: 'Unauthorized.' }, { status: 401 });
   }

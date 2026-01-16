@@ -12,7 +12,10 @@ const SIGNED_URL_TTL_SECONDS = 300;
 
 export const runtime = 'nodejs';
 
-export async function POST(request: NextRequest, { params }: { params: { orderId: string } }) {
+export async function POST(
+  request: NextRequest,
+  { params }: { params?: Promise<{ orderId: string }> }
+) {
   const rateLimitResponse = await enforceRateLimit({
     request,
     route: 'report-download-url',
@@ -24,8 +27,9 @@ export async function POST(request: NextRequest, { params }: { params: { orderId
     return rateLimitResponse;
   }
 
-  const { orderId } = params;
-  if (!orderIdSchema.safeParse(orderId).success) {
+  const resolvedParams = await params;
+  const orderId = resolvedParams?.orderId;
+  if (!orderId || !orderIdSchema.safeParse(orderId).success) {
     return NextResponse.json({ error: 'Invalid order id.' }, { status: 400 });
   }
 

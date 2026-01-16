@@ -45,25 +45,25 @@ export async function generateMetadata({ params }: ResultsPageProps) {
 }
 
 export default async function ResultsPage({ params }: ResultsPageProps) {
-  const { resultId } = await params;
+  try {
+    const { resultId } = await params;
 
-  if (!resultIdSchema.safeParse(resultId).success) {
-    redirect('/quiz');
-  }
-
-  const useFixture = process.env.NEXT_PUBLIC_QUIZ_FIXTURE_MODE === '1';
-  if (useFixture) {
-    const fixtureResult = resultSchema.safeParse({ id: resultId, traits: resultsFixture });
-    if (!fixtureResult.success) {
+    if (!resultIdSchema.safeParse(resultId).success) {
       redirect('/quiz');
     }
 
-    const { traits } = fixtureResult.data;
+    const useFixture = process.env.NEXT_PUBLIC_QUIZ_FIXTURE_MODE === '1';
+    if (useFixture) {
+      const fixtureResult = resultSchema.safeParse({ id: resultId, traits: resultsFixture });
+      if (!fixtureResult.success) {
+        redirect('/quiz');
+      }
 
-    return <ResultsDisplay traits={traits} resultId={resultId} />;
-  }
+      const { traits } = fixtureResult.data;
 
-  try {
+      return <ResultsDisplay traits={traits} resultId={resultId} />;
+    }
+
     const { data, error } = await getScoresByResultId(resultId);
 
     if (error) {

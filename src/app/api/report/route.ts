@@ -1,10 +1,9 @@
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
 import { logError, logInfo, logWarn } from '../../../../lib/logger';
-import { cookies } from 'next/headers';
 import { enforceRateLimit } from '../../../../lib/rate-limit';
 import { getOrderById } from '../../../../lib/db';
-import { GUEST_SESSION_COOKIE_NAME, verifyGuestSessionCookie } from '../../../../lib/guest-session';
+import { isAuthorizedForOrder } from '../../../../lib/report-authorization';
 import { getOrCreateReportDownloadUrl, PdfRenderConcurrencyError, ReportGenerationError } from '../../../../lib/report-download';
 
 const requestSchema = z
@@ -41,8 +40,6 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Invalid request body.' }, { status: 400 });
   }
 
-  const cookieStore = await cookies();
-
   let order;
   try {
     const { data, error: orderError } = await getOrderById({ orderId: parsed.data.orderId });
@@ -60,12 +57,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Unable to generate report.' }, { status: 500 });
   }
 
-  const headerUserId = request.headers.get('x-user-id');
-  const sessionValue = cookieStore.get(GUEST_SESSION_COOKIE_NAME)?.value;
-  const session = verifyGuestSessionCookie(sessionValue);
-  const isAuthorized =
-    (headerUserId && order.user_id && order.user_id === headerUserId) ||
-    (session && order.email && session.email.toLowerCase() === order.email.toLowerCase());
+  const isAuthorized = await isAuthorizedForOrder(request, order);
 
   if (!isAuthorized) {
     return NextResponse.json({ error: 'Unauthorized.' }, { status: 401 });

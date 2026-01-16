@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
+import { randomUUID } from 'crypto';
 import { getCheckoutAmountCents, getCheckoutConfig } from '../../../../lib/payments';
 import { mapOrderRecord, orderStatusSchema } from '../../../../lib/orders';
 import { createProvisionalOrder, getOrderById, updateOrderStatus } from '../../../../lib/db';
@@ -8,7 +9,8 @@ import { generateReportAccessToken, hashReportAccessToken } from '../../../../li
 
 const createOrderBodySchema = z.object({
   resultId: z.string().uuid(),
-  userId: z.string().uuid()
+  userId: z.string().uuid(),
+  email: z.string().email()
 });
 
 const orderIdSchema = z.string().uuid();
@@ -47,10 +49,9 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Invalid request body.' }, { status: 400 });
   }
 
-  let reportAccessToken = '';
   let reportAccessTokenHash = '';
   try {
-    reportAccessToken = generateReportAccessToken();
+    const reportAccessToken = generateReportAccessToken();
     reportAccessTokenHash = hashReportAccessToken(reportAccessToken);
   } catch (error) {
     console.error('Failed to initialize report access token hashing.', error);
@@ -58,12 +59,16 @@ export async function POST(request: Request) {
   }
   let data;
   let error;
+  const providerSessionId = randomUUID();
   try {
     const response = await createProvisionalOrder({
       userId: parsed.data.userId,
       responseId: parsed.data.resultId,
       amountCents: getCheckoutAmountCents(),
-      reportAccessTokenHash
+      reportAccessTokenHash,
+      email: parsed.data.email,
+      provider: 'paddle',
+      providerSessionId
     });
     data = response.data;
     error = response.error;
@@ -90,7 +95,7 @@ export async function POST(request: Request) {
   return NextResponse.json({
     order: mapOrderRecord(data),
     checkout: checkoutConfig,
-    reportAccessToken
+    providerSessionId
   });
 }
 

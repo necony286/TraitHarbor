@@ -48,6 +48,8 @@ type CreateOrderParams = {
   amountCents: number;
   reportAccessTokenHash: string;
   email?: string | null;
+  provider?: string | null;
+  providerSessionId?: string | null;
 };
 
 type UpdateOrderStatusParams = {
@@ -177,7 +179,9 @@ export const createProvisionalOrder = async ({
   responseId,
   amountCents,
   reportAccessTokenHash,
-  email
+  email,
+  provider,
+  providerSessionId
 }: CreateOrderParams): Promise<DbResult<z.infer<typeof orderSchema>>> => {
   const userError = await ensureUserRecord(userId);
   if (userError) {
@@ -208,7 +212,9 @@ export const createProvisionalOrder = async ({
       response_id: responseId,
       report_access_token_hash: reportAccessTokenHash,
       user_id: userId,
-      email: email?.toLowerCase() ?? null
+      email: email?.toLowerCase() ?? null,
+      provider: provider ?? null,
+      provider_session_id: providerSessionId ?? null
     })
     .select('id, status, amount_cents, response_id, paddle_order_id, created_at')
     .single();
@@ -269,6 +275,32 @@ export const getOrderById = async ({ orderId, paddleOrderId }: OrderLookup): Pro
   return { data: parsed.data, error: null };
 };
 
+export const getOrderByProviderSessionId = async (
+  providerSessionId: string
+): Promise<DbResult<z.infer<typeof orderDetailSchema>>> => {
+  const supabase = getSupabaseAdminClient();
+  const { data, error } = await supabase
+    .from('orders')
+    .select(PAID_ORDER_COLUMNS)
+    .eq('provider_session_id', providerSessionId)
+    .maybeSingle();
+
+  if (error) {
+    return { data: null, error: mapDbError(error, 'Failed to lookup order.') };
+  }
+
+  if (!data) {
+    return { data: null, error: null };
+  }
+
+  const parsed = orderDetailSchema.safeParse(data);
+  if (!parsed.success) {
+    return { data: null, error: { message: parsed.error.message } };
+  }
+
+  return { data: parsed.data, error: null };
+};
+
 export const updateOrderStatus = async ({ orderId, status }: UpdateOrderStatusParams): Promise<DbResult<z.infer<typeof orderSchema> | null>> => {
   const supabase = getSupabaseAdminClient();
   const { data, error } = await supabase
@@ -303,7 +335,7 @@ export const updateOrderFromWebhook = async ({
   customerEmail
 }: WebhookUpdateParams): Promise<DbResult<z.infer<typeof orderDetailSchema>>> => {
   const supabase = getSupabaseAdminClient();
-  const updates: { status: typeof status; paddle_order_id?: string; paddle_transaction_id?: string } = { status };
+  const updates: { status: typeof status; paddle_order_id?: string; paddle_transaction_id?: string; email?: string } = { status };
 
   if (paddleOrderId) {
     updates.paddle_order_id = paddleOrderId;
@@ -311,6 +343,10 @@ export const updateOrderFromWebhook = async ({
 
   if (paddleTransactionId) {
     updates.paddle_transaction_id = paddleTransactionId;
+  }
+
+  if (customerEmail) {
+    updates.email = customerEmail.toLowerCase();
   }
 
   const { data, error } = await supabase
@@ -416,6 +452,26 @@ export const storeReportAsset = async ({
 
   if (error) {
     return { data: null, error: mapDbError(error, 'Failed to store asset.') };
+  }
+
+  return { data: null, error: null };
+};
+
+export const updateOrderReportFileKey = async ({
+  orderId,
+  reportFileKey
+}: {
+  orderId: string;
+  reportFileKey: string;
+}): Promise<DbResult<null>> => {
+  const supabase = getSupabaseAdminClient();
+  const { error } = await supabase
+    .from('orders')
+    .update({ report_file_key: reportFileKey, updated_at: new Date().toISOString() })
+    .eq('id', orderId);
+
+  if (error) {
+    return { data: null, error: mapDbError(error, 'Failed to update order report file key.') };
   }
 
   return { data: null, error: null };

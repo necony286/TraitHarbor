@@ -14,8 +14,9 @@ export const runtime = 'nodejs';
 
 export async function POST(
   request: NextRequest,
-  { params }: { params: { orderId: string } }
+  { params }: { params: Promise<{ orderId: string }> }
 ) {
+  const { orderId } = (await params) ?? {};
   const rateLimitResponse = await enforceRateLimit({
     request,
     route: 'report-download-url',
@@ -27,7 +28,6 @@ export async function POST(
     return rateLimitResponse;
   }
 
-  const orderId = params.orderId;
   if (!orderIdSchema.safeParse(orderId).success) {
     return NextResponse.json({ error: 'Invalid order id.' }, { status: 400 });
   }

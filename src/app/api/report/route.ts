@@ -57,7 +57,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Unable to generate report.' }, { status: 500 });
   }
 
-  const isAuthorized = isAuthorizedForOrder(request, order);
+  const isAuthorized = await isAuthorizedForOrder(request, order);
 
   if (!isAuthorized) {
     return NextResponse.json({ error: 'Unauthorized.' }, { status: 401 });

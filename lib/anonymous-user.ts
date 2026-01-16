@@ -65,6 +65,12 @@ export const getOrCreateAnonymousUserId = (): string | null => {
   return generated;
 };
 
+export const setAnonymousUserId = (value: string | null | undefined) => {
+  if (!isBrowser || !value) return;
+  writeCookieValue(value);
+  writeLocalStorageValue(value);
+};
+
 export const clearAnonymousUserId = () => {
   if (!isBrowser) return;
   document.cookie = `${ANONYMOUS_USER_COOKIE}=; Max-Age=0; Path=/; SameSite=Lax`;

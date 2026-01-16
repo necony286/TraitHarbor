@@ -13,6 +13,7 @@ const serializeOrder = (order: {
   created_at: string;
   paid_at?: string | null;
   email?: string | null;
+  user_id?: string | null;
   report_file_key?: string | null;
   provider_session_id?: string | null;
 }) => ({
@@ -22,6 +23,7 @@ const serializeOrder = (order: {
   createdAt: order.created_at,
   paidAt: order.paid_at ?? null,
   email: order.email ?? null,
+  userId: order.user_id ?? null,
   reportReady: Boolean(order.report_file_key),
   providerSessionId: order.provider_session_id ?? null
 });

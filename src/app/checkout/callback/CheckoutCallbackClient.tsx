@@ -4,7 +4,7 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { trackEvent } from '../../../../lib/analytics';
-import { getAnonymousUserId } from '../../../../lib/anonymous-user';
+import { getAnonymousUserId, setAnonymousUserId } from '../../../../lib/anonymous-user';
 import { Button } from '../../../../components/ui/Button';
 import { Card } from '../../../../components/ui/Card';
 import { Container } from '../../../../components/ui/Container';
@@ -20,6 +20,7 @@ type OrderBySession = {
   createdAt: string;
   paidAt: string | null;
   email: string | null;
+  userId?: string | null;
   reportReady: boolean;
   providerSessionId: string | null;
 };
@@ -57,6 +58,9 @@ export default function CheckoutCallbackClient() {
 
       try {
         const updated = await fetchOrderBySession(sessionId);
+        if (updated?.userId) {
+          setAnonymousUserId(updated.userId);
+        }
         setOrder(updated);
         return updated;
       } catch (error) {

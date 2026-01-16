@@ -119,6 +119,7 @@ test('quiz to paid flow with report download', async ({ page }) => {
   await expect(page).toHaveURL(new RegExp(`/results/${FIXTURE_RESULT_ID}$`));
   await expect(page.getByRole('heading', { name: 'TraitHarbor personality snapshot' })).toBeVisible();
 
+  await page.getByLabel('Email for receipt and access').fill('buyer@example.com');
   await page.getByRole('button', { name: 'Unlock full report (PDF)' }).click();
 
   await expect(page).toHaveURL(new RegExp(`/checkout/callback\\?session_id=${SESSION_ID}$`));

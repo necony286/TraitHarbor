@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { trackEvent } from '../../../../lib/analytics';
 import { getAnonymousUserId, setAnonymousUserId } from '../../../../lib/anonymous-user';
+import { ANONYMOUS_USER_ID_HEADER } from '../../../../lib/constants';
 import { Button } from '../../../../components/ui/Button';
 import { Card } from '../../../../components/ui/Card';
 import { Container } from '../../../../components/ui/Container';
@@ -141,7 +142,7 @@ export default function CheckoutCallbackClient() {
       const anonymousUserId = getAnonymousUserId();
       const headers: Record<string, string> = { 'Content-Type': 'application/json' };
       if (anonymousUserId) {
-        headers['x-user-id'] = anonymousUserId;
+        headers[ANONYMOUS_USER_ID_HEADER] = anonymousUserId;
       }
 
       const response = await fetch(`/api/reports/${order.id}/download-url`, {

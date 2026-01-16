@@ -7,11 +7,12 @@ import { logError, logWarn } from '../../../lib/logger';
 export const runtime = 'nodejs';
 
 export async function GET(request: Request) {
+  const redirectToRetrieve = () => NextResponse.redirect(new URL('/retrieve-report', request.url));
   const { searchParams } = new URL(request.url);
   const token = searchParams.get('token');
 
   if (!token) {
-    return NextResponse.redirect(new URL('/retrieve-report', request.url));
+    return redirectToRetrieve();
   }
 
   let tokenHash = '';
@@ -19,7 +20,7 @@ export async function GET(request: Request) {
     tokenHash = hashReportAccessToken(token);
   } catch (error) {
     logError('Failed to hash report access token.', { error });
-    return NextResponse.redirect(new URL('/retrieve-report', request.url));
+    return redirectToRetrieve();
   }
 
   let link;
@@ -27,27 +28,27 @@ export async function GET(request: Request) {
     const { data, error } = await getReportAccessLinkByHash(tokenHash);
     if (error) {
       logWarn('Failed to lookup report access link.', { error });
-      return NextResponse.redirect(new URL('/retrieve-report', request.url));
+      return redirectToRetrieve();
     }
     link = data;
   } catch (error) {
     logError('Failed to initialize Supabase admin client for report access lookup.', { error });
-    return NextResponse.redirect(new URL('/retrieve-report', request.url));
+    return redirectToRetrieve();
   }
 
   if (!link || !isReportAccessLinkActive({ expiresAt: link.expires_at, usedAt: link.used_at })) {
-    return NextResponse.redirect(new URL('/retrieve-report', request.url));
+    return redirectToRetrieve();
   }
 
   try {
     const { data, error } = await markReportAccessLinkUsed(link.id);
     if (error || !data) {
       logWarn('Failed to mark report access link as used.', { linkId: link.id, error });
-      return NextResponse.redirect(new URL('/retrieve-report', request.url));
+      return redirectToRetrieve();
     }
   } catch (error) {
     logError('Failed to initialize Supabase admin client for report access link update.', { error });
-    return NextResponse.redirect(new URL('/retrieve-report', request.url));
+    return redirectToRetrieve();
   }
 
   let guestCookie;
@@ -55,7 +56,7 @@ export async function GET(request: Request) {
     guestCookie = createGuestSessionCookie(link.email);
   } catch (error) {
     logError('Failed to create guest session cookie.', { error });
-    return NextResponse.redirect(new URL('/retrieve-report', request.url));
+    return redirectToRetrieve();
   }
 
   const response = NextResponse.redirect(new URL('/my-reports', request.url));

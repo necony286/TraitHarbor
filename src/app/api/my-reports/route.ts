@@ -21,6 +21,28 @@ const serializeOrder = (order: {
   reportReady: Boolean(order.report_file_key)
 });
 
+const respondWithPaidOrders = async ({
+  fetchOrders,
+  lookupLabel,
+  logContext
+}: {
+  fetchOrders: () => ReturnType<typeof getPaidOrdersByUserId>;
+  lookupLabel: string;
+  logContext: Record<string, unknown>;
+}) => {
+  try {
+    const { data, error } = await fetchOrders();
+    if (error) {
+      logWarn(`Failed to lookup paid orders for ${lookupLabel}.`, { ...logContext, error });
+      return NextResponse.json({ error: 'Unable to fetch reports.' }, { status: 500 });
+    }
+    return NextResponse.json({ orders: (data ?? []).map(serializeOrder) });
+  } catch (error) {
+    logError(`Failed to initialize Supabase admin client for ${lookupLabel} report lookup.`, { ...logContext, error });
+    return NextResponse.json({ error: 'Unable to fetch reports.' }, { status: 500 });
+  }
+};
+
 export const runtime = 'nodejs';
 
 export async function GET(request: Request) {
@@ -28,17 +50,11 @@ export async function GET(request: Request) {
   const userId = headerUserId && userIdSchema.safeParse(headerUserId).success ? headerUserId : null;
 
   if (userId) {
-    try {
-      const { data, error } = await getPaidOrdersByUserId(userId);
-      if (error) {
-        logWarn('Failed to lookup paid orders for user.', { userId, error });
-        return NextResponse.json({ error: 'Unable to fetch reports.' }, { status: 500 });
-      }
-      return NextResponse.json({ orders: (data ?? []).map(serializeOrder) });
-    } catch (error) {
-      logError('Failed to initialize Supabase admin client for user report lookup.', { error });
-      return NextResponse.json({ error: 'Unable to fetch reports.' }, { status: 500 });
-    }
+    return respondWithPaidOrders({
+      fetchOrders: () => getPaidOrdersByUserId(userId),
+      lookupLabel: 'user',
+      logContext: { userId }
+    });
   }
 
   const cookieStore = await cookies();
@@ -49,15 +65,9 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: 'Unauthorized.' }, { status: 401 });
   }
 
-  try {
-    const { data, error } = await getPaidOrdersByEmail(session.email);
-    if (error) {
-      logWarn('Failed to lookup paid orders for guest email.', { email: session.email, error });
-      return NextResponse.json({ error: 'Unable to fetch reports.' }, { status: 500 });
-    }
-    return NextResponse.json({ orders: (data ?? []).map(serializeOrder) });
-  } catch (error) {
-    logError('Failed to initialize Supabase admin client for guest report lookup.', { error });
-    return NextResponse.json({ error: 'Unable to fetch reports.' }, { status: 500 });
-  }
+  return respondWithPaidOrders({
+    fetchOrders: () => getPaidOrdersByEmail(session.email),
+    lookupLabel: 'guest',
+    logContext: { email: session.email }
+  });
 }

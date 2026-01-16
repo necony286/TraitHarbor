@@ -90,7 +90,16 @@ const reportAccessLinkSchema = z.object({
 const PAID_ORDER_COLUMNS =
   'id, status, amount_cents, response_id, paddle_order_id, created_at, report_access_token_hash, user_id, email, provider, provider_session_id, report_id, results_snapshot_id, report_file_key, paid_at, updated_at';
 
-const REPORT_ACCESS_LINK_COLUMNS = 'id, email, order_id, token_hash, expires_at, used_at, created_at';
+const REPORT_ACCESS_LINK_COLUMNS_ARRAY = [
+  'id',
+  'email',
+  'order_id',
+  'token_hash',
+  'expires_at',
+  'used_at',
+  'created_at',
+];
+const REPORT_ACCESS_LINK_COLUMNS = REPORT_ACCESS_LINK_COLUMNS_ARRAY.join(', ');
 
 const ensureUserRecord = async (userId: string): Promise<DbError | null> => {
   const supabase = getSupabaseAdminClient();

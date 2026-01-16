@@ -84,8 +84,8 @@ export default async function ResultsPage({ params }: ResultsPageProps) {
   } catch (error) {
     if (
       error instanceof Error &&
-      typeof (error as any).digest === 'string' &&
-      (error as any).digest.startsWith('NEXT_REDIRECT')
+      typeof (error as { digest?: unknown }).digest === 'string' &&
+      (error as { digest: string }).digest.startsWith('NEXT_REDIRECT')
     ) {
       throw error;
     }

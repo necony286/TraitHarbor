@@ -169,13 +169,17 @@ test('paid report download works without session storage', async ({ page, browse
     })
   );
 
-  await context2.route(`**/api/reports/${ORDER_ID}/download-url`, (route) =>
-    route.fulfill({
+  await context2.route(`**/api/reports/${ORDER_ID}/download-url`, (route) => {
+    const cookies = route.request().headers()['cookie'] || '';
+    if (!cookies.includes(`${GUEST_SESSION_COOKIE_NAME}=test-session`)) {
+      return route.fulfill({ status: 401, body: 'Unauthorized: Missing guest cookie' });
+    }
+    return route.fulfill({
       status: 200,
       contentType: 'application/json',
       body: JSON.stringify({ url: PDF_URL })
-    })
-  );
+    });
+  });
 
   await context2.route(PDF_URL, (route) =>
     route.fulfill({ status: 200, contentType: 'application/pdf', body: '%PDF-1.4\n%EOF' })

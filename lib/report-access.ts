@@ -15,7 +15,7 @@ export const generateReportAccessToken = (bytes = DEFAULT_TOKEN_BYTES) => {
 };
 
 export const hashReportAccessToken = (token: string, pepper: string = getReportAccessTokenPepper()) => {
-  return createHash('sha256').update(`${pepper}:${token}`).digest('hex');
+  return createHmac('sha256', pepper).update(token).digest('hex');
 };
 
 export const verifyReportAccessToken = (

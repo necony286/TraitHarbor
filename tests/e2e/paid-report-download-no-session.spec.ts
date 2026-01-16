@@ -2,6 +2,7 @@ import { test, expect } from '@playwright/test';
 
 const FIXTURE_RESULT_ID = '11111111-1111-1111-1111-111111111111';
 const ORDER_ID = '22222222-2222-2222-2222-222222222222';
+const SESSION_ID = '33333333-3333-3333-3333-333333333333';
 const AGREE_LABEL = 'Agree';
 const GUEST_SESSION_COOKIE_NAME = 'traitharbor_guest_report_access';
 const PDF_URL = 'https://example.com/report.pdf';
@@ -73,7 +74,8 @@ test('paid report download works without session storage', async ({ page, browse
           description: 'Starter PDF',
           environment: 'sandbox',
           clientToken: 'test_token'
-        }
+        },
+        providerSessionId: SESSION_ID
       })
     });
   });
@@ -127,7 +129,7 @@ test('paid report download works without session storage', async ({ page, browse
 
   await page.getByRole('button', { name: 'Unlock full report (PDF)' }).click();
 
-  await expect(page).toHaveURL(new RegExp(`/checkout/callback\?orderId=${ORDER_ID}$`));
+  await expect(page).toHaveURL(new RegExp(`/checkout/callback\\?session_id=${SESSION_ID}$`));
   await expect(page.getByRole('heading', { name: 'Processing your payment' })).toBeVisible();
   await expect(page.getByText('Status: paid')).toBeVisible();
 

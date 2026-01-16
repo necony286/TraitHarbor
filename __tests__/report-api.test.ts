@@ -30,15 +30,13 @@ vi.mock('../lib/report-download', () => ({
 import { POST } from '../src/app/api/report/route';
 
 describe('/api/report', () => {
-  const env = process.env;
-
   beforeEach(() => {
     vi.clearAllMocks();
-    process.env = { ...env, NODE_ENV: 'development' };
+    vi.stubEnv('NODE_ENV', 'development');
   });
 
   afterEach(() => {
-    process.env = env;
+    vi.unstubAllEnvs();
   });
 
   it('requires authorization', async () => {

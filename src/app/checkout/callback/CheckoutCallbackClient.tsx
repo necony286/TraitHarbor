@@ -4,6 +4,7 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { trackEvent } from '../../../../lib/analytics';
+import { getAnonymousUserId } from '../../../../lib/anonymous-user';
 import { Button } from '../../../../components/ui/Button';
 import { Card } from '../../../../components/ui/Card';
 import { Container } from '../../../../components/ui/Container';
@@ -133,9 +134,13 @@ export default function CheckoutCallbackClient() {
     setReportError(null);
 
     try {
+      const anonymousUserId = getAnonymousUserId();
       const response = await fetch(`/api/reports/${order.id}/download-url`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' }
+        headers: {
+          'Content-Type': 'application/json',
+          ...(anonymousUserId ? { 'x-user-id': anonymousUserId } : {})
+        }
       });
 
       if (!response.ok) {

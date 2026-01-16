@@ -2,7 +2,9 @@ import { test, expect } from '@playwright/test';
 
 const FIXTURE_RESULT_ID = '11111111-1111-1111-1111-111111111111';
 const ORDER_ID = '22222222-2222-2222-2222-222222222222';
+const SESSION_ID = '33333333-3333-3333-3333-333333333333';
 const AGREE_LABEL = 'Agree';
+const PDF_URL = 'https://example.com/report.pdf';
 
 const paddleScriptStub = `
   window.Paddle = {
@@ -69,16 +71,16 @@ test('quiz to paid flow with report download', async ({ page }) => {
           environment: 'sandbox',
           clientToken: 'test_token'
         },
-        reportAccessToken: '33333333-3333-3333-3333-333333333333'
+        providerSessionId: SESSION_ID
       })
     });
   });
 
-  await page.route('**/api/report', (route) =>
-    route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ url: 'https://example.com/report.pdf' }) })
+  await page.route(`**/api/reports/${ORDER_ID}/download-url`, (route) =>
+    route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ url: PDF_URL }) })
   );
 
-  await page.route('https://example.com/report.pdf', (route) =>
+  await page.route(PDF_URL, (route) =>
     route.fulfill({ status: 200, contentType: 'application/pdf', body: '%PDF-1.4\n%EOF' })
   );
 
@@ -119,11 +121,13 @@ test('quiz to paid flow with report download', async ({ page }) => {
 
   await page.getByRole('button', { name: 'Unlock full report (PDF)' }).click();
 
-  await expect(page).toHaveURL(new RegExp(`/checkout/callback\\?orderId=${ORDER_ID}$`));
+  await expect(page).toHaveURL(new RegExp(`/checkout/callback\\?session_id=${SESSION_ID}$`));
   await expect(page.getByRole('heading', { name: 'Processing your payment' })).toBeVisible();
 
   await expect(page.getByText('Status: paid')).toBeVisible();
 
-  await page.getByRole('button', { name: 'Generate report PDF' }).click();
-  await expect(page.getByRole('link', { name: 'Download report PDF' })).toHaveAttribute('href', 'https://example.com/report.pdf');
+  const pdfResponsePromise = page.waitForResponse(PDF_URL);
+  await page.getByRole('button', { name: 'Download report PDF' }).click();
+  const pdfResponse = await pdfResponsePromise;
+  expect(pdfResponse.status()).toBe(200);
 });

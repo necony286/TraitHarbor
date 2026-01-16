@@ -1,6 +1,18 @@
-export const metadata = {
+import type { Metadata } from 'next';
+import { canonicalUrl, ogUrl } from '@/lib/siteUrl';
+
+export const metadata: Metadata = {
   title: 'Cookie Policy | TraitHarbor',
-  description: 'Cookie policy for the TraitHarbor personality assessment.'
+  description: 'Cookie policy for the TraitHarbor personality assessment.',
+  alternates: {
+    canonical: canonicalUrl('/cookies')
+  },
+  openGraph: {
+    title: 'Cookie Policy | TraitHarbor',
+    description: 'Cookie policy for the TraitHarbor personality assessment.',
+    url: ogUrl('/cookies'),
+    siteName: 'TraitHarbor'
+  }
 };
 
 export default function CookiesPage() {

@@ -22,13 +22,13 @@ const resultSchema = z.object({
 });
 
 type ResultsPageProps = {
-  params: {
+  params: Promise<{
     resultId: string;
-  };
+  }>;
 };
 
 export async function generateMetadata({ params }: ResultsPageProps) {
-  const { resultId } = params;
+  const { resultId } = await params;
   return {
     title: 'Results | TraitHarbor',
     description: 'Your TraitHarbor personality results and next steps.',
@@ -45,7 +45,7 @@ export async function generateMetadata({ params }: ResultsPageProps) {
 }
 
 export default async function ResultsPage({ params }: ResultsPageProps) {
-  const { resultId } = params;
+  const { resultId } = await params;
 
   if (!resultIdSchema.safeParse(resultId).success) {
     redirect('/quiz');

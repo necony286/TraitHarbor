@@ -1,6 +1,18 @@
-export const metadata = {
+import type { Metadata } from 'next';
+import { canonicalUrl, ogUrl } from '@/lib/siteUrl';
+
+export const metadata: Metadata = {
   title: 'Privacy Policy | TraitHarbor',
-  description: 'Privacy policy for the TraitHarbor personality assessment.'
+  description: 'Privacy policy for the TraitHarbor personality assessment.',
+  alternates: {
+    canonical: canonicalUrl('/privacy')
+  },
+  openGraph: {
+    title: 'Privacy Policy | TraitHarbor',
+    description: 'Privacy policy for the TraitHarbor personality assessment.',
+    url: ogUrl('/privacy'),
+    siteName: 'TraitHarbor'
+  }
 };
 
 export default function PrivacyPolicyPage() {

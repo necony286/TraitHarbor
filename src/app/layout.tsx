@@ -3,21 +3,24 @@ import { Inter } from 'next/font/google';
 import Script from 'next/script';
 import '../app/globals.css';
 import { Navbar } from '../components/figma/Navbar';
+import { absoluteUrl, getSiteUrl, ogUrl, canonicalUrl } from '@/lib/siteUrl';
 
 const inter = Inter({ subsets: ['latin'], display: 'swap' });
 
 export const metadata: Metadata = {
   title: 'TraitHarbor',
   description: 'TraitHarbor personality assessment experience',
-  metadataBase: new URL('https://example.com'),
+  metadataBase: getSiteUrl(),
   alternates: {
-    canonical: '/'
+    canonical: canonicalUrl('/')
   },
+  robots: process.env.VERCEL_ENV === 'preview' ? { index: false, follow: false } : undefined,
   openGraph: {
     title: 'TraitHarbor',
     description: 'Modern five-factor personality quiz and insights',
-    url: 'https://example.com',
-    siteName: 'TraitHarbor'
+    url: ogUrl('/'),
+    siteName: 'TraitHarbor',
+    images: [{ url: absoluteUrl('/og.svg') }]
   }
 };
 

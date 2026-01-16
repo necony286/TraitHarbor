@@ -5,11 +5,12 @@ import { PdfRenderConcurrencyError, generateReportPdf } from '../../../../lib/pd
 import { enforceRateLimit } from '../../../../lib/rate-limit';
 import { getOrderById, getReportAsset, getScoresByResultId, storeReportAsset } from '../../../../lib/db';
 import { getReportPath, getReportSignedUrl, uploadReport } from '../../../../lib/storage';
+import { verifyReportAccessToken } from '../../../../lib/report-access';
 
 const requestSchema = z
   .object({
     orderId: z.string().uuid(),
-    reportAccessToken: z.string().uuid(),
+    reportAccessToken: z.string().min(1).max(255),
     name: z.string().trim().min(1).max(80).optional()
   })
   .strict();
@@ -77,7 +78,20 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Result not attached to order.' }, { status: 400 });
   }
 
-  if (order.report_access_token !== parsed.data.reportAccessToken) {
+  if (!order.report_access_token_hash) {
+    logWarn('Missing report access token hash for report generation.', { orderId: order.id });
+    return NextResponse.json({ error: 'Invalid report access token.' }, { status: 403 });
+  }
+
+  let isTokenValid = false;
+  try {
+    isTokenValid = verifyReportAccessToken(parsed.data.reportAccessToken, order.report_access_token_hash);
+  } catch (error) {
+    logError('Failed to verify report access token hash.', { orderId: order.id, error });
+    return NextResponse.json({ error: 'Unable to generate report.' }, { status: 500 });
+  }
+
+  if (!isTokenValid) {
     logWarn('Invalid report access token for report generation.', { orderId: order.id });
     return NextResponse.json({ error: 'Invalid report access token.' }, { status: 403 });
   }
@@ -90,7 +104,7 @@ export async function POST(request: Request) {
       logWarn('Failed to lookup cached report metadata.', { orderId: order.id, error: assetLookupError.message });
     }
 
-    if (!existingAsset) {
+    if (!existingAsset && order.user_id) {
       const { error: assetError } = await storeReportAsset({
         orderId: order.id,
         userId: order.user_id,
@@ -136,14 +150,16 @@ export async function POST(request: Request) {
       throw new Error('Unable to create signed report URL.');
     }
 
-    const { error: assetError } = await storeReportAsset({
-      orderId: order.id,
-      userId: order.user_id,
-      reportPath,
-      kind: 'report_pdf'
-    });
-    if (assetError) {
-      logWarn('Failed to persist report metadata.', { orderId: order.id, error: assetError.message });
+    if (order.user_id) {
+      const { error: assetError } = await storeReportAsset({
+        orderId: order.id,
+        userId: order.user_id,
+        reportPath,
+        kind: 'report_pdf'
+      });
+      if (assetError) {
+        logWarn('Failed to persist report metadata.', { orderId: order.id, error: assetError.message });
+      }
     }
 
     logInfo('Report generated and stored.', { orderId: order.id, resultId: order.response_id });

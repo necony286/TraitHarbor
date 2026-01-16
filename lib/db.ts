@@ -46,7 +46,8 @@ type CreateOrderParams = {
   userId: string;
   responseId: string;
   amountCents: number;
-  reportAccessToken: string;
+  reportAccessTokenHash: string;
+  email?: string | null;
 };
 
 type UpdateOrderStatusParams = {
@@ -144,7 +145,8 @@ export const createProvisionalOrder = async ({
   userId,
   responseId,
   amountCents,
-  reportAccessToken
+  reportAccessTokenHash,
+  email
 }: CreateOrderParams): Promise<DbResult<z.infer<typeof orderSchema>>> => {
   const userError = await ensureUserRecord(userId);
   if (userError) {
@@ -173,8 +175,9 @@ export const createProvisionalOrder = async ({
       amount_cents: amountCents,
       status: 'created',
       response_id: responseId,
-      report_access_token: reportAccessToken,
-      user_id: userId
+      report_access_token_hash: reportAccessTokenHash,
+      user_id: userId,
+      email: email?.toLowerCase() ?? null
     })
     .select('id, status, amount_cents, response_id, paddle_order_id, created_at')
     .single();
@@ -207,7 +210,9 @@ export const getOrderById = async ({ orderId, paddleOrderId }: OrderLookup): Pro
   const supabase = getSupabaseAdminClient();
   let lookupQuery = supabase
     .from('orders')
-    .select('id, status, amount_cents, response_id, paddle_order_id, created_at, report_access_token, user_id');
+    .select(
+      'id, status, amount_cents, response_id, paddle_order_id, created_at, report_access_token_hash, user_id, email, provider, provider_session_id, report_id, results_snapshot_id, report_file_key, paid_at, updated_at'
+    );
 
   if (orderId) {
     lookupQuery = lookupQuery.eq('id', orderId);
@@ -279,9 +284,11 @@ export const updateOrderFromWebhook = async ({
 
   const { data, error } = await supabase
     .from('orders')
-    .update(updates)
+    .update({ ...updates, paid_at: status === 'paid' ? new Date().toISOString() : undefined, updated_at: new Date().toISOString() })
     .eq('id', orderId)
-    .select('id, status, amount_cents, response_id, paddle_order_id, created_at, report_access_token, user_id')
+    .select(
+      'id, status, amount_cents, response_id, paddle_order_id, created_at, report_access_token_hash, user_id, email, provider, provider_session_id, report_id, results_snapshot_id, report_file_key, paid_at, updated_at'
+    )
     .single();
 
   if (error || !data) {
@@ -293,7 +300,7 @@ export const updateOrderFromWebhook = async ({
     return { data: null, error: { message: parsed.error.message } };
   }
 
-  if (status === 'paid' && customerEmail) {
+  if (status === 'paid' && customerEmail && parsed.data.user_id) {
     const normalizedEmail = customerEmail.toLowerCase();
     const { data: userData, error: userLookupError } = await supabase
       .from('users')

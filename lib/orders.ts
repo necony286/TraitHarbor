@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-export type OrderStatus = 'created' | 'pending_webhook' | 'paid' | 'failed';
+export type OrderStatus = 'created' | 'pending' | 'pending_webhook' | 'paid' | 'failed' | 'refunded';
 
 export type OrderRecord = {
   id: string;
@@ -11,7 +11,7 @@ export type OrderRecord = {
   createdAt: string;
 };
 
-export const orderStatusSchema = z.enum(['created', 'pending_webhook', 'paid', 'failed']);
+export const orderStatusSchema = z.enum(['created', 'pending', 'pending_webhook', 'paid', 'failed', 'refunded']);
 
 export const orderSchema = z.object({
   id: z.string().uuid(),
@@ -42,6 +42,14 @@ export const orderRecordSchema = z.object({
 });
 
 export const orderDetailSchema = orderSchema.extend({
-  report_access_token: z.string().uuid().nullable().optional(),
-  user_id: z.string().uuid()
+  report_access_token_hash: z.string().nullable().optional(),
+  user_id: z.string().uuid().nullable(),
+  email: z.string().nullable().optional(),
+  provider: z.string().nullable().optional(),
+  provider_session_id: z.string().nullable().optional(),
+  report_id: z.string().uuid().nullable().optional(),
+  results_snapshot_id: z.string().uuid().nullable().optional(),
+  report_file_key: z.string().nullable().optional(),
+  paid_at: z.string().datetime().nullable().optional(),
+  updated_at: z.string().datetime().nullable().optional()
 });

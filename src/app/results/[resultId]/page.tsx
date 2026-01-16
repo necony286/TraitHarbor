@@ -82,7 +82,17 @@ export default async function ResultsPage({ params }: ResultsPageProps) {
 
     redirect('/quiz');
   } catch (error) {
-    console.error('Failed to initialize Supabase admin client for results page.', {
+    if (
+      error &&
+      typeof error === 'object' &&
+      'digest' in error &&
+      typeof (error as { digest?: string }).digest === 'string' &&
+      (error as { digest: string }).digest.startsWith('NEXT_REDIRECT')
+    ) {
+      throw error;
+    }
+
+    console.error('Failed to render results page.', {
       message: error instanceof Error ? error.message : 'Unknown error'
     });
   }

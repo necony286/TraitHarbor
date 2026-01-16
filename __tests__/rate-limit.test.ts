@@ -72,29 +72,17 @@ describe('rate limiting safeguards', () => {
       headers: { 'x-real-ip': '127.0.0.1' }
     });
 
-    const first = await enforceRateLimit({
+    const rateLimitParams = {
       request,
       route: 'score',
       limit: 2,
       window: '1 m',
       mode: 'fail-open'
-    });
+    };
 
-    const second = await enforceRateLimit({
-      request,
-      route: 'score',
-      limit: 2,
-      window: '1 m',
-      mode: 'fail-open'
-    });
-
-    const third = await enforceRateLimit({
-      request,
-      route: 'score',
-      limit: 2,
-      window: '1 m',
-      mode: 'fail-open'
-    });
+    const first = await enforceRateLimit(rateLimitParams);
+    const second = await enforceRateLimit(rateLimitParams);
+    const third = await enforceRateLimit(rateLimitParams);
 
     expect(first).toBeNull();
     expect(second).toBeNull();
@@ -107,21 +95,16 @@ describe('rate limiting safeguards', () => {
 
     const request = new Request('http://localhost/api/score');
 
-    await enforceRateLimit({
+    const rateLimitParams = {
       request,
       route: 'score',
       limit: 1,
       window: '1 m',
       mode: 'fail-closed'
-    });
+    };
 
-    await enforceRateLimit({
-      request,
-      route: 'score',
-      limit: 1,
-      window: '1 m',
-      mode: 'fail-closed'
-    });
+    await enforceRateLimit(rateLimitParams);
+    await enforceRateLimit(rateLimitParams);
 
     expect(logErrorMock).toHaveBeenCalledTimes(1);
     expect(logErrorMock).toHaveBeenCalledWith('RATE_LIMIT_DISABLED: Upstash rate limiting is unavailable.', {

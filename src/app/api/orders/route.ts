@@ -1,10 +1,10 @@
-import { randomUUID } from 'crypto';
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
 import { getCheckoutAmountCents, getCheckoutConfig } from '../../../../lib/payments';
 import { mapOrderRecord, orderStatusSchema } from '../../../../lib/orders';
 import { createProvisionalOrder, getOrderById, updateOrderStatus } from '../../../../lib/db';
 import { enforceRateLimit } from '../../../../lib/rate-limit';
+import { generateReportAccessToken, hashReportAccessToken } from '../../../../lib/report-access';
 
 const createOrderBodySchema = z.object({
   resultId: z.string().uuid(),
@@ -47,7 +47,15 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Invalid request body.' }, { status: 400 });
   }
 
-  const reportAccessToken = randomUUID();
+  let reportAccessToken = '';
+  let reportAccessTokenHash = '';
+  try {
+    reportAccessToken = generateReportAccessToken();
+    reportAccessTokenHash = hashReportAccessToken(reportAccessToken);
+  } catch (error) {
+    console.error('Failed to initialize report access token hashing.', error);
+    return NextResponse.json({ error: 'Unable to create order.' }, { status: 500 });
+  }
   let data;
   let error;
   try {
@@ -55,7 +63,7 @@ export async function POST(request: Request) {
       userId: parsed.data.userId,
       responseId: parsed.data.resultId,
       amountCents: getCheckoutAmountCents(),
-      reportAccessToken
+      reportAccessTokenHash
     });
     data = response.data;
     error = response.error;

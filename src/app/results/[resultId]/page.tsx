@@ -82,12 +82,11 @@ export default async function ResultsPage({ params }: ResultsPageProps) {
 
     redirect('/quiz');
   } catch (error) {
-    if (
-      error instanceof Error &&
-      typeof (error as { digest?: unknown }).digest === 'string' &&
-      (error as { digest: string }).digest.startsWith('NEXT_REDIRECT')
-    ) {
-      throw error;
+    if (error instanceof Error) {
+      const digest = (error as { digest?: string }).digest;
+      if (typeof digest === 'string' && digest.startsWith('NEXT_REDIRECT')) {
+        throw error;
+      }
     }
 
     console.error('Failed to render results page.', {

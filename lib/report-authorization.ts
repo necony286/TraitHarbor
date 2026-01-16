@@ -6,13 +6,13 @@ type OrderAuthorizationTarget = {
   email?: string | null;
 };
 
-export const isAuthorizedForOrder = async (request: Request, order: OrderAuthorizationTarget) => {
+export const isAuthorizedForOrder = (request: Request, order: OrderAuthorizationTarget) => {
   const headerUserId = request.headers.get('x-user-id');
   if (headerUserId && order.user_id && order.user_id === headerUserId) {
     return true;
   }
 
-  const cookieStore = await cookies();
+  const cookieStore = cookies();
   const sessionValue = cookieStore.get(GUEST_SESSION_COOKIE_NAME)?.value;
   const session = verifyGuestSessionCookie(sessionValue);
   if (!session || !order.email) {

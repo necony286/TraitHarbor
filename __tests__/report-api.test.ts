@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 const ORDER_ID = '22222222-2222-2222-2222-222222222222';
 const USER_ID = 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa';
@@ -30,6 +30,17 @@ vi.mock('../lib/report-download', () => ({
 import { POST } from '../src/app/api/report/route';
 
 describe('/api/report', () => {
+  const env = process.env;
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+    process.env = { ...env, NODE_ENV: 'development' };
+  });
+
+  afterEach(() => {
+    process.env = env;
+  });
+
   it('requires authorization', async () => {
     getOrderByIdMock.mockResolvedValue({
       data: {

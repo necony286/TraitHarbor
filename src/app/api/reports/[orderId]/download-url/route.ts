@@ -1,4 +1,4 @@
-import { NextResponse, type RouteHandlerContext } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { getOrderById } from '../../../../../../lib/db';
 import { logError, logInfo, logWarn } from '../../../../../../lib/logger';
@@ -12,7 +12,7 @@ const SIGNED_URL_TTL_SECONDS = 300;
 
 export const runtime = 'nodejs';
 
-export async function POST(request: Request, { params }: RouteHandlerContext<{ orderId: string }>) {
+export async function POST(request: NextRequest, { params }: { params: Promise<{ orderId?: string }> }) {
   const rateLimitResponse = await enforceRateLimit({
     request,
     route: 'report-download-url',
@@ -24,8 +24,8 @@ export async function POST(request: Request, { params }: RouteHandlerContext<{ o
     return rateLimitResponse;
   }
 
-  const { orderId } = params;
-  if (!orderIdSchema.safeParse(orderId).success) {
+  const { orderId } = (await params) ?? {};
+  if (!orderId || !orderIdSchema.safeParse(orderId).success) {
     return NextResponse.json({ error: 'Invalid order id.' }, { status: 400 });
   }
 

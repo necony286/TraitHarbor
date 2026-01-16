@@ -5,6 +5,7 @@ import { logError, logWarn } from '../../../../../lib/logger';
 import { enforceRateLimit } from '../../../../../lib/rate-limit';
 
 const sessionIdSchema = z.string().uuid();
+const FIXTURE_RESULT_ID = '11111111-1111-1111-1111-111111111111';
 
 const serializeOrder = (order: {
   id: string;
@@ -47,6 +48,26 @@ export async function GET(request: Request) {
 
   if (!sessionId || !sessionIdSchema.safeParse(sessionId).success) {
     return NextResponse.json({ error: 'Invalid session id.' }, { status: 400 });
+  }
+
+  const useFixture = process.env.NEXT_PUBLIC_QUIZ_FIXTURE_MODE === '1';
+  const supabaseUrl = process.env.SUPABASE_URL;
+  const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+  if (useFixture && (!supabaseUrl || !supabaseServiceKey)) {
+    return NextResponse.json({
+      order: serializeOrder({
+        id: sessionId,
+        status: 'paid',
+        response_id: FIXTURE_RESULT_ID,
+        created_at: new Date().toISOString(),
+        paid_at: new Date().toISOString(),
+        email: 'guest@example.com',
+        user_id: null,
+        report_file_key: 'fixture-report',
+        provider_session_id: sessionId
+      })
+    });
   }
 
   try {

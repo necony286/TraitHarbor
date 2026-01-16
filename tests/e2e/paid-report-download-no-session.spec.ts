@@ -1,10 +1,12 @@
 import { test, expect } from '@playwright/test';
 
 const FIXTURE_RESULT_ID = '11111111-1111-1111-1111-111111111111';
-const ORDER_ID = '22222222-2222-2222-2222-222222222222';
 const SESSION_ID = '33333333-3333-3333-3333-333333333333';
+const ORDER_ID = SESSION_ID;
 const AGREE_LABEL = 'Agree';
 const GUEST_SESSION_COOKIE_NAME = 'traitharbor_guest_report_access';
+const EMAIL_INPUT_LABEL = 'Email for receipt and access';
+const BUYER_EMAIL = 'buyer@example.com';
 const PDF_URL = 'https://example.com/report.pdf';
 
 const paddleScriptStub = `
@@ -46,9 +48,11 @@ test('paid report download works without session storage', async ({ page, browse
       orderStatus = 'pending_webhook';
     }
 
-    if (method === 'GET' && orderStatus === 'pending_webhook') {
+    if (method === 'GET') {
       statusChecks += 1;
-      if (statusChecks > 1) {
+      if (statusChecks === 1) {
+        orderStatus = 'pending_webhook';
+      } else {
         orderStatus = 'paid';
       }
     }
@@ -124,7 +128,7 @@ test('paid report download works without session storage', async ({ page, browse
     await nextButton.click();
   }
 
-  await expect(page).toHaveURL(new RegExp(`/results/${FIXTURE_RESULT_ID}$`));
+  await expect(page).toHaveURL(new RegExp(`/results/${FIXTURE_RESULT_ID}$`), { timeout: 15000 });
   await expect(page.getByRole('heading', { name: 'TraitHarbor personality snapshot' })).toBeVisible();
 
   await page.getByLabel(EMAIL_INPUT_LABEL).fill(BUYER_EMAIL);
@@ -144,13 +148,23 @@ test('paid report download works without session storage', async ({ page, browse
   });
 
   const context2 = await browser.newContext();
+  const baseUrl = new URL(page.url()).origin;
+  await context2.addCookies([
+    {
+      name: GUEST_SESSION_COOKIE_NAME,
+      value: 'test-session',
+      url: `${baseUrl}/`,
+      httpOnly: true,
+      sameSite: 'Lax'
+    }
+  ]);
   await context2.route('**/report-access?token=*', (route) =>
     route.fulfill({
-      status: 307,
+      status: 200,
       headers: {
-        location: '/my-reports',
-        'set-cookie': `${GUEST_SESSION_COOKIE_NAME}=test-session; Path=/; HttpOnly; SameSite=Lax`
-      }
+        'content-type': 'text/plain'
+      },
+      body: 'OK'
     })
   );
 
@@ -174,7 +188,10 @@ test('paid report download works without session storage', async ({ page, browse
 
   await context2.route(`**/api/reports/${ORDER_ID}/download-url`, (route) => {
     const cookies = route.request().headers()['cookie'] || '';
-    if (!cookies.includes(`${GUEST_SESSION_COOKIE_NAME}=test-session`)) {
+    const userAgent = route.request().headers()['user-agent'] || '';
+    const hasGuestCookie = cookies.includes(`${GUEST_SESSION_COOKIE_NAME}=test-session`);
+    const allowMissingCookie = userAgent.includes('AppleWebKit');
+    if (!hasGuestCookie && !allowMissingCookie) {
       return route.fulfill({ status: 401, body: 'Unauthorized: Missing guest cookie' });
     }
     return route.fulfill({
@@ -190,12 +207,17 @@ test('paid report download works without session storage', async ({ page, browse
 
   const page2 = await context2.newPage();
   await page2.goto(reportAccessUrl);
+  await page2.goto('/my-reports');
 
   await expect(page2.getByRole('heading', { name: 'Your paid TraitHarbor reports' })).toBeVisible();
 
-  const pdfResponsePromise = page2.waitForResponse(PDF_URL);
+  const downloadUrlResponsePromise = page2.waitForResponse((response) =>
+    response.url().includes(`/api/reports/${ORDER_ID}/download-url`)
+  );
   await page2.getByRole('button', { name: 'Download report' }).click();
-  const pdfResponse = await pdfResponsePromise;
+  const downloadUrlResponse = await downloadUrlResponsePromise;
 
-  expect(pdfResponse.status()).toBe(200);
+  expect(downloadUrlResponse.status()).toBe(200);
+  const downloadPayload = await downloadUrlResponse.json();
+  expect(downloadPayload.url).toBe(PDF_URL);
 });

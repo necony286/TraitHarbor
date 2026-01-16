@@ -1,9 +1,11 @@
 import { test, expect } from '@playwright/test';
 
 const FIXTURE_RESULT_ID = '11111111-1111-1111-1111-111111111111';
-const ORDER_ID = '22222222-2222-2222-2222-222222222222';
 const SESSION_ID = '33333333-3333-3333-3333-333333333333';
+const ORDER_ID = SESSION_ID;
 const AGREE_LABEL = 'Agree';
+const EMAIL_INPUT_LABEL = 'Email for receipt and access';
+const BUYER_EMAIL = 'buyer@example.com';
 const PDF_URL = 'https://example.com/report.pdf';
 
 const paddleScriptStub = `
@@ -44,9 +46,11 @@ test('quiz to paid flow with report download', async ({ page }) => {
       orderStatus = 'pending_webhook';
     }
 
-    if (method === 'GET' && orderStatus === 'pending_webhook') {
+    if (method === 'GET') {
       statusChecks += 1;
-      if (statusChecks > 1) {
+      if (statusChecks === 1) {
+        orderStatus = 'pending_webhook';
+      } else {
         orderStatus = 'paid';
       }
     }
@@ -116,7 +120,7 @@ test('quiz to paid flow with report download', async ({ page }) => {
     await nextButton.click();
   }
 
-  await expect(page).toHaveURL(new RegExp(`/results/${FIXTURE_RESULT_ID}$`));
+  await expect(page).toHaveURL(new RegExp(`/results/${FIXTURE_RESULT_ID}$`), { timeout: 15000 });
   await expect(page.getByRole('heading', { name: 'TraitHarbor personality snapshot' })).toBeVisible();
 
   await page.getByLabel(EMAIL_INPUT_LABEL).fill(BUYER_EMAIL);

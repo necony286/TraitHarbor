@@ -16,7 +16,7 @@ export async function POST(
   request: NextRequest,
   { params }: { params: Promise<{ orderId: string }> }
 ) {
-  const { orderId } = await params;
+  const { orderId } = (await params) ?? {};
   const rateLimitResponse = await enforceRateLimit({
     request,
     route: 'report-download-url',

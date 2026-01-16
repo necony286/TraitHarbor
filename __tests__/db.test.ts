@@ -24,7 +24,7 @@ const baseOrder = {
   response_id: null,
   paddle_order_id: null,
   created_at: new Date().toISOString(),
-  report_access_token: null,
+  report_access_token_hash: null,
   user_id: USER_ID
 };
 
@@ -82,7 +82,14 @@ describe('updateOrderFromWebhook', () => {
     });
 
     expect(result.error).toBeNull();
-    expect(ordersTable.update).toHaveBeenCalledWith({ status: 'paid', paddle_order_id: 'paddle-123' });
+    expect(ordersTable.update).toHaveBeenCalledWith(
+      expect.objectContaining({
+        status: 'paid',
+        paddle_order_id: 'paddle-123',
+        paid_at: expect.any(String),
+        updated_at: expect.any(String)
+      })
+    );
     expect(logWarnMock).toHaveBeenCalledWith('User not found for order during webhook processing.', {
       orderId: ORDER_ID,
       userId: USER_ID
@@ -100,7 +107,13 @@ describe('updateOrderFromWebhook', () => {
     });
 
     expect(result.error).toBeNull();
-    expect(ordersTable.update).toHaveBeenCalledWith({ status: 'paid' });
+    expect(ordersTable.update).toHaveBeenCalledWith(
+      expect.objectContaining({
+        status: 'paid',
+        paid_at: expect.any(String),
+        updated_at: expect.any(String)
+      })
+    );
     expect(usersTable.update).toHaveBeenCalledWith({ email: 'newemail@example.com' });
     expect(usersUpdateChain.eq).toHaveBeenCalledWith('id', USER_ID);
     expect(logWarnMock).not.toHaveBeenCalled();
@@ -116,7 +129,13 @@ describe('updateOrderFromWebhook', () => {
     });
 
     expect(result.error).toBeNull();
-    expect(ordersTable.update).toHaveBeenCalledWith({ status: 'paid' });
+    expect(ordersTable.update).toHaveBeenCalledWith(
+      expect.objectContaining({
+        status: 'paid',
+        paid_at: expect.any(String),
+        updated_at: expect.any(String)
+      })
+    );
     expect(usersTable.update).not.toHaveBeenCalled();
     expect(logWarnMock).not.toHaveBeenCalled();
   });
@@ -131,7 +150,13 @@ describe('updateOrderFromWebhook', () => {
     });
 
     expect(result.error).toBeNull();
-    expect(ordersTable.update).toHaveBeenCalledWith({ status: 'paid' });
+    expect(ordersTable.update).toHaveBeenCalledWith(
+      expect.objectContaining({
+        status: 'paid',
+        paid_at: expect.any(String),
+        updated_at: expect.any(String)
+      })
+    );
     expect(logWarnMock).toHaveBeenCalledWith('Webhook email mismatch for user.', {
       orderId: ORDER_ID,
       existingEmail: 'stored@example.com',
@@ -149,7 +174,13 @@ describe('updateOrderFromWebhook', () => {
       customerEmail: 'any@example.com'
     });
     expect(result.error).toBeNull();
-    expect(ordersTable.update).toHaveBeenCalledWith({ status: 'paid' });
+    expect(ordersTable.update).toHaveBeenCalledWith(
+      expect.objectContaining({
+        status: 'paid',
+        paid_at: expect.any(String),
+        updated_at: expect.any(String)
+      })
+    );
     expect(logWarnMock).toHaveBeenCalledWith('Failed to lookup user for webhook email update.', {
       orderId: ORDER_ID,
       error: lookupError
@@ -168,7 +199,13 @@ describe('updateOrderFromWebhook', () => {
       customerEmail: 'newemail@example.com'
     });
     expect(result.error).toBeNull();
-    expect(ordersTable.update).toHaveBeenCalledWith({ status: 'paid' });
+    expect(ordersTable.update).toHaveBeenCalledWith(
+      expect.objectContaining({
+        status: 'paid',
+        paid_at: expect.any(String),
+        updated_at: expect.any(String)
+      })
+    );
     expect(logWarnMock).toHaveBeenCalledWith('Failed to update user email from webhook.', {
       orderId: ORDER_ID,
       error: updateError

@@ -79,7 +79,7 @@ describe('orders API route', () => {
       userId,
       responseId: resultId,
       amountCents: 5000,
-      reportAccessToken: expect.any(String)
+      reportAccessTokenHash: expect.any(String)
     });
     expect(response.status).toBe(404);
     expect(payload).toEqual({ error: 'Result not found.' });
@@ -103,7 +103,7 @@ describe('orders API route', () => {
       userId,
       responseId: resultId,
       amountCents: 5000,
-      reportAccessToken: expect.any(String)
+      reportAccessTokenHash: expect.any(String)
     });
     expect(response.status).toBe(404);
     expect(payload).toEqual({ error: 'Result not found.' });
@@ -139,7 +139,7 @@ describe('orders API route', () => {
       userId,
       responseId: resultId,
       amountCents: 5000,
-      reportAccessToken: expect.any(String)
+      reportAccessTokenHash: expect.any(String)
     });
     expect(getCheckoutConfigMock).toHaveBeenCalledTimes(1);
     expect(consoleErrorSpy).toHaveBeenCalledWith(

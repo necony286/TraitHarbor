@@ -40,6 +40,7 @@ vi.mock('../lib/db', () => ({
 
 import { generateReportPdf } from '../lib/pdf';
 import { getReportSignedUrl, uploadReport } from '../lib/storage';
+import { hashReportAccessToken } from '../lib/report-access';
 import { POST } from '../src/app/api/report/route';
 
 describe('/api/report', () => {
@@ -67,7 +68,7 @@ describe('/api/report', () => {
         response_id: RESULT_ID,
         paddle_order_id: null,
         created_at: new Date().toISOString(),
-        report_access_token: REPORT_ACCESS_TOKEN,
+        report_access_token_hash: hashReportAccessToken(REPORT_ACCESS_TOKEN),
         user_id: 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa'
       },
       error: null
@@ -98,7 +99,7 @@ describe('/api/report', () => {
         response_id: RESULT_ID,
         paddle_order_id: null,
         created_at: new Date().toISOString(),
-        report_access_token: REPORT_ACCESS_TOKEN,
+        report_access_token_hash: hashReportAccessToken(REPORT_ACCESS_TOKEN),
         user_id: 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb'
       },
       error: null

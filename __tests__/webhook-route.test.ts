@@ -38,7 +38,7 @@ describe('paddle webhook route', () => {
         response_id: '11111111-1111-1111-1111-111111111111',
         paddle_order_id: null,
         created_at: new Date().toISOString(),
-        report_access_token: null,
+        report_access_token_hash: null,
         user_id: userId
       },
       error: null
@@ -52,7 +52,7 @@ describe('paddle webhook route', () => {
         response_id: '11111111-1111-1111-1111-111111111111',
         paddle_order_id: 'txn_123',
         created_at: new Date().toISOString(),
-        report_access_token: null,
+        report_access_token_hash: null,
         user_id: userId
       },
       error: null

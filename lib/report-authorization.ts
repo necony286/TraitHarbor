@@ -6,7 +6,7 @@ type OrderAuthorizationTarget = {
   email?: string | null;
 };
 
-export const isAuthorizedForOrder = async (request: Request, order: OrderAuthorizationTarget) => {
+export const isAuthorizedForOrder = async (request: Request, order: OrderAuthorizationTarget): Promise<boolean> => {
   const headerUserId = request.headers.get('x-user-id');
   if (headerUserId && order.user_id && order.user_id === headerUserId) {
     return true;

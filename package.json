@@ -10,7 +10,7 @@
     "lint": "next lint",
     "test": "pnpm test:unit",
     "test:unit": "vitest run",
-    "test:e2e": "playwright test"
+    "test:e2e": "pnpm exec playwright install && playwright test"
   },
   "dependencies": {
     "@supabase/supabase-js": "2.49.1",

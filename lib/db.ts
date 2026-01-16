@@ -70,6 +70,23 @@ type ReportAssetParams = {
   kind: 'report_pdf';
 };
 
+type ReportAccessLinkParams = {
+  email: string;
+  orderId: string;
+  tokenHash: string;
+  expiresAt: string;
+};
+
+const reportAccessLinkSchema = z.object({
+  id: z.string().uuid(),
+  email: z.string().email(),
+  order_id: z.string().uuid().nullable().optional(),
+  token_hash: z.string(),
+  expires_at: z.string().datetime(),
+  used_at: z.string().datetime().nullable().optional(),
+  created_at: z.string().datetime()
+});
+
 const ensureUserRecord = async (userId: string): Promise<DbError | null> => {
   const supabase = getSupabaseAdminClient();
   const { error } = await supabase.from('users').upsert({ id: userId }, { onConflict: 'id' });
@@ -388,4 +405,144 @@ export const storeReportAsset = async ({
   }
 
   return { data: null, error: null };
+};
+
+export const getPaidOrdersByEmail = async (email: string): Promise<DbResult<z.infer<typeof orderDetailSchema>[]>> => {
+  const supabase = getSupabaseAdminClient();
+  const { data, error } = await supabase
+    .from('orders')
+    .select(
+      'id, status, amount_cents, response_id, paddle_order_id, created_at, report_access_token_hash, user_id, email, provider, provider_session_id, report_id, results_snapshot_id, report_file_key, paid_at, updated_at'
+    )
+    .eq('status', 'paid')
+    .eq('email', email)
+    .order('paid_at', { ascending: false })
+    .order('created_at', { ascending: false });
+
+  if (error) {
+    return { data: null, error: mapDbError(error, 'Failed to lookup orders.') };
+  }
+
+  if (!data) {
+    return { data: [], error: null };
+  }
+
+  const parsed = z.array(orderDetailSchema).safeParse(data);
+  if (!parsed.success) {
+    return { data: null, error: { message: parsed.error.message } };
+  }
+
+  return { data: parsed.data, error: null };
+};
+
+export const getPaidOrdersByUserId = async (userId: string): Promise<DbResult<z.infer<typeof orderDetailSchema>[]>> => {
+  const supabase = getSupabaseAdminClient();
+  const { data, error } = await supabase
+    .from('orders')
+    .select(
+      'id, status, amount_cents, response_id, paddle_order_id, created_at, report_access_token_hash, user_id, email, provider, provider_session_id, report_id, results_snapshot_id, report_file_key, paid_at, updated_at'
+    )
+    .eq('status', 'paid')
+    .eq('user_id', userId)
+    .order('paid_at', { ascending: false })
+    .order('created_at', { ascending: false });
+
+  if (error) {
+    return { data: null, error: mapDbError(error, 'Failed to lookup orders.') };
+  }
+
+  if (!data) {
+    return { data: [], error: null };
+  }
+
+  const parsed = z.array(orderDetailSchema).safeParse(data);
+  if (!parsed.success) {
+    return { data: null, error: { message: parsed.error.message } };
+  }
+
+  return { data: parsed.data, error: null };
+};
+
+export const createReportAccessLink = async ({
+  email,
+  orderId,
+  tokenHash,
+  expiresAt
+}: ReportAccessLinkParams): Promise<DbResult<z.infer<typeof reportAccessLinkSchema>>> => {
+  const supabase = getSupabaseAdminClient();
+  const { data, error } = await supabase
+    .from('report_access_links')
+    .insert({
+      email: email.toLowerCase(),
+      order_id: orderId,
+      token_hash: tokenHash,
+      expires_at: expiresAt
+    })
+    .select('id, email, order_id, token_hash, expires_at, used_at, created_at')
+    .single();
+
+  if (error || !data) {
+    return { data: null, error: mapDbError(error, 'Failed to create report access link.') };
+  }
+
+  const parsed = reportAccessLinkSchema.safeParse(data);
+  if (!parsed.success) {
+    return { data: null, error: { message: parsed.error.message } };
+  }
+
+  return { data: parsed.data, error: null };
+};
+
+export const getReportAccessLinkByHash = async (
+  tokenHash: string
+): Promise<DbResult<z.infer<typeof reportAccessLinkSchema> | null>> => {
+  const supabase = getSupabaseAdminClient();
+  const { data, error } = await supabase
+    .from('report_access_links')
+    .select('id, email, order_id, token_hash, expires_at, used_at, created_at')
+    .eq('token_hash', tokenHash)
+    .maybeSingle();
+
+  if (error) {
+    return { data: null, error: mapDbError(error, 'Failed to lookup report access link.') };
+  }
+
+  if (!data) {
+    return { data: null, error: null };
+  }
+
+  const parsed = reportAccessLinkSchema.safeParse(data);
+  if (!parsed.success) {
+    return { data: null, error: { message: parsed.error.message } };
+  }
+
+  return { data: parsed.data, error: null };
+};
+
+export const markReportAccessLinkUsed = async (
+  linkId: string
+): Promise<DbResult<z.infer<typeof reportAccessLinkSchema> | null>> => {
+  const supabase = getSupabaseAdminClient();
+  const { data, error } = await supabase
+    .from('report_access_links')
+    .update({ used_at: new Date().toISOString() })
+    .eq('id', linkId)
+    .is('used_at', null)
+    .select('id, email, order_id, token_hash, expires_at, used_at, created_at')
+    .maybeSingle();
+
+  if (error) {
+    return { data: null, error: mapDbError(error, 'Failed to update report access link.') };
+  }
+
+  if (!data) {
+    return { data: null, error: null };
+  }
+
+  const parsed = reportAccessLinkSchema.safeParse(data);
+  if (!parsed.success) {
+    return { data: null, error: { message: parsed.error.message } };
+  }
+
+  return { data: parsed.data, error: null };
 };

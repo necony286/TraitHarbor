@@ -1,11 +1,8 @@
 import { test, expect } from '@playwright/test';
 
-const FIXTURE_RESULT_ID = '11111111-1111-1111-1111-111111111111';
-const ORDER_ID = '22222222-2222-2222-2222-222222222222';
-const SESSION_ID = '33333333-3333-3333-3333-333333333333';
-const AGREE_LABEL = 'Agree';
+import { AGREE_LABEL, FIXTURE_RESULT_ID, ORDER_ID, PDF_URL, SESSION_ID } from './constants';
+
 const GUEST_SESSION_COOKIE_NAME = 'traitharbor_guest_report_access';
-const PDF_URL = 'https://example.com/report.pdf';
 
 const paddleScriptStub = `
   window.Paddle = {

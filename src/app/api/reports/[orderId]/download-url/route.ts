@@ -1,31 +1,14 @@
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
-import { cookies } from 'next/headers';
 import { getOrderById } from '../../../../../../lib/db';
 import { logError, logInfo, logWarn } from '../../../../../../lib/logger';
 import { enforceRateLimit } from '../../../../../../lib/rate-limit';
-import { GUEST_SESSION_COOKIE_NAME, verifyGuestSessionCookie } from '../../../../../../lib/guest-session';
+import { isAuthorizedForOrder } from '../../../../../../lib/report-authorization';
 import { getOrCreateReportDownloadUrl, PdfRenderConcurrencyError, ReportGenerationError } from '../../../../../../lib/report-download';
 
 const orderIdSchema = z.string().uuid();
 
 const SIGNED_URL_TTL_SECONDS = 300;
-
-const isAuthorizedForOrder = async (request: Request, order: { user_id?: string | null; email?: string | null }) => {
-  const headerUserId = request.headers.get('x-user-id');
-  if (headerUserId && order.user_id && order.user_id === headerUserId) {
-    return true;
-  }
-
-  const cookieStore = await cookies();
-  const sessionValue = cookieStore.get(GUEST_SESSION_COOKIE_NAME)?.value;
-  const session = verifyGuestSessionCookie(sessionValue);
-  if (!session || !order.email) {
-    return false;
-  }
-
-  return session.email.toLowerCase() === order.email.toLowerCase();
-};
 
 export const runtime = 'nodejs';
 

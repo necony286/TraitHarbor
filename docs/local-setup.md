@@ -1,11 +1,11 @@
-# Local setup guide (Windows)
+# Local setup guide
 
-This guide focuses on running the TraitHarbor app locally on Windows, including Supabase via Docker, Paddle Sandbox, and optional Upstash Redis.
+This guide covers running TraitHarbor locally with Supabase (Docker) and optional Upstash Redis. Paddle is present in code but pending enablement.
 
 ## 1) Prerequisites
 
 - **Node.js** (see `.nvmrc` for version)
-  - If you use `nvm-windows`, run `nvm install` and `nvm use` from the repository root to automatically use the version specified in `.nvmrc`.
+  - If you use `nvm-windows`, run `nvm install` and `nvm use` from the repository root.
 - **pnpm 9.12.3** (matches `package.json`).
 - **Docker Desktop** (required for Supabase CLI local stack).
 - **Supabase CLI** (`supabase` command available).
@@ -22,18 +22,48 @@ pnpm exec playwright install --with-deps
 
 Copy the example environment file:
 
-```bash
-copy .env.example .env
-```
+- Windows (PowerShell):
+  ```bash
+  copy .env.example .env.local
+  ```
+- macOS/Linux:
+  ```bash
+  cp .env.example .env.local
+  ```
 
 Fill in the variables you need:
 
-- **Supabase (local)**: set `SUPABASE_URL`, `SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`.
-- **Paddle (Sandbox)**: set `PADDLE_ENV=sandbox`, plus `PADDLE_CLIENT_TOKEN`, `PADDLE_PRICE_ID`, `PADDLE_WEBHOOK_SECRET`.
-- **Upstash Redis (optional)**: set `UPSTASH_REDIS_REST_URL` and `UPSTASH_REDIS_REST_TOKEN`.
-- **Analytics (optional)**: set `NEXT_PUBLIC_PLAUSIBLE_DOMAIN`.
+**Supabase (required for API routes)**
+- `SUPABASE_URL`
+- `SUPABASE_SERVICE_ROLE_KEY`
+- `SUPABASE_REPORTS_BUCKET` (optional; defaults to `reports`)
+- `SUPABASE_ANON_KEY` (optional; reserved for future client usage)
 
-If you want to run without Redis locally, leave the Upstash values blank unless a route requires them.
+**Report access security (required for report access flows)**
+- `GUEST_SESSION_SECRET`
+- `REPORT_ACCESS_TOKEN_PEPPER`
+
+**Upstash Redis (optional locally)**
+- `UPSTASH_REDIS_REST_URL`
+- `UPSTASH_REDIS_REST_TOKEN`
+
+**Analytics (optional)**
+- `NEXT_PUBLIC_PLAUSIBLE_DOMAIN`
+- `NEXT_PUBLIC_SITE_URL`
+
+**App behavior (optional)**
+- `NEXT_PUBLIC_QUIZ_FIXTURE_MODE=1`
+
+**Payments (Paddle — pending enablement)**
+- `PADDLE_ENV=sandbox`
+- `PADDLE_CLIENT_TOKEN`
+- `PADDLE_PRICE_ID`
+- `PADDLE_WEBHOOK_SECRET`
+
+**Local webhook simulation (development only)**
+- `ALLOW_WEBHOOK_TEST_BYPASS=1`
+
+If you want to run without Redis locally, leave the Upstash values blank; the app falls back to an in-memory limiter in development.
 
 ## 4) Start Supabase locally (Docker)
 
@@ -43,7 +73,7 @@ From the repo root, start the Supabase stack:
 supabase start
 ```
 
-Use the output to populate the Supabase environment variables in `.env`.
+Use the output to populate the Supabase environment variables in `.env.local`.
 
 ## 5) Run the dev server
 

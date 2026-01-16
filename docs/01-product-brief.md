@@ -1,7 +1,7 @@
 # 01 · Product Brief
 
-**Last updated:** 2025-12-28
 **Owner:** Product
+**Status:** Living brief (update as MVP scope changes)
 
 ## 1. Problem & Opportunity
 - Users want quick, credible personality insights with actionable advice (career/relationships).
@@ -26,7 +26,8 @@
 - Note top competitors and what we do better/different.
 
 ## 7. Constraints & Assumptions
-- Payment via Paddle, Next.js 15 + Vercel, Supabase storage.
+- Next.js 15 + Vercel, Supabase storage, Upstash rate limiting.
+- Payments planned via Paddle (integration pending enablement).
 
 ## 8. Risks & Mitigations
 - Credibility → show sources & disclaimers.

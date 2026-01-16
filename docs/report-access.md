@@ -8,6 +8,10 @@
 - Maintain compatibility with existing account-based orders and payment flows.
 - Establish guest access via signed, httpOnly cookies (no localStorage).
 
+## Dependencies
+- `GUEST_SESSION_SECRET` for signing guest cookies.
+- `REPORT_ACCESS_TOKEN_PEPPER` for hashing access tokens.
+
 ## Tables
 
 ### orders (additions)

@@ -17,7 +17,7 @@
 - **CTA** invites the user to unlock the full report.
 
 ## 5) Paywall / Checkout
-- Selecting “Unlock full report” opens checkout (Paddle modal).
+- Selecting “Unlock full report” opens checkout (Paddle modal; pending enablement).
 - Checkout includes a summary and purchase flow.
 
 ## 6) Payment confirmation (Webhook)

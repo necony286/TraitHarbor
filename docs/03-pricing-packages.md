@@ -1,6 +1,6 @@
 # 03 · Pricing & Packages
 
-## Price Points (A/B test)
+## Price Points (A/B test, not live yet)
 - Starter PDF: €5 vs €9
 - Add-on: Career Deep-Dive +€3 (post-purchase upsell)
 

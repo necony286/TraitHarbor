@@ -150,7 +150,7 @@ This plan converts the MVP flow (Landing → Quiz → Free result → Paywall �
 - **Scope:** Wire Plausible events per `15-analytics-taxonomy.md`, add QA checklist items from `18-qa-launch-checklist.md`, and codify end-to-end coverage with Playwright.
 - **Files:**
   - `lib/analytics.ts` updates for all events, `src/app/layout.tsx` to inject Plausible script.
-  - QA checklist doc `docs/qa-checklist.md` derived from `18-qa-launch-checklist.md`.
+  - QA checklist doc `docs/18-qa-launch-checklist.md` kept as the single source of truth.
   - Playwright e2e specs covering quiz → paywall → paid (local webhook simulation helper per E2) → PDF download path.
   - Minor UI polish: meta tags per `17-seo-og-plan.md`, legal links to `21–24` stubs.
 - **Acceptance Criteria:**
@@ -168,4 +168,4 @@ This plan converts the MVP flow (Landing → Quiz → Free result → Paywall �
 ## Notes
 - Keep PRs small and sequential; each PR references the matching issue.
 - Follow fraud controls and security guidance from `11-payments-playbook.md` and `14-security-compliance.md` when implementing APIs.
-- Deployment targets Vercel + Supabase (per `13-deployment-env.md`), with Paddle sandbox for payment tests.
+- Deployment targets Vercel + Supabase + Upstash (per `13-deployment-env.md`); Paddle sandbox remains optional until payments are enabled.

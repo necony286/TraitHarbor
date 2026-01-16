@@ -29,7 +29,7 @@ const baseOrder = {
 };
 
 describe('updateOrderFromWebhook', () => {
-  const paidOrderUpdateMatcher = (extraProperties = {}) =>
+  const paidOrderUpdateMatcher = (extraProperties: Record<string, unknown> = {}) =>
     expect.objectContaining({
       status: 'paid',
       paid_at: expect.any(String),

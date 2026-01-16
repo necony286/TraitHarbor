@@ -1,40 +1,44 @@
 # Vercel deployment guide
 
-This guide covers deploying TraitHarbor to Vercel using hosted Supabase, Upstash Redis, and Paddle (Production or Sandbox).
+This guide covers deploying TraitHarbor to Vercel using hosted Supabase and Upstash Redis. Paddle is implemented but pending production enablement.
 
 ## 1) Prerequisites
 
 - Vercel account + project linked to this repo.
-- Hosted Supabase project (URL, anon key, service role key, and reports bucket).
+- Hosted Supabase project (URL, service role key, and reports bucket).
 - Upstash Redis database (REST URL + REST token).
-- Paddle account (Production or Sandbox).
+- Paddle account **only if** you are enabling payments in this environment.
 
 ## 2) Configure Vercel Environment Variables
 
 Set the following in **Vercel → Project → Settings → Environment Variables**:
 
-**Supabase**
+**Supabase (required)**
 - `SUPABASE_URL`
-- `SUPABASE_ANON_KEY`
 - `SUPABASE_SERVICE_ROLE_KEY`
 - `SUPABASE_REPORTS_BUCKET` (default: `reports`)
+- `SUPABASE_ANON_KEY` (optional; reserved for future client usage)
 
-**Paddle**
-- `PADDLE_ENV` (`production` or `sandbox`)
-- `PADDLE_CLIENT_TOKEN`
-- `PADDLE_PRICE_ID`
-- `PADDLE_WEBHOOK_SECRET`
+**Report access security (required)**
+- `GUEST_SESSION_SECRET`
+- `REPORT_ACCESS_TOKEN_PEPPER`
 
-**Upstash Redis**
+**Upstash Redis (required for rate limiting)**
 - `UPSTASH_REDIS_REST_URL`
 - `UPSTASH_REDIS_REST_TOKEN`
 
 **Analytics (optional)**
 - `NEXT_PUBLIC_PLAUSIBLE_DOMAIN`
+- `NEXT_PUBLIC_SITE_URL` (used for absolute URLs in emails)
 
 **App behavior (optional)**
 - `NEXT_PUBLIC_QUIZ_FIXTURE_MODE`
-- `ALLOW_WEBHOOK_TEST_BYPASS`
+
+**Payments (Paddle — pending enablement)**
+- `PADDLE_ENV` (`production` or `sandbox`)
+- `PADDLE_CLIENT_TOKEN`
+- `PADDLE_PRICE_ID`
+- `PADDLE_WEBHOOK_SECRET`
 
 ## 3) Runtime notes (Node.js)
 
@@ -49,5 +53,5 @@ PDF generation requires the Node.js runtime. Ensure API routes remain on Node.js
 
 - Verify the homepage loads.
 - Run a full quiz flow.
-- Test Paddle payment + webhook flow in the environment you selected.
 - Generate a PDF report to confirm Node.js runtime functionality.
+- If payments are enabled, test Paddle checkout + webhook flow in the target environment.

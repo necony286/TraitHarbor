@@ -7,7 +7,7 @@
 ## GDPR
 - Legal basis: consent (quiz), contract (purchase).
 - DSR: export/delete endpoint; 30-day retention after delete request.
-- DPA with processors (Vercel, Supabase, Paddle).
+- DPA with processors (Vercel, Supabase, Upstash; Paddle when enabled).
 
 ## Controls
 - Rate-limit, input validation (Zod), webhook signature verify.

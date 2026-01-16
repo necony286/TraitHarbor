@@ -6,7 +6,7 @@ flowchart LR
   B --> C[Quiz 120/120]
   C --> D[Compute Scores]
   D --> E[Free Results Page]
-  E -->|Unlock full report| F[Checkout (Paddle modal)]
+  E -->|Unlock full report| F[Checkout (Paddle modal - pending enablement)]
   F -->|Paid| G[Webhook confirms]
   G --> H[Generate PDF]
   H --> I[Thank-you + Download Link + Email]

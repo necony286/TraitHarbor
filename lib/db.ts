@@ -278,7 +278,15 @@ export const getOrderById = async ({ orderId, paddleOrderId }: OrderLookup): Pro
 export const getOrderByProviderSessionId = async (
   providerSessionId: string
 ): Promise<DbResult<z.infer<typeof orderDetailSchema>>> => {
-  const supabase = getSupabaseAdminClient();
+  let supabase: ReturnType<typeof getSupabaseAdminClient>;
+  try {
+    supabase = getSupabaseAdminClient();
+  } catch (error) {
+    return {
+      data: null,
+      error: { message: error instanceof Error ? error.message : 'Missing Supabase configuration.' }
+    };
+  }
   const { data, error } = await supabase
     .from('orders')
     .select(PAID_ORDER_COLUMNS)

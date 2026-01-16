@@ -27,9 +27,8 @@ export async function POST(
     return rateLimitResponse;
   }
 
-  const resolvedParams = await params;
-  const orderId = resolvedParams?.orderId;
-  if (!orderId || !orderIdSchema.safeParse(orderId).success) {
+  const orderId = (await params)?.orderId;
+  if (!orderIdSchema.safeParse(orderId).success) {
     return NextResponse.json({ error: 'Invalid order id.' }, { status: 400 });
   }
 

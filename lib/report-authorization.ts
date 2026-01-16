@@ -1,5 +1,6 @@
 import { cookies } from 'next/headers';
 import { GUEST_SESSION_COOKIE_NAME, verifyGuestSessionCookie } from './guest-session';
+import { ANONYMOUS_USER_ID_HEADER } from './constants';
 
 type OrderAuthorizationTarget = {
   user_id?: string | null;
@@ -7,7 +8,7 @@ type OrderAuthorizationTarget = {
 };
 
 export const isAuthorizedForOrder = async (request: Request, order: OrderAuthorizationTarget): Promise<boolean> => {
-  const headerUserId = request.headers.get('x-user-id');
+  const headerUserId = request.headers.get(ANONYMOUS_USER_ID_HEADER);
   if (headerUserId && order.user_id && order.user_id === headerUserId) {
     return true;
   }

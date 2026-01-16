@@ -1,0 +1,119 @@
+import { z } from 'zod';
+import { PdfRenderConcurrencyError, generateReportPdf } from './pdf';
+import { getReportAsset, getScoresByResultId, storeReportAsset, updateOrderReportFileKey } from './db';
+import { getReportPath, getReportSignedUrl, getReportSignedUrlForPath, uploadReport } from './storage';
+
+export class ReportGenerationError extends Error {
+  code: 'RESULT_NOT_FOUND' | 'RESULT_INVALID' | 'SIGNED_URL_MISSING';
+
+  constructor(code: ReportGenerationError['code'], message: string) {
+    super(message);
+    this.code = code;
+  }
+}
+
+const traitsSchema = z.object({
+  O: z.number(),
+  C: z.number(),
+  E: z.number(),
+  A: z.number(),
+  N: z.number()
+});
+
+const resultSchema = z.object({
+  id: z.string().uuid(),
+  traits: traitsSchema
+});
+
+type OrderDetail = {
+  id: string;
+  response_id?: string | null;
+  created_at: string;
+  report_file_key?: string | null;
+  user_id?: string | null;
+};
+
+const resolveReportFileKey = async (order: OrderDetail) => {
+  if (order.report_file_key) {
+    return order.report_file_key;
+  }
+
+  const { data: existingAsset } = await getReportAsset(order.id, 'report_pdf');
+  if (existingAsset?.path) {
+    await updateOrderReportFileKey({ orderId: order.id, reportFileKey: existingAsset.path });
+    return existingAsset.path;
+  }
+
+  return getReportPath(order.id);
+};
+
+export const getOrCreateReportDownloadUrl = async ({
+  order,
+  ttlSeconds,
+  name = 'You'
+}: {
+  order: OrderDetail;
+  ttlSeconds: number;
+  name?: string;
+}) => {
+  const reportPath = getReportPath(order.id);
+  const reportFileKey = await resolveReportFileKey(order);
+
+  const existingUrl = await getReportSignedUrlForPath(reportFileKey, ttlSeconds);
+  if (existingUrl) {
+    if (order.report_file_key !== reportFileKey) {
+      await updateOrderReportFileKey({ orderId: order.id, reportFileKey });
+    }
+    return { url: existingUrl, cached: true, reportFileKey };
+  }
+
+  if (reportFileKey !== reportPath) {
+    const fallbackUrl = await getReportSignedUrlForPath(reportPath, ttlSeconds);
+    if (fallbackUrl) {
+      await updateOrderReportFileKey({ orderId: order.id, reportFileKey: reportPath });
+      return { url: fallbackUrl, cached: true, reportFileKey: reportPath };
+    }
+  }
+
+  if (!order.response_id) {
+    throw new ReportGenerationError('RESULT_NOT_FOUND', 'Result not attached to order.');
+  }
+
+  const { data: traits, error: resultError } = await getScoresByResultId(order.response_id);
+  if (resultError || !traits) {
+    throw new ReportGenerationError('RESULT_NOT_FOUND', 'Result not found.');
+  }
+
+  const parsedResult = resultSchema.safeParse({ id: order.response_id, traits });
+  if (!parsedResult.success) {
+    throw new ReportGenerationError('RESULT_INVALID', 'Invalid result payload.');
+  }
+
+  const pdfBuffer = await generateReportPdf({
+    name,
+    date: new Date(order.created_at),
+    traits: parsedResult.data.traits
+  });
+
+  await uploadReport(order.id, pdfBuffer);
+
+  const signedUrl = await getReportSignedUrl(order.id, ttlSeconds);
+  if (!signedUrl) {
+    throw new ReportGenerationError('SIGNED_URL_MISSING', 'Unable to create signed report URL.');
+  }
+
+  await updateOrderReportFileKey({ orderId: order.id, reportFileKey: reportPath });
+
+  if (order.user_id) {
+    await storeReportAsset({
+      orderId: order.id,
+      userId: order.user_id,
+      reportPath,
+      kind: 'report_pdf'
+    });
+  }
+
+  return { url: signedUrl, cached: false, reportFileKey: reportPath };
+};
+
+export { PdfRenderConcurrencyError };

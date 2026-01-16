@@ -4,123 +4,117 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { trackEvent } from '../../../../lib/analytics';
-import { orderRecordSchema, type OrderRecord } from '../../../../lib/orders';
-import { getReportAccessTokenKey } from '../../../../lib/report-access-token';
 import { Button } from '../../../../components/ui/Button';
 import { Card } from '../../../../components/ui/Card';
 import { Container } from '../../../../components/ui/Container';
 
-const ORDER_STATUS_POLL_INTERVAL_MS = 3000;
+const MAX_POLL_TIME_MS = 60_000;
+const INITIAL_POLL_DELAY_MS = 1000;
+const MAX_POLL_DELAY_MS = 8000;
 
-const fetchOrder = async (orderId: string) => {
-  const response = await fetch(`/api/orders?orderId=${orderId}`);
-  if (!response.ok) {
-    throw new Error('Unable to load order status.');
-  }
-  const payload = await response.json();
-  const parsed = orderRecordSchema.safeParse(payload?.order);
-  if (!parsed.success) {
-    console.error('Failed to parse order from API:', parsed.error);
-    throw new Error('Unable to load order status.');
-  }
-  return parsed.data;
+type OrderBySession = {
+  id: string;
+  status: string;
+  resultId: string | null;
+  createdAt: string;
+  paidAt: string | null;
+  email: string | null;
+  reportReady: boolean;
+  providerSessionId: string | null;
 };
 
-const markPendingWebhook = async (orderId: string) => {
-  const response = await fetch('/api/orders', {
-    method: 'PATCH',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ orderId, status: 'pending_webhook' })
-  });
-
+const fetchOrderBySession = async (sessionId: string) => {
+  const response = await fetch(`/api/orders/by-session?session_id=${sessionId}`);
   if (!response.ok) {
-    throw new Error('Unable to update order status.');
+    throw new Error('Unable to load order status.');
   }
-
   const payload = await response.json();
-  const parsed = orderRecordSchema.safeParse(payload?.order);
-  if (!parsed.success) {
-    console.error('Failed to parse order from API after update:', parsed.error);
-    throw new Error('Unable to update order status.');
-  }
-  return parsed.data;
+  return payload?.order as OrderBySession;
 };
 
 export default function CheckoutCallbackClient() {
   const searchParams = useSearchParams();
-  const orderId = searchParams.get('orderId');
-  const [order, setOrder] = useState<OrderRecord | null>(null);
+  const sessionId = searchParams.get('session_id');
+  const [order, setOrder] = useState<OrderBySession | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const [reportUrl, setReportUrl] = useState<string | null>(null);
   const [isGeneratingReport, setIsGeneratingReport] = useState(false);
   const [reportError, setReportError] = useState<string | null>(null);
+  const [linkStatus, setLinkStatus] = useState<string | null>(null);
   const trackedPurchaseRef = useRef(false);
+  const pollStartRef = useRef<number | null>(null);
+  const pollDelayRef = useRef(INITIAL_POLL_DELAY_MS);
+  const pollTimeoutRef = useRef<number | null>(null);
 
   const refreshStatus = useCallback(
     async ({ silent = false }: { silent?: boolean } = {}) => {
-      if (!orderId) return;
+      if (!sessionId) return;
       if (!silent) {
         setIsLoading(true);
         setErrorMessage(null);
       }
 
       try {
-        const updated = await fetchOrder(orderId);
+        const updated = await fetchOrderBySession(sessionId);
         setOrder(updated);
+        return updated;
       } catch (error) {
         setErrorMessage((error instanceof Error && error.message) || 'Unable to fetch order status.');
+        return null;
       } finally {
         if (!silent) {
           setIsLoading(false);
         }
       }
     },
-    [orderId]
+    [sessionId]
   );
 
   useEffect(() => {
-    if (!orderId) {
+    if (!sessionId) {
       setIsLoading(false);
       setErrorMessage('Missing order confirmation details.');
       return;
     }
 
-    const updateOrderStatus = async () => {
-      try {
-        const currentOrder = await fetchOrder(orderId);
-        if (currentOrder.status !== 'created') {
-          setOrder(currentOrder);
-          return;
-        }
-        const updated = await markPendingWebhook(orderId);
-        setOrder(updated);
-      } catch (error) {
-        setErrorMessage((error instanceof Error && error.message) || 'Unable to update order status.');
-      } finally {
+    pollStartRef.current = Date.now();
+    pollDelayRef.current = INITIAL_POLL_DELAY_MS;
+
+    const poll = async () => {
+      if (!pollStartRef.current) return;
+      if (Date.now() - pollStartRef.current > MAX_POLL_TIME_MS) {
+        setIsLoading(false);
+        setErrorMessage('We are still confirming your payment. Please refresh in a moment.');
+        return;
+      }
+
+      const updated = await refreshStatus({ silent: true });
+
+      const shouldContinue =
+        !updated ||
+        updated.status === 'created' ||
+        updated.status === 'pending' ||
+        updated.status === 'pending_webhook';
+
+      if (shouldContinue) {
+        pollDelayRef.current = Math.min(pollDelayRef.current * 2, MAX_POLL_DELAY_MS);
+        pollTimeoutRef.current = window.setTimeout(poll, pollDelayRef.current);
+      } else {
         setIsLoading(false);
       }
     };
 
-    updateOrderStatus();
-  }, [orderId]);
+    void poll();
+
+    return () => {
+      if (pollTimeoutRef.current) {
+        window.clearTimeout(pollTimeoutRef.current);
+      }
+    };
+  }, [refreshStatus, sessionId]);
 
   useEffect(() => {
-    if (!orderId || order?.status !== 'pending_webhook') {
-      return;
-    }
-
-    void refreshStatus({ silent: true });
-
-    const intervalId = window.setInterval(() => {
-      void refreshStatus({ silent: true });
-    }, ORDER_STATUS_POLL_INTERVAL_MS);
-
-    return () => window.clearInterval(intervalId);
-  }, [orderId, order?.status, refreshStatus]);
-
-  useEffect(() => {
-    if (!orderId || !order || order.status !== 'paid') {
+    if (!sessionId || !order || order.status !== 'paid') {
       return;
     }
 
@@ -128,26 +122,20 @@ export default function CheckoutCallbackClient() {
       return;
     }
 
-    trackEvent('purchase_success', { orderId, resultId: order.resultId });
+    trackEvent('purchase_success', { orderId: order.id, resultId: order.resultId });
     trackedPurchaseRef.current = true;
-  }, [order, orderId]);
+  }, [order, sessionId]);
 
   const handleReportDownload = async () => {
-    if (!orderId || isGeneratingReport) return;
+    if (!order || isGeneratingReport) return;
 
     setIsGeneratingReport(true);
     setReportError(null);
 
     try {
-      const reportAccessToken = sessionStorage.getItem(getReportAccessTokenKey(orderId));
-      if (!reportAccessToken) {
-        throw new Error('Missing report access token.');
-      }
-
-      const response = await fetch('/api/report', {
+      const response = await fetch(`/api/reports/${order.id}/download-url`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ orderId, reportAccessToken })
+        headers: { 'Content-Type': 'application/json' }
       });
 
       if (!response.ok) {
@@ -159,11 +147,36 @@ export default function CheckoutCallbackClient() {
         throw new Error('Report URL missing.');
       }
 
-      setReportUrl(payload.url);
+      window.location.assign(payload.url);
     } catch (error) {
       setReportError((error instanceof Error && error.message) || 'Unable to generate report.');
     } finally {
       setIsGeneratingReport(false);
+    }
+  };
+
+  const handleRequestLink = async () => {
+    if (!order?.email) {
+      setLinkStatus('Please use the email you checked out with to request access.');
+      return;
+    }
+
+    setLinkStatus(null);
+
+    try {
+      const response = await fetch('/api/report-access/request-link', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: order.email })
+      });
+
+      if (!response.ok) {
+        throw new Error('Unable to request access link.');
+      }
+
+      setLinkStatus('We just emailed a secure access link. Check your inbox shortly.');
+    } catch (error) {
+      setLinkStatus((error instanceof Error && error.message) || 'Unable to request access link.');
     }
   };
 
@@ -192,21 +205,21 @@ export default function CheckoutCallbackClient() {
         {order?.status === 'paid' ? (
           <div className="space-y-3">
             <p className="text-sm text-slate-600">Your payment is confirmed. Download your premium report below.</p>
-            {reportUrl ? (
-              <a className="text-sm font-semibold text-indigo-600 hover:text-indigo-700" href={reportUrl} target="_blank" rel="noopener noreferrer">
-                Download report PDF
-              </a>
-            ) : (
-              <Button type="button" onClick={handleReportDownload} disabled={isGeneratingReport}>
-                {isGeneratingReport ? 'Preparing report…' : 'Generate report PDF'}
-              </Button>
-            )}
+            <Button type="button" onClick={handleReportDownload} disabled={isGeneratingReport}>
+              {isGeneratingReport ? 'Preparing report…' : 'Download report PDF'}
+            </Button>
             {reportError ? <p className="text-sm font-medium text-red-600">{reportError}</p> : null}
+            <div className="space-y-2">
+              <Button type="button" variant="ghost" onClick={handleRequestLink}>
+                Email me my access link
+              </Button>
+              {linkStatus ? <p className="text-sm text-slate-600">{linkStatus}</p> : null}
+            </div>
           </div>
         ) : null}
 
         <div className="flex flex-col gap-3 sm:flex-row">
-          <Button type="button" variant="ghost" onClick={() => refreshStatus()} disabled={!orderId || isLoading}>
+          <Button type="button" variant="ghost" onClick={() => refreshStatus()} disabled={!sessionId || isLoading}>
             Retry status check
           </Button>
           <Link href="/quiz" className="inline-flex items-center justify-center rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition-colors hover:border-indigo-200 hover:text-indigo-700">

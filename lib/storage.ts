@@ -50,10 +50,21 @@ export function clearQuizState() {
   window.localStorage.removeItem(QUIZ_STATE_KEY);
 }
 
-export async function getReportSignedUrl(orderId: string): Promise<string | null> {
+export async function getReportSignedUrl(orderId: string, ttlSeconds = REPORT_TTL_SECONDS): Promise<string | null> {
   const storage = await getReportStorageClient();
   const path = getReportPath(orderId);
-  const { data, error } = await storage.createSignedUrl(path, REPORT_TTL_SECONDS);
+  const { data, error } = await storage.createSignedUrl(path, ttlSeconds);
+
+  if (error || !data?.signedUrl) {
+    return null;
+  }
+
+  return data.signedUrl;
+}
+
+export async function getReportSignedUrlForPath(path: string, ttlSeconds = REPORT_TTL_SECONDS): Promise<string | null> {
+  const storage = await getReportStorageClient();
+  const { data, error } = await storage.createSignedUrl(path, ttlSeconds);
 
   if (error || !data?.signedUrl) {
     return null;

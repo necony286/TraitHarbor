@@ -41,6 +41,26 @@ Indexes: `token_hash`, `email`, `expires_at`, `order_id`.
 6. Server sets an httpOnly signed cookie with the verified email (1–7 day TTL) and redirects to `/my-reports`.
 7. `/api/my-reports` returns paid orders for the logged-in user or verified guest email.
 
+## Download access flow
+
+1. Paywall requires a guest email before checkout; the email is stored on the order.
+2. Checkout completion redirects to `/checkout/callback?session_id=...`.
+3. Callback page calls `GET /api/orders/by-session?session_id=...` and polls with exponential backoff until paid or timeout.
+4. Once paid, the UI calls `POST /api/reports/:orderId/download-url` to mint a short-lived signed URL (60–300 seconds).
+5. Endpoint enforces server-side authorization:
+   - Logged in: `order.user_id` matches `x-user-id`.
+   - Guest: verified email cookie matches `order.email`.
+6. If the report file exists, we sign it; otherwise we generate once, store it, and return a short-lived signed URL.
+
+## Key endpoints
+
+- `POST /api/orders`
+  - Creates a provisional order and stores the guest email + provider session id.
+- `GET /api/orders/by-session?session_id=...`
+  - Looks up orders by provider session id for the callback page.
+- `POST /api/reports/:orderId/download-url`
+  - Returns `{ url, expiresInSeconds }` for a paid order.
+
 ## Security notes
 
 - Raw tokens are never stored; only hashed tokens are persisted.
@@ -48,3 +68,4 @@ Indexes: `token_hash`, `email`, `expires_at`, `order_id`.
 - Guest access is stored in a signed, httpOnly cookie to avoid localStorage/sessionStorage.
 - Request-link endpoint always returns success to avoid email enumeration.
 - Rate limiting is enforced per IP + email to slow abuse.
+- Signed report URLs are short-lived (≤ 5 minutes) and minted server-side per request.

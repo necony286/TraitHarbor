@@ -8,6 +8,7 @@ import CheckoutCallbackClient from '../src/app/checkout/callback/CheckoutCallbac
 const orderId = '0d2a9f23-1f52-4f7d-9b75-b9b21c0ef35d';
 const resultId = 'f7f0a8c1-7a7a-4fda-8ec1-2f4c6d1c9427';
 const userId = '5f394c07-2e3a-4b42-8e57-f9c527fa4cc8';
+const email = 'buyer@example.com';
 const createProvisionalOrderMock = vi.fn();
 const updateOrderStatusMock = vi.fn();
 
@@ -28,7 +29,7 @@ vi.mock('../lib/payments', () => ({
 
 vi.mock('next/navigation', () => ({
   useSearchParams: () => ({
-    get: (key: string) => (key === 'orderId' ? orderId : null)
+    get: (key: string) => (key === 'session_id' ? orderId : null)
   })
 }));
 
@@ -69,7 +70,7 @@ describe('orders API route', () => {
 
     const request = new Request('http://localhost/api/orders', {
       method: 'POST',
-      body: JSON.stringify({ resultId, userId })
+      body: JSON.stringify({ resultId, userId, email })
     });
 
     const response = await POST(request);
@@ -79,7 +80,10 @@ describe('orders API route', () => {
       userId,
       responseId: resultId,
       amountCents: 5000,
-      reportAccessTokenHash: expect.any(String)
+      reportAccessTokenHash: expect.any(String),
+      email,
+      provider: 'paddle',
+      providerSessionId: expect.any(String)
     });
     expect(response.status).toBe(404);
     expect(payload).toEqual({ error: 'Result not found.' });
@@ -93,7 +97,7 @@ describe('orders API route', () => {
 
     const request = new Request('http://localhost/api/orders', {
       method: 'POST',
-      body: JSON.stringify({ resultId, userId })
+      body: JSON.stringify({ resultId, userId, email })
     });
 
     const response = await POST(request);
@@ -103,7 +107,10 @@ describe('orders API route', () => {
       userId,
       responseId: resultId,
       amountCents: 5000,
-      reportAccessTokenHash: expect.any(String)
+      reportAccessTokenHash: expect.any(String),
+      email,
+      provider: 'paddle',
+      providerSessionId: expect.any(String)
     });
     expect(response.status).toBe(404);
     expect(payload).toEqual({ error: 'Result not found.' });
@@ -129,7 +136,7 @@ describe('orders API route', () => {
 
     const request = new Request('http://localhost/api/orders', {
       method: 'POST',
-      body: JSON.stringify({ resultId, userId })
+      body: JSON.stringify({ resultId, userId, email })
     });
 
     const response = await POST(request);
@@ -139,7 +146,10 @@ describe('orders API route', () => {
       userId,
       responseId: resultId,
       amountCents: 5000,
-      reportAccessTokenHash: expect.any(String)
+      reportAccessTokenHash: expect.any(String),
+      email,
+      provider: 'paddle',
+      providerSessionId: expect.any(String)
     });
     expect(getCheckoutConfigMock).toHaveBeenCalledTimes(1);
     expect(consoleErrorSpy).toHaveBeenCalledWith(
@@ -157,7 +167,7 @@ describe('orders API route', () => {
         createdAt: '2024-01-01T00:00:00.000Z'
       },
       checkout: null,
-      reportAccessToken: expect.any(String)
+      providerSessionId: expect.any(String)
     });
 
     consoleErrorSpy.mockRestore();
@@ -173,10 +183,12 @@ describe('Checkout callback behavior', () => {
     const paidOrder = {
       id: orderId,
       status: 'paid',
-      amountCents: 5000,
       resultId,
-      paddleOrderId: null,
-      createdAt: '2024-01-01T00:00:00.000Z'
+      createdAt: '2024-01-01T00:00:00.000Z',
+      paidAt: '2024-01-02T00:00:00.000Z',
+      email,
+      reportReady: true,
+      providerSessionId: orderId
     };
 
     const fetchMock = vi.fn().mockResolvedValueOnce(
@@ -192,6 +204,6 @@ describe('Checkout callback behavior', () => {
 
     expect(await screen.findByText(/Status: paid/i)).toBeInTheDocument();
     expect(fetchMock).toHaveBeenCalledTimes(1);
-    expect(fetchMock.mock.calls[0][0]).toBe(`/api/orders?orderId=${orderId}`);
+    expect(fetchMock.mock.calls[0][0]).toBe(`/api/orders/by-session?session_id=${orderId}`);
   });
 });

@@ -1,30 +1,18 @@
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
 import { logError, logInfo, logWarn } from '../../../../lib/logger';
-import { PdfRenderConcurrencyError, generateReportPdf } from '../../../../lib/pdf';
+import { cookies } from 'next/headers';
 import { enforceRateLimit } from '../../../../lib/rate-limit';
-import { getOrderById, getReportAsset, getScoresByResultId, storeReportAsset } from '../../../../lib/db';
-import { getReportPath, getReportSignedUrl, uploadReport } from '../../../../lib/storage';
-import { verifyReportAccessToken } from '../../../../lib/report-access';
+import { getOrderById } from '../../../../lib/db';
+import { GUEST_SESSION_COOKIE_NAME, verifyGuestSessionCookie } from '../../../../lib/guest-session';
+import { getOrCreateReportDownloadUrl, PdfRenderConcurrencyError, ReportGenerationError } from '../../../../lib/report-download';
 
 const requestSchema = z
   .object({
     orderId: z.string().uuid(),
-    reportAccessToken: z.string().min(1).max(255),
     name: z.string().trim().min(1).max(80).optional()
   })
   .strict();
-
-const resultSchema = z.object({
-  id: z.string().uuid(),
-  traits: z.object({
-    O: z.number(),
-    C: z.number(),
-    E: z.number(),
-    A: z.number(),
-    N: z.number()
-  })
-});
 
 export const runtime = 'nodejs';
 
@@ -53,6 +41,8 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Invalid request body.' }, { status: 400 });
   }
 
+  const cookieStore = await cookies();
+
   let order;
   try {
     const { data, error: orderError } = await getOrderById({ orderId: parsed.data.orderId });
@@ -70,105 +60,39 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Unable to generate report.' }, { status: 500 });
   }
 
+  const headerUserId = request.headers.get('x-user-id');
+  const sessionValue = cookieStore.get(GUEST_SESSION_COOKIE_NAME)?.value;
+  const session = verifyGuestSessionCookie(sessionValue);
+  const isAuthorized =
+    (headerUserId && order.user_id && order.user_id === headerUserId) ||
+    (session && order.email && session.email.toLowerCase() === order.email.toLowerCase());
+
+  if (!isAuthorized) {
+    return NextResponse.json({ error: 'Unauthorized.' }, { status: 401 });
+  }
+
   if (order.status !== 'paid') {
     return NextResponse.json({ error: 'Order not paid.' }, { status: 403 });
   }
 
-  if (!order.response_id) {
-    return NextResponse.json({ error: 'Result not attached to order.' }, { status: 400 });
-  }
-
-  if (!order.report_access_token_hash) {
-    logWarn('Missing report access token hash for report generation.', { orderId: order.id });
-    return NextResponse.json({ error: 'Invalid report access token.' }, { status: 403 });
-  }
-
-  let isTokenValid = false;
   try {
-    isTokenValid = verifyReportAccessToken(parsed.data.reportAccessToken, order.report_access_token_hash);
-  } catch (error) {
-    logError('Failed to verify report access token hash.', { orderId: order.id, error });
-    return NextResponse.json({ error: 'Unable to generate report.' }, { status: 500 });
-  }
-
-  if (!isTokenValid) {
-    logWarn('Invalid report access token for report generation.', { orderId: order.id });
-    return NextResponse.json({ error: 'Invalid report access token.' }, { status: 403 });
-  }
-
-  const reportPath = getReportPath(order.id);
-  const existingUrl = await getReportSignedUrl(order.id);
-  if (existingUrl) {
-    const { data: existingAsset, error: assetLookupError } = await getReportAsset(order.id, 'report_pdf');
-    if (assetLookupError) {
-      logWarn('Failed to lookup cached report metadata.', { orderId: order.id, error: assetLookupError.message });
-    }
-
-    if (!existingAsset && order.user_id) {
-      const { error: assetError } = await storeReportAsset({
-        orderId: order.id,
-        userId: order.user_id,
-        reportPath,
-        kind: 'report_pdf'
-      });
-      if (assetError) {
-        logWarn('Failed to persist cached report metadata.', { orderId: order.id, error: assetError.message });
-      }
-    }
-
-    logInfo('Using cached report PDF.', { orderId: order.id });
-    return NextResponse.json({ url: existingUrl, cached: true });
-  }
-
-  const { data: traits, error: resultError } = await getScoresByResultId(order.response_id);
-  if (resultError || !traits) {
-    logWarn('Unable to fetch result for report generation.', {
-      orderId: order.id,
-      resultId: order.response_id,
-      error: resultError
-    });
-    return NextResponse.json({ error: 'Result not found.' }, { status: 404 });
-  }
-
-  const parsedResult = resultSchema.safeParse({ id: order.response_id, traits });
-  if (!parsedResult.success) {
-    logError('Result payload invalid for report generation.', { orderId: order.id });
-    return NextResponse.json({ error: 'Unable to generate report.' }, { status: 500 });
-  }
-
-  try {
-    const pdfBuffer = await generateReportPdf({
-      name: parsed.data.name ?? 'You',
-      date: new Date(order.created_at),
-      traits: parsedResult.data.traits
+    const { url, cached } = await getOrCreateReportDownloadUrl({
+      order,
+      ttlSeconds: 300,
+      name: parsed.data.name ?? 'You'
     });
 
-    await uploadReport(order.id, pdfBuffer);
-
-    const signedUrl = await getReportSignedUrl(order.id);
-    if (!signedUrl) {
-      throw new Error('Unable to create signed report URL.');
-    }
-
-    if (order.user_id) {
-      const { error: assetError } = await storeReportAsset({
-        orderId: order.id,
-        userId: order.user_id,
-        reportPath,
-        kind: 'report_pdf'
-      });
-      if (assetError) {
-        logWarn('Failed to persist report metadata.', { orderId: order.id, error: assetError.message });
-      }
-    }
-
-    logInfo('Report generated and stored.', { orderId: order.id, resultId: order.response_id });
-
-    return NextResponse.json({ url: signedUrl, cached: false });
+    logInfo('Report generated for access.', { orderId: order.id, cached });
+    return NextResponse.json({ url, cached });
   } catch (error) {
     if (error instanceof PdfRenderConcurrencyError) {
       return NextResponse.json({ error: 'Report generation busy. Try again shortly.' }, { status: 429 });
     }
+
+    if (error instanceof ReportGenerationError && error.code === 'RESULT_NOT_FOUND') {
+      return NextResponse.json({ error: 'Result not found.' }, { status: 404 });
+    }
+
     logError('Report generation failed.', { orderId: order.id, error });
     return NextResponse.json({ error: 'Unable to generate report.' }, { status: 500 });
   }

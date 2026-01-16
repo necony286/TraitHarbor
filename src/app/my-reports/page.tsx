@@ -18,6 +18,8 @@ export default function MyReportsPage() {
   const [orders, setOrders] = useState<ReportOrder[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [downloadError, setDownloadError] = useState<string | null>(null);
+  const [activeDownloadId, setActiveDownloadId] = useState<string | null>(null);
 
   useEffect(() => {
     const loadReports = async () => {
@@ -45,6 +47,33 @@ export default function MyReportsPage() {
     loadReports();
   }, []);
 
+  const handleDownload = async (orderId: string) => {
+    setActiveDownloadId(orderId);
+    setDownloadError(null);
+
+    try {
+      const response = await fetch(`/api/reports/${orderId}/download-url`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' }
+      });
+
+      if (!response.ok) {
+        throw new Error('Unable to generate download link.');
+      }
+
+      const payload = (await response.json()) as { url?: string };
+      if (!payload.url) {
+        throw new Error('Download link missing.');
+      }
+
+      window.location.assign(payload.url);
+    } catch (downloadErrorResponse) {
+      setDownloadError(downloadErrorResponse instanceof Error ? downloadErrorResponse.message : 'Unable to download report.');
+    } finally {
+      setActiveDownloadId(null);
+    }
+  };
+
   return (
     <div className="bg-background py-16">
       <Container>
@@ -71,6 +100,10 @@ export default function MyReportsPage() {
               </div>
             ) : null}
 
+            {downloadError ? (
+              <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">{downloadError}</div>
+            ) : null}
+
             {!isLoading && !error && orders.length === 0 ? (
               <div className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-600">
                 We couldn&apos;t find any paid reports for this email yet.
@@ -94,8 +127,13 @@ export default function MyReportsPage() {
                         Report availability: {order.reportReady ? 'Ready to download' : 'Preparing'}
                       </p>
                     </div>
-                    <Button type="button" variant="primary" disabled={!order.reportReady}>
-                      Download report
+                    <Button
+                      type="button"
+                      variant="primary"
+                      disabled={!order.reportReady || activeDownloadId === order.id}
+                      onClick={() => handleDownload(order.id)}
+                    >
+                      {activeDownloadId === order.id ? 'Preparing…' : 'Download report'}
                     </Button>
                   </div>
                 ))}

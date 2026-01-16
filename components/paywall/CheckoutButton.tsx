@@ -7,13 +7,12 @@ import { getOrCreateAnonymousUserId } from '../../lib/anonymous-user';
 import { z } from 'zod';
 import { checkoutConfigSchema } from '../../lib/payments';
 import { orderRecordSchema } from '../../lib/orders';
-import { getReportAccessTokenKey } from '../../lib/report-access-token';
 import { Button } from '../ui/Button';
 
 const createOrderResponseSchema = z.object({
   order: orderRecordSchema,
   checkout: checkoutConfigSchema,
-  reportAccessToken: z.string().uuid()
+  providerSessionId: z.string().uuid().nullable()
 });
 
 type CheckoutButtonProps = {
@@ -53,10 +52,13 @@ function loadPaddleScript(): Promise<void> {
 export function CheckoutButton({ resultId }: CheckoutButtonProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [email, setEmail] = useState('');
+  const [emailError, setEmailError] = useState<string | null>(null);
   const router = useRouter();
 
   const handleCheckout = async () => {
     setErrorMessage(null);
+    setEmailError(null);
     setIsLoading(true);
 
     try {
@@ -64,10 +66,17 @@ export function CheckoutButton({ resultId }: CheckoutButtonProps) {
       if (!userId) {
         throw new Error('Unable to start checkout.');
       }
+
+      const parsedEmail = z.string().trim().email().safeParse(email);
+      if (!parsedEmail.success) {
+        setEmailError('Please enter a valid email address to continue.');
+        return;
+      }
+
       const response = await fetch('/api/orders', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ resultId, userId })
+        body: JSON.stringify({ resultId, userId, email: parsedEmail.data })
       });
       if (!response.ok) {
         throw new Error('Checkout unavailable.');
@@ -79,9 +88,7 @@ export function CheckoutButton({ resultId }: CheckoutButtonProps) {
         throw new Error('Invalid checkout response.');
       }
 
-      const { order, checkout, reportAccessToken } = parsedResponse.data;
-
-      sessionStorage.setItem(getReportAccessTokenKey(order.id), reportAccessToken);
+      const { order, checkout, providerSessionId } = parsedResponse.data;
 
       await loadPaddleScript();
 
@@ -94,20 +101,26 @@ export function CheckoutButton({ resultId }: CheckoutButtonProps) {
 
       trackEvent('checkout_open', { resultId, priceId: checkout.priceId, orderId: order.id });
 
-      window.Paddle.Checkout.open({
+      const checkoutOptions = {
         items: [
           {
             priceId: checkout.priceId,
             quantity: 1
           }
         ],
+        customer: {
+          email: parsedEmail.data
+        },
         customData: {
           order_id: order.id
         },
         successCallback: () => {
-          router.push(`/checkout/callback?orderId=${order.id}`);
+          const sessionId = providerSessionId ?? order.id;
+          router.push(`/checkout/callback?session_id=${sessionId}`);
         }
-      });
+      } as unknown as Parameters<typeof window.Paddle.Checkout.open>[0];
+
+      window.Paddle.Checkout.open(checkoutOptions);
     } catch (error) {
       // eslint-disable-next-line no-console
       console.error('Checkout error', error);
@@ -119,6 +132,22 @@ export function CheckoutButton({ resultId }: CheckoutButtonProps) {
 
   return (
     <div className="space-y-2">
+      <div className="space-y-2">
+        <label htmlFor={`checkout-email-${resultId}`} className="text-sm font-medium text-slate-700">
+          Email for receipt and access
+        </label>
+        <input
+          id={`checkout-email-${resultId}`}
+          type="email"
+          inputMode="email"
+          autoComplete="email"
+          className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-base text-slate-900 shadow-sm focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-200"
+          placeholder="you@example.com"
+          value={email}
+          onChange={(event) => setEmail(event.target.value)}
+        />
+        {emailError ? <p className="text-sm text-red-600">{emailError}</p> : null}
+      </div>
       <Button type="button" onClick={handleCheckout} disabled={isLoading} size="lg">
         {isLoading ? 'Loading checkout…' : 'Unlock full report (PDF)'}
       </Button>

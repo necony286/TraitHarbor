@@ -24,8 +24,8 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     return rateLimitResponse;
   }
 
-  const { orderId } = (await params) ?? {};
-  if (!orderId || !orderIdSchema.safeParse(orderId).success) {
+  const { orderId } = params;
+  if (!orderIdSchema.safeParse(orderId).success) {
     return NextResponse.json({ error: 'Invalid order id.' }, { status: 400 });
   }
 

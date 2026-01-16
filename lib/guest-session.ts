@@ -1,4 +1,5 @@
 import { createHmac } from 'crypto';
+import { z } from 'zod';
 import { timingSafeEquals } from './signature';
 
 export const GUEST_SESSION_COOKIE_NAME = 'traitharbor_guest_report_access';
@@ -7,6 +8,11 @@ type GuestSessionPayload = {
   email: string;
   exp: number;
 };
+
+const guestSessionPayloadSchema = z.object({
+  email: z.string(),
+  exp: z.number()
+});
 
 const COOKIE_TTL_DAYS = 7;
 
@@ -23,11 +29,9 @@ const encodePayload = (payload: GuestSessionPayload) => Buffer.from(JSON.stringi
 const decodePayload = (value: string): GuestSessionPayload | null => {
   try {
     const decoded = Buffer.from(value, 'base64url').toString('utf8');
-    const parsed = JSON.parse(decoded) as GuestSessionPayload;
-    if (!parsed?.email || typeof parsed.exp !== 'number') {
-      return null;
-    }
-    return parsed;
+    const parsed = JSON.parse(decoded);
+    const result = guestSessionPayloadSchema.safeParse(parsed);
+    return result.success ? result.data : null;
   } catch {
     return null;
   }

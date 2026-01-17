@@ -33,13 +33,13 @@ export function HowItWorks() {
               key={index}
               className="relative bg-card border border-border rounded-2xl p-6 lg:p-8 shadow-sm hover:shadow-md transition-shadow duration-200"
             >
-              <div className="absolute -top-3 -left-3 w-8 h-8 bg-brand text-brand-foreground rounded-full flex items-center justify-center text-sm font-medium shadow-md">
+              <div className="absolute -top-3 -left-3 w-8 h-8 bg-[#2563eb] text-white rounded-full flex items-center justify-center text-sm font-medium shadow-md">
                 {index + 1}
               </div>
 
               <div className="mb-4">
-                <div className="inline-flex items-center justify-center w-12 h-12 bg-brand/10 rounded-xl">
-                  <Icon className="w-6 h-6 text-brand" />
+                <div className="inline-flex items-center justify-center w-12 h-12 bg-[#2563eb]/10 rounded-xl">
+                  <Icon className="w-6 h-6 text-[#2563eb]" />
                 </div>
               </div>
 

@@ -85,7 +85,7 @@ export function StickyNavigation({
           `}
           aria-label={isLastPage ? 'Submit' : 'Next page'}
         >
-          <span>{isLastPage ? 'Submit Quiz' : 'Next'}</span>
+          <span>{isLastPage ? 'Submit' : 'Next'}</span>
           {!isLastPage && <ChevronRight className="w-4 h-4" />}
           {isLastPage && (
             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">

@@ -50,7 +50,7 @@ export function StickyNavigation({
           className={`
             flex items-center gap-2 px-5 py-3 rounded-xl border-2 font-semibold text-sm
             transition-all duration-200 ease-out motion-reduce:transition-none
-            focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#2563eb]/50
+            focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary/50
             ${
               canGoPrevious
                 ? 'border-border bg-background text-foreground hover:bg-muted hover:border-border/80 active:scale-95 shadow-sm'
@@ -76,11 +76,11 @@ export function StickyNavigation({
           className={`
             flex items-center gap-2 px-6 py-3 rounded-xl font-semibold text-sm
             transition-all duration-200 ease-out motion-reduce:transition-none
-            focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#2563eb]/50
+            focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary/50
             ${
               isLastPage
-                ? 'bg-gradient-to-r from-[#2563eb] to-[#3b82f6] text-white hover:from-[#1d4ed8] hover:to-[#2563eb] active:scale-95 shadow-lg shadow-[#2563eb]/25'
-                : 'bg-[#2563eb] text-white hover:bg-[#1d4ed8] active:scale-95 shadow-md'
+                ? 'bg-gradient-to-r from-primary to-primary/80 text-primary-foreground hover:from-primary/90 hover:to-primary active:scale-95 shadow-lg shadow-primary/25'
+                : 'bg-primary text-primary-foreground hover:bg-primary/90 active:scale-95 shadow-md'
             }
           `}
           aria-label={isLastPage ? 'Submit quiz' : 'Next page'}

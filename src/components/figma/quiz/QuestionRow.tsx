@@ -22,7 +22,7 @@ export function QuestionRow({
     <div
       className={`
         p-5 lg:p-6 rounded-xl border-2 transition-all duration-300 motion-reduce:transition-none
-        ${hasError ? 'border-destructive/50 bg-destructive/5 shadow-sm' : value ? 'border-[#2563eb]/20 bg-card shadow-sm' : 'border-border bg-card hover:border-border/80'}
+        ${hasError ? 'border-destructive/50 bg-destructive/5 shadow-sm' : value ? 'border-primary/20 bg-card shadow-sm' : 'border-border bg-card hover:border-border/80'}
       `}
     >
       <div className="space-y-4">

@@ -21,6 +21,91 @@ interface LikertScaleProps {
   questionId: string;
 }
 
+type LikertVariant = 'desktop' | 'mobile';
+
+interface LikertOptionItemProps {
+  option: LikertOption;
+  isSelected: boolean;
+  name: string;
+  onChange: (value: number) => void;
+  variant: LikertVariant;
+}
+
+function LikertOptionItem({ option, isSelected, name, onChange, variant }: LikertOptionItemProps) {
+  const isDesktop = variant === 'desktop';
+  const labelSpacing = isDesktop ? 'gap-2.5 p-3.5' : 'gap-2 p-3';
+  const selectedLabelClasses = isDesktop
+    ? 'border-primary bg-primary/10 shadow-sm'
+    : 'border-primary bg-primary/10';
+  const unselectedLabelClasses = isDesktop
+    ? 'border-border bg-background hover:border-primary/50 hover:bg-muted/50 hover:shadow-sm'
+    : 'border-border bg-background active:border-primary/50 active:bg-muted/50';
+  const indicatorSize = isDesktop ? 'w-5 h-5' : 'w-4 h-4';
+  const indicatorSelectedClasses = isDesktop
+    ? 'border-primary bg-primary scale-110'
+    : 'border-primary bg-primary';
+
+  return (
+    <div className={isDesktop ? '' : 'relative flex-1 group'}>
+      <label
+        className={`
+          relative flex flex-col items-center justify-center rounded-xl border-2 cursor-pointer ${labelSpacing}
+          transition-all duration-200 ease-out motion-reduce:transition-none
+          ${isSelected ? selectedLabelClasses : unselectedLabelClasses}
+          focus-within:outline focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-primary/50
+        `}
+      >
+        <input
+          type="radio"
+          name={name}
+          value={option.value}
+          checked={isSelected}
+          onChange={() => onChange(option.value)}
+          className="sr-only"
+        />
+
+        <div
+          className={`
+            ${indicatorSize} rounded-full border-2 flex items-center justify-center
+            transition-all duration-200 ease-out motion-reduce:transition-none
+            ${isSelected ? indicatorSelectedClasses : 'border-muted-foreground/30'}
+          `}
+        >
+          {isSelected && <div className={`${isDesktop ? 'w-2 h-2' : 'w-1.5 h-1.5'} rounded-full bg-white`} />}
+        </div>
+
+        <span
+          className={`
+            text-xs font-medium ${isDesktop ? 'text-center leading-tight' : ''} transition-colors duration-200
+            ${isSelected ? 'text-primary' : 'text-foreground'}
+          `}
+        >
+          {isDesktop ? option.label : option.shortLabel}
+        </span>
+
+        {!isDesktop && <span className="sr-only">{option.label}</span>}
+      </label>
+
+      {!isDesktop && (
+        <div
+          className={`
+            absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1
+            bg-foreground text-background text-xs rounded-md whitespace-nowrap
+            opacity-0 pointer-events-none transition-opacity duration-200
+            group-active:opacity-100
+          `}
+          aria-hidden="true"
+        >
+          {option.label}
+          <div className="absolute top-full left-1/2 -translate-x-1/2 -mt-px">
+            <div className="border-4 border-transparent border-t-foreground" />
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 export function LikertScale({ name, value, onChange, questionId }: LikertScaleProps) {
   return (
     <div role="radiogroup" aria-labelledby={`question-${questionId}`} className="space-y-3">
@@ -29,43 +114,14 @@ export function LikertScale({ name, value, onChange, questionId }: LikertScalePr
           const isSelected = value === option.value;
 
           return (
-            <label
+            <LikertOptionItem
               key={option.value}
-              className={`
-                relative flex flex-col items-center justify-center gap-2.5 p-3.5 rounded-xl border-2 cursor-pointer
-                transition-all duration-200 ease-out motion-reduce:transition-none
-                ${isSelected ? 'border-[#2563eb] bg-[#2563eb]/10 shadow-sm' : 'border-border bg-background hover:border-[#2563eb]/50 hover:bg-muted/50 hover:shadow-sm'}
-                focus-within:outline focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-[#2563eb]/50
-              `}
-            >
-              <input
-                type="radio"
-                name={name}
-                value={option.value}
-                checked={isSelected}
-                onChange={() => onChange(option.value)}
-                className="sr-only"
-              />
-
-              <div
-                className={`
-                  w-5 h-5 rounded-full border-2 flex items-center justify-center
-                  transition-all duration-200 ease-out motion-reduce:transition-none
-                  ${isSelected ? 'border-[#2563eb] bg-[#2563eb] scale-110' : 'border-muted-foreground/30'}
-                `}
-              >
-                {isSelected && <div className="w-2 h-2 rounded-full bg-white" />}
-              </div>
-
-              <span
-                className={`
-                  text-xs font-medium text-center leading-tight transition-colors duration-200
-                  ${isSelected ? 'text-[#2563eb]' : 'text-foreground'}
-                `}
-              >
-                {option.label}
-              </span>
-            </label>
+              option={option}
+              isSelected={isSelected}
+              name={name}
+              onChange={onChange}
+              variant="desktop"
+            />
           );
         })}
       </div>
@@ -75,61 +131,14 @@ export function LikertScale({ name, value, onChange, questionId }: LikertScalePr
           const isSelected = value === option.value;
 
           return (
-            <div key={option.value} className="relative flex-1 group">
-              <label
-                className={`
-                  relative flex flex-col items-center justify-center gap-2 p-3 rounded-xl border-2 cursor-pointer
-                  transition-all duration-200 ease-out motion-reduce:transition-none
-                  ${isSelected ? 'border-[#2563eb] bg-[#2563eb]/10' : 'border-border bg-background active:border-[#2563eb]/50 active:bg-muted/50'}
-                  focus-within:outline focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-[#2563eb]/50
-                `}
-              >
-                <input
-                  type="radio"
-                  name={name}
-                  value={option.value}
-                  checked={isSelected}
-                  onChange={() => onChange(option.value)}
-                  className="sr-only"
-                />
-
-                <div
-                  className={`
-                    w-4 h-4 rounded-full border-2 flex items-center justify-center
-                    transition-all duration-200 ease-out motion-reduce:transition-none
-                    ${isSelected ? 'border-[#2563eb] bg-[#2563eb]' : 'border-muted-foreground/30'}
-                  `}
-                >
-                  {isSelected && <div className="w-1.5 h-1.5 rounded-full bg-white" />}
-                </div>
-
-                <span
-                  className={`
-                    text-xs font-medium transition-colors duration-200
-                    ${isSelected ? 'text-[#2563eb]' : 'text-foreground'}
-                  `}
-                >
-                  {option.shortLabel}
-                </span>
-
-                <span className="sr-only">{option.label}</span>
-              </label>
-
-              <div
-                className={`
-                  absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1
-                  bg-gray-900 text-white text-xs rounded-md whitespace-nowrap
-                  opacity-0 pointer-events-none transition-opacity duration-200
-                  ${isSelected ? 'group-active:opacity-100' : ''}
-                `}
-                aria-hidden="true"
-              >
-                {option.label}
-                <div className="absolute top-full left-1/2 -translate-x-1/2 -mt-px">
-                  <div className="border-4 border-transparent border-t-gray-900" />
-                </div>
-              </div>
-            </div>
+            <LikertOptionItem
+              key={option.value}
+              option={option}
+              isSelected={isSelected}
+              name={name}
+              onChange={onChange}
+              variant="mobile"
+            />
           );
         })}
       </div>

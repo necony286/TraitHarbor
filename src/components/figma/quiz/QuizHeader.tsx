@@ -23,7 +23,7 @@ export function QuizHeader({
   return (
     <header className="space-y-6">
       <div className="flex items-center gap-2">
-        <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[#2563eb] to-[#3b82f6] flex items-center justify-center shadow-sm">
+        <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-primary/80 flex items-center justify-center shadow-sm">
           <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path
               strokeLinecap="round"
@@ -37,7 +37,7 @@ export function QuizHeader({
       </div>
 
       <div className="space-y-2">
-        {subtitle && <p className="text-sm text-[#2563eb] font-medium tracking-wide uppercase">{subtitle}</p>}
+        {subtitle && <p className="text-sm text-primary font-medium tracking-wide uppercase">{subtitle}</p>}
         <h1 className="text-2xl lg:text-3xl font-semibold text-foreground">{title}</h1>
       </div>
 
@@ -49,7 +49,7 @@ export function QuizHeader({
         </span>
         <span>
           <span className="font-semibold text-foreground">{answeredCount}</span>/{totalQuestions} answered
-          <span className="ml-2 text-xs text-[#2563eb] font-medium">({percentage}%)</span>
+          <span className="ml-2 text-xs text-primary font-medium">({percentage}%)</span>
         </span>
       </div>
     </header>

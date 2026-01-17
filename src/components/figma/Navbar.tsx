@@ -15,7 +15,7 @@ export function Navbar({ onStartQuiz }: NavbarProps) {
     <nav className="sticky top-0 z-50 border-b border-border/70 bg-background/80 backdrop-blur-md">
       <div className="container mx-auto flex h-16 max-w-6xl items-center justify-between px-4">
         <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#2563eb] text-white shadow-lg shadow-[#2563eb]/25">
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[var(--brand-primary)] text-white shadow-lg shadow-[var(--brand-primary)]/25">
             <span className="text-lg font-semibold">TH</span>
           </div>
           <span className="text-lg font-medium text-foreground">TraitHarbor</span>

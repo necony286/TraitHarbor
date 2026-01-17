@@ -4,21 +4,19 @@ import { LikertScale } from '../src/components/figma/quiz/LikertScale';
 
 describe('LikertScale', () => {
   it('updates checked state when value changes', () => {
-    const { container, rerender } = render(
+    const { rerender } = render(
       <LikertScale name="likert" value={2} onChange={() => undefined} questionId="q1" />
     );
 
-    const getRadiosByValue = (value: number) =>
-      Array.from(container.querySelectorAll(`input[type="radio"][value="${value}"]`));
+    const disagreeRadios = screen.getAllByRole('radio', { name: 'Disagree' });
+    const agreeRadios = screen.getAllByRole('radio', { name: 'Agree' });
 
-    const isAnyChecked = (value: number) => getRadiosByValue(value).some((input) => input.checked);
-
-    expect(isAnyChecked(2)).toBe(true);
-    expect(isAnyChecked(4)).toBe(false);
+    disagreeRadios.forEach((radio) => expect(radio).toBeChecked());
+    agreeRadios.forEach((radio) => expect(radio).not.toBeChecked());
 
     rerender(<LikertScale name="likert" value={4} onChange={() => undefined} questionId="q1" />);
 
-    expect(isAnyChecked(2)).toBe(false);
-    expect(isAnyChecked(4)).toBe(true);
+    disagreeRadios.forEach((radio) => expect(radio).not.toBeChecked());
+    agreeRadios.forEach((radio) => expect(radio).toBeChecked());
   });
 });

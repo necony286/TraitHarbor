@@ -83,7 +83,7 @@ export function StickyNavigation({
                 : 'bg-primary text-primary-foreground hover:bg-primary/90 active:scale-95 shadow-md'
             }
           `}
-          aria-label={isLastPage ? 'Submit' : 'Next page'}
+          aria-label={isLastPage ? 'Submit' : 'Next'}
         >
           <span>{isLastPage ? 'Submit' : 'Next'}</span>
           {!isLastPage && <ChevronRight className="w-4 h-4" />}

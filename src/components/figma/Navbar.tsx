@@ -45,7 +45,7 @@ export function Navbar({ onStartQuiz }: NavbarProps) {
         <div className="hidden md:flex">
           <Link
             href="/quiz"
-            className="rounded-xl bg-[#2563eb] px-5 py-2 text-sm font-medium text-white shadow-lg shadow-[#2563eb]/25 transition-all duration-200 hover:bg-[#1d4ed8] hover:shadow-xl hover:shadow-[#2563eb]/30 active:scale-[0.98]"
+            className="rounded-xl bg-[var(--brand-primary)] px-5 py-2 text-sm font-medium text-white shadow-lg shadow-[var(--brand-primary)]/25 transition-all duration-200 hover:bg-[var(--brand-primary-dark)] hover:shadow-xl hover:shadow-[var(--brand-primary)]/30 active:scale-[0.98]"
             onClick={onStartQuiz}
           >
             Start quiz

@@ -79,7 +79,7 @@ export function StickyNavigation({
             focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary/50
             ${
               isLastPage
-                ? 'bg-gradient-to-r from-primary to-primary/80 text-primary-foreground hover:from-primary/90 hover:to-primary active:scale-95 shadow-lg'
+                ? 'bg-gradient-to-r from-primary to-primary/80 text-primary-foreground hover:from-primary/90 hover:to-primary active:scale-95 shadow-lg shadow-primary/25'
                 : 'bg-primary text-primary-foreground hover:bg-primary/90 active:scale-95 shadow-md'
             }
           `}

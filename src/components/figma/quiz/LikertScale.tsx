@@ -92,7 +92,7 @@ function LikertOptionItem({ option, isSelected, name, onChange, variant }: Liker
             absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1
             bg-foreground text-background text-xs rounded-md whitespace-nowrap
             opacity-0 pointer-events-none transition-opacity duration-200
-            ${isSelected ? 'group-active:opacity-100' : ''}
+            group-active:opacity-100
           `}
           aria-hidden="true"
         >

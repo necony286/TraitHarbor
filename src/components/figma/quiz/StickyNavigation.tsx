@@ -22,12 +22,12 @@ export function StickyNavigation({
 }: StickyNavigationProps) {
   return (
     <nav
-      className="fixed bottom-0 left-0 right-0 border-t border-border/50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80 z-10 shadow-2xl"
+      className="fixed bottom-0 left-0 right-0 border-t border-border/50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80 z-10 shadow-2xl pointer-events-none"
       aria-label="Quiz navigation"
     >
       {errorMessage && (
         <div
-          className="px-4 py-3 bg-destructive/10 border-b border-destructive/20 animate-in slide-in-from-bottom duration-300"
+          className="px-4 py-3 bg-destructive/10 border-b border-destructive/20 animate-in slide-in-from-bottom duration-300 pointer-events-auto"
           role="alert"
         >
           <div className="container max-w-4xl mx-auto flex items-center justify-center gap-2">
@@ -43,12 +43,12 @@ export function StickyNavigation({
         </div>
       )}
 
-      <div className="container max-w-4xl mx-auto px-4 py-4 flex items-center justify-between gap-4">
+      <div className="container max-w-4xl mx-auto px-4 py-4 flex items-center justify-between gap-4 pointer-events-none">
         <button
           onClick={onPrevious}
           disabled={!canGoPrevious}
           className={`
-            flex items-center gap-2 px-5 py-3 rounded-xl border-2 font-semibold text-sm
+            flex items-center gap-2 px-5 py-3 rounded-xl border-2 font-semibold text-sm pointer-events-auto
             transition-all duration-200 ease-out motion-reduce:transition-none
             focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary/50
             ${
@@ -74,7 +74,7 @@ export function StickyNavigation({
         <button
           onClick={onNext}
           className={`
-            flex items-center gap-2 px-6 py-3 rounded-xl font-semibold text-sm
+            flex items-center gap-2 px-6 py-3 rounded-xl font-semibold text-sm pointer-events-auto
             transition-all duration-200 ease-out motion-reduce:transition-none
             focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary/50
             ${
@@ -83,7 +83,7 @@ export function StickyNavigation({
                 : 'bg-primary text-primary-foreground hover:bg-primary/90 active:scale-95 shadow-md'
             }
           `}
-          aria-label={isLastPage ? 'Submit quiz' : 'Next page'}
+          aria-label={isLastPage ? 'Submit' : 'Next page'}
         >
           <span>{isLastPage ? 'Submit Quiz' : 'Next'}</span>
           {!isLastPage && <ChevronRight className="w-4 h-4" />}

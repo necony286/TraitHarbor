@@ -13,17 +13,21 @@ export function ProgressBar({ current, total }: ProgressBarProps) {
 
   return (
     <div
-      className="w-full"
+      className="w-full space-y-2"
       role="progressbar"
       aria-valuenow={clampedCurrent}
       aria-valuemin={0}
       aria-valuemax={safeTotal}
     >
-      <div className="h-1.5 bg-muted rounded-full overflow-hidden">
+      <div className="relative h-2 bg-muted rounded-full overflow-hidden shadow-inner">
         <div
-          className="h-full bg-primary transition-all duration-300 ease-out motion-reduce:transition-none"
+          className="h-full bg-gradient-to-r from-[#2563eb] to-[#3b82f6] transition-all duration-500 ease-out motion-reduce:transition-none relative"
           style={{ width: `${percentage}%` }}
-        />
+        >
+          {percentage > 0 && percentage < 100 && (
+            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent animate-shimmer" />
+          )}
+        </div>
       </div>
       <span className="sr-only">{percentage}% complete</span>
     </div>

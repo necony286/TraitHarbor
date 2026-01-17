@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { z } from 'zod';
 import { QuestionRow } from '@/components/figma/quiz/QuestionRow';
 import { QuizHeader } from '@/components/figma/quiz/QuizHeader';
+import { ScaleLegend } from '@/components/figma/quiz/ScaleLegend';
 import { StickyNavigation } from '@/components/figma/quiz/StickyNavigation';
 import { QuizEventName, trackQuizEvent } from '../../../lib/analytics';
 import { loadQuizItems, QuizItem } from '../../../lib/ipip';
@@ -168,7 +169,7 @@ export default function QuizPage() {
   const pageStartIndex = currentPage * PAGE_SIZE;
 
   return (
-    <div className="min-h-screen bg-background pb-28">
+    <div className="min-h-screen bg-slate-50 pb-28">
       <div className="container max-w-4xl mx-auto px-4 py-8 lg:py-12">
         <QuizHeader
           title="Personality questionnaire"
@@ -179,7 +180,11 @@ export default function QuizPage() {
           totalQuestions={items.length}
         />
 
-        <main className="mt-8 lg:mt-12 space-y-4" aria-live="polite">
+        <div className="mt-6 lg:mt-8">
+          <ScaleLegend />
+        </div>
+
+        <main className="mt-6 lg:mt-8 space-y-4" aria-live="polite">
           {pageItems.map((item, index) => (
             <QuestionRow
               key={item.id}

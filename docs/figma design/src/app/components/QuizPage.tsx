@@ -1,7 +1,9 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { QuizHeader } from "@/app/components/QuizHeader";
 import { QuestionRow } from "@/app/components/QuestionRow";
 import { StickyNavigation } from "@/app/components/StickyNavigation";
+import { ScaleLegend } from "@/app/components/ScaleLegend";
+import { KeyboardHint } from "@/app/components/KeyboardHint";
 
 // Quiz configuration
 const QUESTIONS_PER_PAGE = 12;
@@ -174,6 +176,31 @@ export function QuizPage() {
   const answeredCount = Object.keys(answers).length;
   const isLastPage = currentPage === TOTAL_PAGES;
 
+  // Keyboard shortcuts
+  useEffect(() => {
+    const handleKeyPress = (e: KeyboardEvent) => {
+      // Don't trigger if user is typing in an input
+      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) {
+        return;
+      }
+
+      // Alt/Option + Left Arrow: Previous page
+      if (e.altKey && e.key === 'ArrowLeft' && currentPage > 1) {
+        e.preventDefault();
+        handlePrevious();
+      }
+
+      // Alt/Option + Right Arrow: Next page
+      if (e.altKey && e.key === 'ArrowRight') {
+        e.preventDefault();
+        handleNext();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyPress);
+    return () => window.removeEventListener('keydown', handleKeyPress);
+  }, [currentPage, answers]);
+
   // Handle answer change
   const handleAnswerChange = (questionId: number, value: string) => {
     setAnswers((prev) => ({ ...prev, [questionId]: value }));
@@ -231,8 +258,14 @@ export function QuizPage() {
   const pageCategory = PAGE_CATEGORIES[currentPage - 1];
 
   return (
-    <div className="min-h-screen bg-background pb-28">
-      <div className="container max-w-4xl mx-auto px-4 py-8 lg:py-12">
+    <div className="min-h-screen bg-gradient-to-b from-background via-background to-blue-50/30 dark:to-blue-950/10 pb-28">
+      {/* Decorative background elements */}
+      <div className="fixed inset-0 -z-10 overflow-hidden pointer-events-none">
+        <div className="absolute top-0 right-0 w-96 h-96 bg-blue-100/20 dark:bg-blue-900/10 rounded-full blur-3xl" />
+        <div className="absolute bottom-0 left-0 w-96 h-96 bg-indigo-100/20 dark:bg-indigo-900/10 rounded-full blur-3xl" />
+      </div>
+
+      <div className="container max-w-4xl mx-auto px-4 py-8 lg:py-12 relative z-0">
         {/* Header */}
         <QuizHeader
           title={pageCategory.title}
@@ -243,8 +276,22 @@ export function QuizPage() {
           totalQuestions={TOTAL_QUESTIONS}
         />
 
+        {/* Scale Legend - Show on first page or when user needs help */}
+        {currentPage === 1 && (
+          <div className="mt-8">
+            <ScaleLegend />
+          </div>
+        )}
+
+        {/* Compact Scale Reference - Show on subsequent pages */}
+        {currentPage > 1 && (
+          <div className="mt-6">
+            <ScaleLegend variant="compact" />
+          </div>
+        )}
+
         {/* Questions */}
-        <main className="mt-8 lg:mt-12 space-y-4">
+        <main className="mt-6 lg:mt-8 space-y-4">
           {currentQuestions.map((question, index) => {
             const questionId = startIndex + index;
             const globalQuestionNumber = questionId + 1;
@@ -264,6 +311,9 @@ export function QuizPage() {
           })}
         </main>
       </div>
+
+      {/* Keyboard shortcuts hint */}
+      {currentPage === 1 && <KeyboardHint />}
 
       {/* Sticky Navigation */}
       <StickyNavigation

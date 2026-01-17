@@ -2,6 +2,7 @@ import { Hero } from "@/app/components/home/Hero";
 import { TrustRow } from "@/app/components/home/TrustRow";
 import { HowItWorks } from "@/app/components/home/HowItWorks";
 import { WhatYouGet } from "@/app/components/home/WhatYouGet";
+import { CTASection } from "@/app/components/home/CTASection";
 import { FAQ } from "@/app/components/home/FAQ";
 import { Footer } from "@/app/components/home/Footer";
 
@@ -23,6 +24,8 @@ export function HomePage({ onStartTest }: HomePageProps) {
       </div>
 
       <WhatYouGet />
+
+      <CTASection onStartTest={onStartTest} />
 
       <FAQ />
 

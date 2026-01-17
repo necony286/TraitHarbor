@@ -59,8 +59,13 @@ function LikertOptionItem({ option, isSelected, name, onChange, variant }: Liker
           type="radio"
           name={name}
           value={option.value}
-          checked={isSelected}
-          onChange={() => onChange(option.value)}
+          defaultChecked={isSelected}
+          onChange={(event) => {
+            if (!event.currentTarget.checked) {
+              event.currentTarget.checked = true;
+            }
+            onChange(option.value);
+          }}
           className="absolute inset-0 z-10 h-full w-full cursor-pointer opacity-0 scroll-mt-24 scroll-mb-32"
         />
 

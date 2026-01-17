@@ -50,7 +50,13 @@ export function QuestionRow({
         </div>
 
         <div className="pt-1">
-          <LikertScale name={`question-${questionId}`} value={value} onChange={onChange} questionId={questionId} />
+          <LikertScale
+            key={`${questionId}-${value ?? 'unset'}`}
+            name={`question-${questionId}`}
+            value={value}
+            onChange={onChange}
+            questionId={questionId}
+          />
         </div>
       </div>
     </div>

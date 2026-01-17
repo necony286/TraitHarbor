@@ -81,7 +81,7 @@ export function Navbar({ onStartQuiz }: NavbarProps) {
           <div className="mt-4">
             <Link
               href="/quiz"
-              className="block w-full rounded-xl bg-[#2563eb] px-5 py-2 text-center text-sm font-medium text-white shadow-lg shadow-[#2563eb]/25"
+              className="block w-full rounded-xl bg-[var(--brand-primary)] px-5 py-2 text-center text-sm font-medium text-white shadow-lg shadow-[var(--brand-primary)]/25"
               onClick={onStartQuiz}
             >
               Start quiz

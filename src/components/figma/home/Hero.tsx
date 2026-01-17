@@ -22,7 +22,7 @@ export function Hero({ onStartTest }: HeroProps) {
           <div className="space-y-3">
             <button
               onClick={onStartTest}
-              className="group inline-flex items-center gap-2 px-8 py-4 bg-brand text-brand-foreground rounded-xl font-medium shadow-lg shadow-brand/25 hover:bg-brand-strong hover:shadow-xl hover:shadow-brand/30 active:scale-[0.98] transition-all duration-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
+              className="group inline-flex items-center gap-2 px-8 py-4 bg-[#2563eb] text-white rounded-xl font-medium shadow-lg shadow-[#2563eb]/25 hover:bg-[#1d4ed8] hover:shadow-xl hover:shadow-[#2563eb]/30 active:scale-[0.98] transition-all duration-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#2563eb]"
             >
               Start the test
               <ArrowRight className="w-5 h-5 group-hover:translate-x-0.5 transition-transform duration-200" />

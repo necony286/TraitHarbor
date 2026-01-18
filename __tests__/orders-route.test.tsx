@@ -1,7 +1,7 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { describe, expect, it, beforeEach, vi } from 'vitest';
-import { getCheckoutConfig } from '../lib/payments';
+import { getCheckoutConfigResult } from '../lib/payments';
 import { PATCH, POST } from '../src/app/api/orders/route';
 import CheckoutCallbackClient from '../src/app/checkout/callback/CheckoutCallbackClient';
 
@@ -24,7 +24,7 @@ vi.mock('../lib/db', () => ({
 
 vi.mock('../lib/payments', () => ({
   getCheckoutAmountCents: () => 5000,
-  getCheckoutConfig: vi.fn()
+  getCheckoutConfigResult: vi.fn()
 }));
 
 vi.mock('next/navigation', () => ({
@@ -128,7 +128,7 @@ describe('orders API route', () => {
     createProvisionalOrderMock.mockResolvedValue({ data: createdOrder, error: null });
 
     const checkoutConfigError = new Error('Checkout config unavailable');
-    const getCheckoutConfigMock = vi.mocked(getCheckoutConfig);
+    const getCheckoutConfigMock = vi.mocked(getCheckoutConfigResult);
     getCheckoutConfigMock.mockImplementation(() => {
       throw checkoutConfigError;
     });

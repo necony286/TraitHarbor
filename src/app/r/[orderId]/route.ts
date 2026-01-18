@@ -14,7 +14,13 @@ export async function GET(
   { params }: { params: Promise<{ orderId: string }> }
 ) {
   const redirectToRetrieve = () => NextResponse.redirect(new URL('/retrieve-report', request.url));
-  const { orderId } = await params;
+  let orderId: string;
+  try {
+    ({ orderId } = await params);
+  } catch (error) {
+    logError('Failed to resolve orderId from route params', { error });
+    return redirectToRetrieve();
+  }
 
   if (!orderIdSchema.safeParse(orderId).success) {
     return redirectToRetrieve();

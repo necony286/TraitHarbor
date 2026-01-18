@@ -22,6 +22,7 @@ type CheckoutButtonProps = {
 };
 
 const PADDLE_SCRIPT_SRC = 'https://cdn.paddle.com/paddle/v2/paddle.js';
+let paddleScriptPromise: Promise<void> | null = null;
 
 function loadPaddleScript(): Promise<void> {
   if (typeof window === 'undefined') {
@@ -32,25 +33,52 @@ function loadPaddleScript(): Promise<void> {
     return Promise.resolve();
   }
 
-  const existingScript = document.querySelector<HTMLScriptElement>('script[data-paddle]');
-  if (existingScript) {
-    return new Promise((resolve, reject) => {
-      existingScript.addEventListener('load', () => resolve(), { once: true });
-      existingScript.addEventListener('error', () => reject(new Error('Failed to load Paddle.')), {
-        once: true
-      });
-    });
+  if (paddleScriptPromise) {
+    return paddleScriptPromise;
   }
 
-  return new Promise((resolve, reject) => {
+  const isScriptLoaded = (script: HTMLScriptElement) => script.dataset.paddleLoaded === 'true';
+
+  paddleScriptPromise = new Promise((resolve, reject) => {
+    const existingScript = document.querySelector<HTMLScriptElement>('script[data-paddle]');
+    const handleError = () => {
+      document.querySelector('script[data-paddle]')?.remove();
+      paddleScriptPromise = null;
+      reject(new Error('Failed to load Paddle.'));
+    };
+
+    if (existingScript) {
+      if (isScriptLoaded(existingScript)) {
+        existingScript.dataset.paddleLoaded = 'true';
+        resolve();
+        return;
+      }
+
+      existingScript.addEventListener(
+        'load',
+        () => {
+          existingScript.dataset.paddleLoaded = 'true';
+          resolve();
+        },
+        { once: true }
+      );
+      existingScript.addEventListener('error', handleError, { once: true });
+      return;
+    }
+
     const script = document.createElement('script');
     script.src = PADDLE_SCRIPT_SRC;
     script.async = true;
     script.dataset.paddle = 'true';
-    script.onload = () => resolve();
-    script.onerror = () => reject(new Error('Failed to load Paddle.'));
+    script.onload = () => {
+      script.dataset.paddleLoaded = 'true';
+      resolve();
+    };
+    script.onerror = handleError;
     document.body.appendChild(script);
   });
+
+  return paddleScriptPromise;
 }
 
 export function CheckoutButton({ resultId }: CheckoutButtonProps) {
@@ -146,8 +174,6 @@ export function CheckoutButton({ resultId }: CheckoutButtonProps) {
       try {
         window.Paddle.Checkout.open(checkoutOptions);
       } catch (error) {
-        // eslint-disable-next-line no-console
-        console.error('[Paddle] Checkout.open failed', error);
         throw error;
       }
     } catch (error) {

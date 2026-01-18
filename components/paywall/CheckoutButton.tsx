@@ -37,10 +37,7 @@ function loadPaddleScript(): Promise<void> {
     return paddleScriptPromise;
   }
 
-  const isScriptLoaded = (script: HTMLScriptElement) =>
-    script.dataset.paddleLoaded === 'true' ||
-    script.readyState === 'complete' ||
-    script.readyState === 'loaded';
+  const isScriptLoaded = (script: HTMLScriptElement) => script.dataset.paddleLoaded === 'true';
 
   paddleScriptPromise = new Promise((resolve, reject) => {
     const existingScript = document.querySelector<HTMLScriptElement>('script[data-paddle]');

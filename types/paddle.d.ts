@@ -5,11 +5,13 @@ type PaddleCheckoutItem = {
   quantity?: number;
 };
 
+type PaddleCustomer = {
+  email?: string;
+};
+
 type PaddleCheckoutOptions = {
   items: PaddleCheckoutItem[];
-  customer?: {
-    email?: string;
-  };
+  customer?: PaddleCustomer;
   customData?: Record<string, unknown>;
   successCallback?: () => void;
 };

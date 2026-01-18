@@ -105,14 +105,11 @@ export function getCheckoutConfigResult(): CheckoutConfigResult {
   if (missing.length > 0) {
     return { checkout: null, reason: 'MISSING_ENV', missing };
   }
-  const resolvedClientToken = clientToken ?? '';
-  const resolvedPriceId = effectivePriceId ?? '';
-
   return {
     checkout: {
       environment,
-      clientToken: resolvedClientToken,
-      ...buildPrice(resolvedPriceId)
+      clientToken: clientToken!,
+      ...buildPrice(effectivePriceId!)
     }
   };
 }

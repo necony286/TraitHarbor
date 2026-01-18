@@ -62,16 +62,6 @@ export function CheckoutButton({ resultId }: CheckoutButtonProps) {
   const [emailError, setEmailError] = useState<string | null>(null);
   const router = useRouter();
 
-  const getTokenPrefix = (token: string) => {
-    if (token.startsWith('test_')) {
-      return 'test_';
-    }
-    if (token.startsWith('live_')) {
-      return 'live_';
-    }
-    return 'unknown';
-  };
-
   const handleCheckout = async () => {
     setErrorMessage(null);
     setEmailError(null);
@@ -112,14 +102,6 @@ export function CheckoutButton({ resultId }: CheckoutButtonProps) {
         throw new Error('Paddle SDK not available.');
       }
 
-      const tokenPrefix = getTokenPrefix(checkout.clientToken);
-      // eslint-disable-next-line no-console
-      console.log('[Paddle] Checkout config', {
-        environment: checkout.environment,
-        tokenPrefix,
-        priceId: checkout.priceId
-      });
-
       try {
         window.Paddle.Environment.set(checkout.environment);
         window.Paddle.Initialize({ token: checkout.clientToken });
@@ -149,9 +131,6 @@ export function CheckoutButton({ resultId }: CheckoutButtonProps) {
           router.push(`/checkout/callback?session_id=${sessionId}`);
         }
       } as unknown as Parameters<typeof window.Paddle.Checkout.open>[0];
-
-      // eslint-disable-next-line no-console
-      console.log('[Paddle] Checkout.open payload', checkoutOptions);
 
       try {
         window.Paddle.Checkout.open(checkoutOptions);

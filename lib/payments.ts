@@ -68,21 +68,22 @@ function assertAllowedPrice(price: CheckoutPrice): CheckoutPrice {
 
 export function getCheckoutConfig(): CheckoutConfig {
   const clientToken = assertEnvValue(process.env.PADDLE_CLIENT_TOKEN, 'PADDLE_CLIENT_TOKEN');
-
+  const configuredEnvironment = process.env.PADDLE_ENV as PaddleEnvironment | undefined;
   const environmentFromToken = clientToken.startsWith('test_')
     ? 'sandbox'
     : clientToken.startsWith('live_')
       ? 'production'
       : null;
-  let environment = (process.env.PADDLE_ENV ?? environmentFromToken ?? 'sandbox') as PaddleEnvironment;
 
-  if (environmentFromToken && environment !== environmentFromToken) {
-    console.warn('Paddle env mismatch. Using env derived from token.', {
-      configured: environment,
-      derived: environmentFromToken
-    });
-    environment = environmentFromToken;
+  if (configuredEnvironment === 'sandbox' && !clientToken.startsWith('test_')) {
+    throw new Error('PADDLE_ENV is sandbox but PADDLE_CLIENT_TOKEN is not a test_ token.');
   }
+
+  if (configuredEnvironment === 'production' && !clientToken.startsWith('live_')) {
+    throw new Error('PADDLE_ENV is production but PADDLE_CLIENT_TOKEN is not a live_ token.');
+  }
+
+  const environment = (configuredEnvironment ?? environmentFromToken ?? 'sandbox') as PaddleEnvironment;
 
   const price = assertAllowedPrice(environment === 'sandbox' ? SANDBOX_PRICE : PRODUCTION_PRICE);
 

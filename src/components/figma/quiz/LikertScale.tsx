@@ -74,7 +74,7 @@ function LikertOptionItem({ option, isSelected, name, onChange }: LikertOptionIt
           <span className="md:hidden" aria-hidden="true">
             {option.shortLabel}
           </span>
-          <span className="hidden md:inline" aria-hidden="true">
+          <span className="hidden md:inline">
             {option.label}
           </span>
         </span>

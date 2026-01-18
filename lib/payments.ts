@@ -23,17 +23,24 @@ export const checkoutConfigSchema = z.object({
   clientToken: z.string()
 });
 
-const DEFAULT_PRICE: CheckoutPrice = {
+const SANDBOX_PRICE: CheckoutPrice = {
+  priceId: process.env.PADDLE_SANDBOX_PRICE_ID ?? process.env.PADDLE_PRICE_ID ?? '',
+  currency: 'EUR',
+  amount: 900,
+  description: 'Starter PDF'
+};
+
+const PRODUCTION_PRICE: CheckoutPrice = {
   priceId: process.env.PADDLE_PRICE_ID ?? '',
   currency: 'EUR',
   amount: 900,
   description: 'Starter PDF'
 };
 
-const PRICE_ALLOWLIST = [DEFAULT_PRICE];
+const PRICE_ALLOWLIST = [SANDBOX_PRICE, PRODUCTION_PRICE];
 
 export function getCheckoutAmountCents(): number {
-  return DEFAULT_PRICE.amount;
+  return PRODUCTION_PRICE.amount;
 }
 
 function assertEnvValue(value: string | undefined, name: string): string {
@@ -60,9 +67,24 @@ function assertAllowedPrice(price: CheckoutPrice): CheckoutPrice {
 }
 
 export function getCheckoutConfig(): CheckoutConfig {
-  const environment = (process.env.PADDLE_ENV ?? 'sandbox') as PaddleEnvironment;
   const clientToken = assertEnvValue(process.env.PADDLE_CLIENT_TOKEN, 'PADDLE_CLIENT_TOKEN');
-  const price = assertAllowedPrice(DEFAULT_PRICE);
+
+  const environmentFromToken = clientToken.startsWith('test_')
+    ? 'sandbox'
+    : clientToken.startsWith('live_')
+      ? 'production'
+      : null;
+  let environment = (process.env.PADDLE_ENV ?? environmentFromToken ?? 'sandbox') as PaddleEnvironment;
+
+  if (environmentFromToken && environment !== environmentFromToken) {
+    console.warn('Paddle env mismatch. Using env derived from token.', {
+      configured: environment,
+      derived: environmentFromToken
+    });
+    environment = environmentFromToken;
+  }
+
+  const price = assertAllowedPrice(environment === 'sandbox' ? SANDBOX_PRICE : PRODUCTION_PRICE);
 
   return {
     environment,

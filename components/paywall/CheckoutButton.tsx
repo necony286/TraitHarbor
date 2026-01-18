@@ -27,12 +27,16 @@ function loadPaddleScript(): Promise<void> {
   }
 
   if (window.Paddle) {
+    // eslint-disable-next-line no-console
+    console.log('[Paddle] SDK already loaded.');
     return Promise.resolve();
   }
 
   const existingScript = document.querySelector<HTMLScriptElement>('script[data-paddle]');
   if (existingScript) {
     return new Promise((resolve, reject) => {
+      // eslint-disable-next-line no-console
+      console.log('[Paddle] Waiting for existing SDK script to load.');
       existingScript.addEventListener('load', () => resolve());
       existingScript.addEventListener('error', () => reject(new Error('Failed to load Paddle.')));
     });
@@ -43,6 +47,8 @@ function loadPaddleScript(): Promise<void> {
     script.src = PADDLE_SCRIPT_SRC;
     script.async = true;
     script.dataset.paddle = 'true';
+    // eslint-disable-next-line no-console
+    console.log('[Paddle] Injecting SDK script.');
     script.onload = () => resolve();
     script.onerror = () => reject(new Error('Failed to load Paddle.'));
     document.body.appendChild(script);
@@ -55,6 +61,16 @@ export function CheckoutButton({ resultId }: CheckoutButtonProps) {
   const [email, setEmail] = useState('');
   const [emailError, setEmailError] = useState<string | null>(null);
   const router = useRouter();
+
+  const getTokenPrefix = (token: string) => {
+    if (token.startsWith('test_')) {
+      return 'test_';
+    }
+    if (token.startsWith('live_')) {
+      return 'live_';
+    }
+    return 'unknown';
+  };
 
   const handleCheckout = async () => {
     setErrorMessage(null);
@@ -96,8 +112,22 @@ export function CheckoutButton({ resultId }: CheckoutButtonProps) {
         throw new Error('Paddle SDK not available.');
       }
 
-      window.Paddle.Environment.set(checkout.environment);
-      window.Paddle.Initialize({ token: checkout.clientToken });
+      const tokenPrefix = getTokenPrefix(checkout.clientToken);
+      // eslint-disable-next-line no-console
+      console.log('[Paddle] Checkout config', {
+        environment: checkout.environment,
+        tokenPrefix,
+        priceId: checkout.priceId
+      });
+
+      try {
+        window.Paddle.Environment.set(checkout.environment);
+        window.Paddle.Initialize({ token: checkout.clientToken });
+      } catch (error) {
+        // eslint-disable-next-line no-console
+        console.error('[Paddle] Failed to initialize SDK', error);
+        throw error;
+      }
 
       trackEvent('checkout_open', { resultId, priceId: checkout.priceId, orderId: order.id });
 
@@ -120,7 +150,16 @@ export function CheckoutButton({ resultId }: CheckoutButtonProps) {
         }
       } as unknown as Parameters<typeof window.Paddle.Checkout.open>[0];
 
-      window.Paddle.Checkout.open(checkoutOptions);
+      // eslint-disable-next-line no-console
+      console.log('[Paddle] Checkout.open payload', checkoutOptions);
+
+      try {
+        window.Paddle.Checkout.open(checkoutOptions);
+      } catch (error) {
+        // eslint-disable-next-line no-console
+        console.error('[Paddle] Checkout.open failed', error);
+        throw error;
+      }
     } catch (error) {
       // eslint-disable-next-line no-console
       console.error('Checkout error', error);

@@ -145,12 +145,35 @@ export function CheckoutButton({ resultId }: CheckoutButtonProps) {
           router.push(`/checkout/callback?session_id=${sessionId}`);
         }
       };
+      const normalizedCheckoutOptions = { ...checkoutOptions } as PaddleCheckoutOptions & {
+        allowedPaymentMethods?: string[];
+      };
+
+      if (
+        Array.isArray(normalizedCheckoutOptions.allowedPaymentMethods) &&
+        normalizedCheckoutOptions.allowedPaymentMethods.length === 0
+      ) {
+        delete normalizedCheckoutOptions.allowedPaymentMethods;
+      }
+
+      // eslint-disable-next-line no-console
+      console.log('[Paddle] Checkout.open payload', normalizedCheckoutOptions);
 
       try {
-        window.Paddle.Checkout.open(checkoutOptions);
+        window.Paddle.Checkout.open(normalizedCheckoutOptions);
       } catch (error) {
         // eslint-disable-next-line no-console
         console.error('[Paddle] Checkout.open failed', error);
+        const errorBody =
+          (error as { response?: { data?: unknown; body?: unknown } })?.response?.data ??
+          (error as { response?: { data?: unknown; body?: unknown } })?.response?.body ??
+          (error as { body?: unknown })?.body ??
+          (error as { message?: string })?.message ??
+          null;
+        if (errorBody) {
+          // eslint-disable-next-line no-console
+          console.error('[Paddle] Checkout.open error body', errorBody);
+        }
         throw error;
       }
     } catch (error) {

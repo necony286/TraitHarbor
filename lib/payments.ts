@@ -105,11 +105,14 @@ export function getCheckoutConfigResult(): CheckoutConfigResult {
   if (missing.length > 0) {
     return { checkout: null, reason: 'MISSING_ENV', missing };
   }
+  if (!clientToken || !effectivePriceId) {
+    throw new Error('Internal error: Invariant violation in getCheckoutConfigResult');
+  }
   return {
     checkout: {
       environment,
-      clientToken: clientToken!,
-      ...buildPrice(effectivePriceId!)
+      clientToken,
+      ...buildPrice(effectivePriceId)
     }
   };
 }

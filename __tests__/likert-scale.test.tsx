@@ -8,15 +8,15 @@ describe('LikertScale', () => {
       <LikertScale name="likert" value={2} onChange={() => undefined} questionId="q1" />
     );
 
-    const disagreeRadios = screen.getAllByRole('radio', { name: 'Disagree' });
-    const agreeRadios = screen.getAllByRole('radio', { name: 'Agree' });
+    const getDisagreeRadios = () => screen.getAllByRole('radio', { name: 'Disagree' });
+    const getAgreeRadios = () => screen.getAllByRole('radio', { name: 'Agree' });
 
-    disagreeRadios.forEach((radio) => expect(radio).toBeChecked());
-    agreeRadios.forEach((radio) => expect(radio).not.toBeChecked());
+    getDisagreeRadios().forEach((radio) => expect(radio).toBeChecked());
+    getAgreeRadios().forEach((radio) => expect(radio).not.toBeChecked());
 
     rerender(<LikertScale name="likert" value={4} onChange={() => undefined} questionId="q1" />);
 
-    disagreeRadios.forEach((radio) => expect(radio).not.toBeChecked());
-    agreeRadios.forEach((radio) => expect(radio).toBeChecked());
+    getDisagreeRadios().forEach((radio) => expect(radio).not.toBeChecked());
+    getAgreeRadios().forEach((radio) => expect(radio).toBeChecked());
   });
 });

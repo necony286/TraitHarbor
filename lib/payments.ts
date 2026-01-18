@@ -55,8 +55,14 @@ function buildPrice(priceId: string): CheckoutPrice {
   };
 }
 
-export function getCheckoutConfigResult(): CheckoutConfigResult {
-  const { clientToken, configuredEnvironmentValue, productionPriceId, sandboxPriceId } = getCheckoutEnvSnapshot();
+type CheckoutConfigOptions = {
+  allowMissingEnv?: boolean;
+  envSnapshot?: ReturnType<typeof getCheckoutEnvSnapshot>;
+};
+
+export function getCheckoutConfigResult(options: CheckoutConfigOptions = {}): CheckoutConfigResult {
+  const { clientToken, configuredEnvironmentValue, productionPriceId, sandboxPriceId } =
+    options.envSnapshot ?? getCheckoutEnvSnapshot();
   const allowedEnvironments = checkoutConfigSchema.shape.environment.options;
   if (configuredEnvironmentValue && !allowedEnvironments.includes(configuredEnvironmentValue as PaddleEnvironment)) {
     throw new Error(`Invalid PADDLE_ENV: "${configuredEnvironmentValue}". Must be 'sandbox' or 'production'.`);
@@ -102,11 +108,17 @@ export function getCheckoutConfigResult(): CheckoutConfigResult {
     }
   }
 
-  if (missing.length > 0) {
+  if (missing.length > 0 && !options.allowMissingEnv) {
     return { checkout: null, reason: 'MISSING_ENV', missing };
   }
   if (!clientToken || !effectivePriceId) {
-    throw new Error('Internal error: Invariant violation in getCheckoutConfigResult');
+    const missingVars = [
+      !clientToken && 'clientToken',
+      !effectivePriceId && 'effectivePriceId',
+    ].filter(Boolean);
+    throw new Error(
+      `Internal error: Invariant violation in getCheckoutConfigResult. Missing: ${missingVars.join(', ')}`
+    );
   }
   return {
     checkout: {

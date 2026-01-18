@@ -15,7 +15,7 @@ export default defineConfig(async () => {
       globals: true,
       setupFiles: './vitest.setup.ts',
       css: false,
-      exclude: ['**/tests/e2e/**', 'node_modules']
+      exclude: ['**/tests/e2e/**', '**/node_modules/**']
     }
   };
 });

@@ -9,9 +9,12 @@ const orderIdSchema = z.string().uuid();
 
 export const runtime = 'nodejs';
 
-export async function GET(request: Request, { params }: { params: { orderId: string } }) {
+export async function GET(
+  request: Request,
+  { params }: { params: Promise<{ orderId: string }> }
+) {
   const redirectToRetrieve = () => NextResponse.redirect(new URL('/retrieve-report', request.url));
-  const orderId = params.orderId;
+  const { orderId } = await params;
 
   if (!orderIdSchema.safeParse(orderId).success) {
     return redirectToRetrieve();

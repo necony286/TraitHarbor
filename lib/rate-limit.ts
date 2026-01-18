@@ -77,7 +77,7 @@ const loggedRateLimitIssues = new Set<string>();
 const isProductionLike = () => process.env.NODE_ENV === 'production' || process.env.VERCEL_ENV === 'preview';
 const isVitest = () => process.env.VITEST === 'true' || process.env.VITEST === '1';
 
-const isTestEnv = () => process.env.NODE_ENV === 'test' || process.env.NODE_ENV === undefined;
+const isTestEnv = () => process.env.NODE_ENV === 'test';
 
 const allowFailOpen = () => process.env.RATE_LIMIT_ALLOW_FAIL_OPEN === 'true';
 

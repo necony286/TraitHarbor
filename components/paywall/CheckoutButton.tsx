@@ -29,18 +29,16 @@ function loadPaddleScript(): Promise<void> {
   }
 
   if (window.Paddle) {
-    // eslint-disable-next-line no-console
-    console.log('[Paddle] SDK already loaded.');
     return Promise.resolve();
   }
 
   const existingScript = document.querySelector<HTMLScriptElement>('script[data-paddle]');
   if (existingScript) {
     return new Promise((resolve, reject) => {
-      // eslint-disable-next-line no-console
-      console.log('[Paddle] Waiting for existing SDK script to load.');
-      existingScript.addEventListener('load', () => resolve());
-      existingScript.addEventListener('error', () => reject(new Error('Failed to load Paddle.')));
+      existingScript.addEventListener('load', () => resolve(), { once: true });
+      existingScript.addEventListener('error', () => reject(new Error('Failed to load Paddle.')), {
+        once: true
+      });
     });
   }
 
@@ -49,8 +47,6 @@ function loadPaddleScript(): Promise<void> {
     script.src = PADDLE_SCRIPT_SRC;
     script.async = true;
     script.dataset.paddle = 'true';
-    // eslint-disable-next-line no-console
-    console.log('[Paddle] Injecting SDK script.');
     script.onload = () => resolve();
     script.onerror = () => reject(new Error('Failed to load Paddle.'));
     document.body.appendChild(script);
@@ -67,7 +63,6 @@ export function CheckoutButton({ resultId }: CheckoutButtonProps) {
   const handleCheckout = async () => {
     setErrorMessage(null);
     setEmailError(null);
-    setIsLoading(true);
 
     try {
       const userId = getOrCreateAnonymousUserId();
@@ -80,6 +75,8 @@ export function CheckoutButton({ resultId }: CheckoutButtonProps) {
         setEmailError('Please enter a valid email address to continue.');
         return;
       }
+
+      setIsLoading(true);
 
       const response = await fetch('/api/orders', {
         method: 'POST',
@@ -145,35 +142,12 @@ export function CheckoutButton({ resultId }: CheckoutButtonProps) {
           router.push(`/checkout/callback?session_id=${sessionId}`);
         }
       };
-      const normalizedCheckoutOptions = { ...checkoutOptions } as PaddleCheckoutOptions & {
-        allowedPaymentMethods?: string[];
-      };
-
-      if (
-        Array.isArray(normalizedCheckoutOptions.allowedPaymentMethods) &&
-        normalizedCheckoutOptions.allowedPaymentMethods.length === 0
-      ) {
-        delete normalizedCheckoutOptions.allowedPaymentMethods;
-      }
-
-      // eslint-disable-next-line no-console
-      console.log('[Paddle] Checkout.open payload', normalizedCheckoutOptions);
 
       try {
-        window.Paddle.Checkout.open(normalizedCheckoutOptions);
+        window.Paddle.Checkout.open(checkoutOptions);
       } catch (error) {
         // eslint-disable-next-line no-console
         console.error('[Paddle] Checkout.open failed', error);
-        const errorBody =
-          (error as { response?: { data?: unknown; body?: unknown } })?.response?.data ??
-          (error as { response?: { data?: unknown; body?: unknown } })?.response?.body ??
-          (error as { body?: unknown })?.body ??
-          (error as { message?: string })?.message ??
-          null;
-        if (errorBody) {
-          // eslint-disable-next-line no-console
-          console.error('[Paddle] Checkout.open error body', errorBody);
-        }
         throw error;
       }
     } catch (error) {

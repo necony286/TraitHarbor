@@ -75,6 +75,9 @@ const upstashLimiters = new Map<string, Limiter>();
 const loggedRateLimitIssues = new Set<string>();
 
 const isProductionLike = () => process.env.NODE_ENV === 'production' || process.env.VERCEL_ENV === 'preview';
+const isVitest = () => process.env.VITEST === 'true' || process.env.VITEST === '1';
+
+const isTestEnv = () => process.env.NODE_ENV === 'test' || process.env.NODE_ENV === undefined;
 
 const allowFailOpen = () => process.env.RATE_LIMIT_ALLOW_FAIL_OPEN === 'true';
 
@@ -128,10 +131,15 @@ const getUpstashLimiter = (limit: number, window: RateLimitConfig['window']): Li
 };
 
 const getLimiter = (limit: number, window: RateLimitConfig['window']): Limiter | null => {
+  if (isTestEnv()) {
+    return createDevLimiter(limit, window);
+  }
+
   const hasUpstash =
     Boolean(process.env.UPSTASH_REDIS_REST_URL) && Boolean(process.env.UPSTASH_REDIS_REST_TOKEN);
+  const shouldBypassUpstash = isVitest() && !isProductionLike();
 
-  if (hasUpstash) {
+  if (hasUpstash && !shouldBypassUpstash) {
     return getUpstashLimiter(limit, window);
   }
 

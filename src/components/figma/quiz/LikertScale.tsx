@@ -21,32 +21,23 @@ interface LikertScaleProps {
   questionId: string;
 }
 
-type LikertVariant = 'desktop' | 'mobile';
-
 interface LikertOptionItemProps {
   option: LikertOption;
   isSelected: boolean;
   name: string;
   onChange: (value: number) => void;
-  variant: LikertVariant;
 }
 
-function LikertOptionItem({ option, isSelected, name, onChange, variant }: LikertOptionItemProps) {
-  const isDesktop = variant === 'desktop';
-  const labelSpacing = isDesktop ? 'gap-2.5 p-3.5' : 'gap-2 p-3';
-  const selectedLabelClasses = isDesktop
-    ? 'border-primary bg-primary/10 shadow-sm'
-    : 'border-primary bg-primary/10';
-  const unselectedLabelClasses = isDesktop
-    ? 'border-border bg-background hover:border-primary/50 hover:bg-muted/50 hover:shadow-sm'
-    : 'border-border bg-background active:border-primary/50 active:bg-muted/50';
-  const indicatorSize = isDesktop ? 'w-5 h-5' : 'w-4 h-4';
-  const indicatorSelectedClasses = isDesktop
-    ? 'border-primary bg-primary scale-110'
-    : 'border-primary bg-primary';
+function LikertOptionItem({ option, isSelected, name, onChange }: LikertOptionItemProps) {
+  const labelSpacing = 'gap-2 p-3 md:gap-2.5 md:p-3.5';
+  const selectedLabelClasses = 'border-primary bg-primary/10 md:shadow-sm';
+  const unselectedLabelClasses =
+    'border-border bg-background active:border-primary/50 active:bg-muted/50 md:hover:border-primary/50 md:hover:bg-muted/50 md:hover:shadow-sm';
+  const indicatorSize = 'w-4 h-4 md:w-5 md:h-5';
+  const indicatorSelectedClasses = 'border-primary bg-primary md:scale-110';
 
   return (
-    <div className={isDesktop ? '' : 'relative flex-1 group'}>
+    <div className="relative flex-1 group md:flex-none">
       <label
         className={`
           relative flex flex-col items-center justify-center rounded-xl border-2 cursor-pointer ${labelSpacing}
@@ -71,37 +62,40 @@ function LikertOptionItem({ option, isSelected, name, onChange, variant }: Liker
             ${isSelected ? indicatorSelectedClasses : 'border-muted-foreground/30'}
           `}
         >
-          {isSelected && <div className={`${isDesktop ? 'w-2 h-2' : 'w-1.5 h-1.5'} rounded-full bg-white`} />}
+          {isSelected && <div className="h-1.5 w-1.5 rounded-full bg-white md:h-2 md:w-2" />}
         </div>
 
         <span
           className={`
-            text-xs font-medium ${isDesktop ? 'text-center leading-tight' : ''} transition-colors duration-200
+            text-xs font-medium transition-colors duration-200 md:text-center md:leading-tight
             ${isSelected ? 'text-primary' : 'text-foreground'}
           `}
         >
-          {isDesktop ? option.label : option.shortLabel}
+          <span className="md:hidden" aria-hidden="true">
+            {option.shortLabel}
+          </span>
+          <span className="hidden md:inline" aria-hidden="true">
+            {option.label}
+          </span>
         </span>
 
-        {!isDesktop && <span className="sr-only">{option.label}</span>}
+        <span className="sr-only md:hidden">{option.label}</span>
       </label>
 
-      {!isDesktop && (
-        <div
-          className={`
-            absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1
-            bg-foreground text-background text-xs rounded-md whitespace-nowrap
-            opacity-0 pointer-events-none transition-opacity duration-200
-            group-active:opacity-100
-          `}
-          aria-hidden="true"
-        >
-          {option.label}
-          <div className="absolute top-full left-1/2 -translate-x-1/2 -mt-px">
-            <div className="border-4 border-transparent border-t-foreground" />
-          </div>
+      <div
+        className={`
+          absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1
+          bg-foreground text-background text-xs rounded-md whitespace-nowrap
+          opacity-0 pointer-events-none transition-opacity duration-200
+          group-active:opacity-100 md:hidden
+        `}
+        aria-hidden="true"
+      >
+        {option.label}
+        <div className="absolute top-full left-1/2 -translate-x-1/2 -mt-px">
+          <div className="border-4 border-transparent border-t-foreground" />
         </div>
-      )}
+      </div>
     </div>
   );
 }
@@ -109,7 +103,7 @@ function LikertOptionItem({ option, isSelected, name, onChange, variant }: Liker
 export function LikertScale({ name, value, onChange, questionId }: LikertScaleProps) {
   return (
     <div role="radiogroup" aria-labelledby={`question-${questionId}`} className="space-y-3">
-      <div className="hidden md:grid grid-cols-5 gap-2">
+      <div className="flex gap-2 md:grid md:grid-cols-5">
         {LIKERT_OPTIONS.map((option) => {
           const isSelected = value === option.value;
 
@@ -120,24 +114,6 @@ export function LikertScale({ name, value, onChange, questionId }: LikertScalePr
               isSelected={isSelected}
               name={name}
               onChange={onChange}
-              variant="desktop"
-            />
-          );
-        })}
-      </div>
-
-      <div className="flex md:hidden gap-2">
-        {LIKERT_OPTIONS.map((option) => {
-          const isSelected = value === option.value;
-
-          return (
-            <LikertOptionItem
-              key={option.value}
-              option={option}
-              isSelected={isSelected}
-              name={name}
-              onChange={onChange}
-              variant="mobile"
             />
           );
         })}

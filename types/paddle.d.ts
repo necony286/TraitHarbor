@@ -5,6 +5,10 @@ type PaddleCheckoutItem = {
   quantity?: number;
 };
 
+/**
+ * Represents a customer's address for Paddle.js.
+ * @see https://developer.paddle.com/reference/paddle-js/parameters/customer
+ */
 type PaddleAddress = {
   addressLine1?: string;
   addressLine2?: string;
@@ -14,11 +18,19 @@ type PaddleAddress = {
   region?: string;
 };
 
+/**
+ * Represents a customer's business information for Paddle.js.
+ * @see https://developer.paddle.com/reference/paddle-js/parameters/customer
+ */
 type PaddleBusiness = {
   name?: string;
   taxIdentifier?: string;
 };
 
+/**
+ * Represents customer details for Paddle.js checkout.
+ * @see https://developer.paddle.com/reference/paddle-js/parameters/customer
+ */
 type PaddleCustomer = {
   email?: string;
   address?: PaddleAddress;

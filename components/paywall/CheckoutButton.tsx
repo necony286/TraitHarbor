@@ -124,19 +124,21 @@ export function CheckoutButton({ resultId }: CheckoutButtonProps) {
 
       trackEvent('checkout_open', { resultId, priceId: checkout.priceId, orderId: order.id });
 
+      const items: Parameters<typeof window.Paddle.Checkout.open>[0]['items'] = [
+        {
+          priceId: checkout.priceId,
+          quantity: 1
+        }
+      ];
+      const customData: Parameters<typeof window.Paddle.Checkout.open>[0]['customData'] = {
+        order_id: order.id
+      };
       const checkoutOptions: Parameters<typeof window.Paddle.Checkout.open>[0] = {
-        items: [
-          {
-            priceId: checkout.priceId,
-            quantity: 1
-          }
-        ],
+        items,
         customer: {
           email: parsedEmail.data
         },
-        customData: {
-          order_id: order.id
-        },
+        customData,
         successCallback: () => {
           const sessionId = providerSessionId ?? order.id;
           router.push(`/checkout/callback?session_id=${sessionId}`);

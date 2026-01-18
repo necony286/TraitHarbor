@@ -69,7 +69,7 @@ function assertAllowedPrice(price: CheckoutPrice): CheckoutPrice {
 export function getCheckoutConfig(): CheckoutConfig {
   const clientToken = assertEnvValue(process.env.PADDLE_CLIENT_TOKEN, 'PADDLE_CLIENT_TOKEN');
   const configuredEnvironmentValue = process.env.PADDLE_ENV;
-  if (configuredEnvironmentValue && !['sandbox', 'production'].includes(configuredEnvironmentValue)) {
+  if (configuredEnvironmentValue && !checkoutConfigSchema.shape.environment.options.includes(configuredEnvironmentValue)) {
     throw new Error(`Invalid PADDLE_ENV: "${configuredEnvironmentValue}". Must be 'sandbox' or 'production'.`);
   }
   const configuredEnvironment = configuredEnvironmentValue as PaddleEnvironment | undefined;

@@ -124,7 +124,7 @@ export function CheckoutButton({ resultId }: CheckoutButtonProps) {
 
       trackEvent('checkout_open', { resultId, priceId: checkout.priceId, orderId: order.id });
 
-      const checkoutOptions = {
+      const checkoutOptions: Parameters<typeof window.Paddle.Checkout.open>[0] = {
         items: [
           {
             priceId: checkout.priceId,
@@ -141,7 +141,7 @@ export function CheckoutButton({ resultId }: CheckoutButtonProps) {
           const sessionId = providerSessionId ?? order.id;
           router.push(`/checkout/callback?session_id=${sessionId}`);
         }
-      } as unknown as Parameters<typeof window.Paddle.Checkout.open>[0];
+      };
 
       try {
         window.Paddle.Checkout.open(checkoutOptions);

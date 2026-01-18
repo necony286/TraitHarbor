@@ -15,6 +15,15 @@ const isAnswerStorageError = (error?: { code?: string } | null) => {
   return error.code.startsWith('XXA');
 };
 
+const isValidationError = (error?: { code?: string } | null) => {
+  if (!error?.code) return false;
+  return (
+    error.code.startsWith('XXA') ||
+    error.code.startsWith('XXP') ||
+    error.code.startsWith('XXU')
+  );
+};
+
 export async function POST(request: Request) {
   const rateLimitResponse = await enforceRateLimit({
     request,
@@ -96,6 +105,12 @@ export async function POST(request: Request) {
   if (createError || !createdResultId) {
     if (createError) {
       console.error('Failed to store response via RPC.', createError);
+    }
+    if (isValidationError(createError)) {
+      return NextResponse.json(
+        { error: createError?.message ?? 'Invalid quiz submission.', code: createError?.code },
+        { status: 400 }
+      );
     }
     const errorMessage = isAnswerStorageError(createError)
       ? 'Failed to store answers.'

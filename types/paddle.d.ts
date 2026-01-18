@@ -7,6 +7,9 @@ type PaddleCheckoutItem = {
 
 type PaddleCheckoutOptions = {
   items: PaddleCheckoutItem[];
+  customer?: {
+    email?: string;
+  };
   customData?: Record<string, unknown>;
   successCallback?: () => void;
 };

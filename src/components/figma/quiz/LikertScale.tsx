@@ -52,6 +52,7 @@ function LikertOptionItem({ option, isSelected, name, onChange }: LikertOptionIt
           value={option.value}
           checked={isSelected}
           onChange={() => onChange(option.value)}
+          aria-label={option.label}
           className="absolute inset-0 z-10 h-full w-full cursor-pointer opacity-0 scroll-mt-24 scroll-mb-32"
         />
 

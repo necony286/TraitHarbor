@@ -20,7 +20,7 @@ export const orderSchema = z.object({
   response_id: z.string().uuid().nullable().optional(),
   paddle_order_id: z.string().nullable().optional(),
   paddle_transaction_id: z.string().nullable().optional(),
-  created_at: z.string().datetime()
+  created_at: z.string().datetime({ offset: true })
 });
 
 export const mapOrderRecord = (order: z.infer<typeof orderSchema>): OrderRecord => ({
@@ -38,7 +38,7 @@ export const orderRecordSchema = z.object({
   amountCents: z.number().int().nonnegative(),
   resultId: z.string().uuid().nullable(),
   paddleOrderId: z.string().nullable(),
-  createdAt: z.string().datetime()
+  createdAt: z.string().datetime({ offset: true })
 });
 
 export const orderDetailSchema = orderSchema.extend({
@@ -50,6 +50,6 @@ export const orderDetailSchema = orderSchema.extend({
   report_id: z.string().uuid().nullable().optional(),
   results_snapshot_id: z.string().uuid().nullable().optional(),
   report_file_key: z.string().nullable().optional(),
-  paid_at: z.string().datetime().nullable().optional(),
-  updated_at: z.string().datetime().nullable().optional()
+  paid_at: z.string().datetime({ offset: true }).nullable().optional(),
+  updated_at: z.string().datetime({ offset: true }).nullable().optional()
 });

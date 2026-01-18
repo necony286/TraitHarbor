@@ -112,13 +112,10 @@ export function getCheckoutConfigResult(options: CheckoutConfigOptions = {}): Ch
     return { checkout: null, reason: 'MISSING_ENV', missing };
   }
   if (!clientToken || !effectivePriceId) {
-    const missingVars: string[] = [];
-    if (!clientToken) {
-      missingVars.push('clientToken');
-    }
-    if (!effectivePriceId) {
-      missingVars.push('effectivePriceId');
-    }
+    const missingVars = [
+      !clientToken && 'clientToken',
+      !effectivePriceId && 'effectivePriceId',
+    ].filter(Boolean);
     throw new Error(
       `Internal error: Invariant violation in getCheckoutConfigResult. Missing: ${missingVars.join(', ')}`
     );

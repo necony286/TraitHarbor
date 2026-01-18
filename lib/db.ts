@@ -485,6 +485,26 @@ export const updateOrderReportFileKey = async ({
   return { data: null, error: null };
 };
 
+export const updateOrderReportAccessToken = async ({
+  orderId,
+  reportAccessTokenHash
+}: {
+  orderId: string;
+  reportAccessTokenHash: string;
+}): Promise<DbResult<null>> => {
+  const supabase = getSupabaseAdminClient();
+  const { error } = await supabase
+    .from('orders')
+    .update({ report_access_token_hash: reportAccessTokenHash, updated_at: new Date().toISOString() })
+    .eq('id', orderId);
+
+  if (error) {
+    return { data: null, error: mapDbError(error, 'Failed to update order report access token.') };
+  }
+
+  return { data: null, error: null };
+};
+
 const getPaidOrdersBy = async (
   field: 'email' | 'user_id',
   value: string

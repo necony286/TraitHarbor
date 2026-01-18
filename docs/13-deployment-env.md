@@ -21,6 +21,10 @@ This document defines the environments, branching, and required environment vari
 - `UPSTASH_REDIS_REST_URL`
 - `UPSTASH_REDIS_REST_TOKEN`
 
+**Email delivery (Resend)**
+- `RESEND_API_KEY`
+- `EMAIL_FROM` (e.g., `Trait Harbor <support@traitharbor.com>`)
+
 ## Optional environment variables
 
 **App behavior / analytics**

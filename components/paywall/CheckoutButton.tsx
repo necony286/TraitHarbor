@@ -45,6 +45,7 @@ function loadPaddleScript(): Promise<void> {
   paddleScriptPromise = new Promise((resolve, reject) => {
     const existingScript = document.querySelector<HTMLScriptElement>('script[data-paddle]');
     const handleError = () => {
+      document.querySelector('script[data-paddle]')?.remove();
       paddleScriptPromise = null;
       reject(new Error('Failed to load Paddle.'));
     };

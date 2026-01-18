@@ -23,77 +23,96 @@ export const checkoutConfigSchema = z.object({
   clientToken: z.string()
 });
 
-const SANDBOX_PRICE: CheckoutPrice = {
-  priceId: process.env.PADDLE_SANDBOX_PRICE_ID ?? '',
-  currency: 'EUR',
-  amount: 900,
-  description: 'Starter PDF'
-};
-
-const PRODUCTION_PRICE: CheckoutPrice = {
-  priceId: process.env.PADDLE_PRICE_ID ?? '',
-  currency: 'EUR',
-  amount: 900,
-  description: 'Starter PDF'
-};
-
-const PRICE_ALLOWLIST = [SANDBOX_PRICE, PRODUCTION_PRICE];
+const CHECKOUT_PRICE_AMOUNT = 900;
+const CHECKOUT_PRICE_CURRENCY: CheckoutPrice['currency'] = 'EUR';
+const CHECKOUT_PRICE_DESCRIPTION = 'Starter PDF';
 
 export function getCheckoutAmountCents(): number {
-  return PRODUCTION_PRICE.amount;
+  return CHECKOUT_PRICE_AMOUNT;
 }
 
-function assertEnvValue(value: string | undefined, name: string): string {
-  if (!value) {
-    throw new Error(`Missing ${name}`);
-  }
-  return value;
+export type CheckoutConfigResult = {
+  checkout: CheckoutConfig | null;
+  reason?: 'MISSING_ENV';
+  missing?: string[];
+};
+
+function getCheckoutEnvSnapshot() {
+  return {
+    clientToken: process.env.PADDLE_CLIENT_TOKEN,
+    configuredEnvironmentValue: process.env.PADDLE_ENV,
+    productionPriceId: process.env.PADDLE_PRICE_ID,
+    sandboxPriceId: process.env.PADDLE_SANDBOX_PRICE_ID
+  };
 }
 
-function assertAllowedPrice(price: CheckoutPrice): CheckoutPrice {
-  if (!price.priceId) {
-    throw new Error('Missing PADDLE_PRICE_ID');
-  }
-
-  const match = PRICE_ALLOWLIST.find(
-    (allowed) => allowed.priceId === price.priceId && allowed.currency === price.currency && allowed.amount === price.amount
-  );
-
-  if (!match) {
-    throw new Error('Price not in allowlist');
-  }
-
-  return match;
+function buildPrice(priceId: string): CheckoutPrice {
+  return {
+    priceId,
+    currency: CHECKOUT_PRICE_CURRENCY,
+    amount: CHECKOUT_PRICE_AMOUNT,
+    description: CHECKOUT_PRICE_DESCRIPTION
+  };
 }
 
-export function getCheckoutConfig(): CheckoutConfig {
-  const clientToken = assertEnvValue(process.env.PADDLE_CLIENT_TOKEN, 'PADDLE_CLIENT_TOKEN');
-  const configuredEnvironmentValue = process.env.PADDLE_ENV;
-  if (configuredEnvironmentValue && !checkoutConfigSchema.shape.environment.options.includes(configuredEnvironmentValue)) {
+export function getCheckoutConfigResult(): CheckoutConfigResult {
+  const { clientToken, configuredEnvironmentValue, productionPriceId, sandboxPriceId } = getCheckoutEnvSnapshot();
+  const allowedEnvironments = checkoutConfigSchema.shape.environment.options;
+  if (configuredEnvironmentValue && !allowedEnvironments.includes(configuredEnvironmentValue as PaddleEnvironment)) {
     throw new Error(`Invalid PADDLE_ENV: "${configuredEnvironmentValue}". Must be 'sandbox' or 'production'.`);
   }
   const configuredEnvironment = configuredEnvironmentValue as PaddleEnvironment | undefined;
-  const environmentFromToken = clientToken.startsWith('test_')
-    ? 'sandbox'
-    : clientToken.startsWith('live_')
-      ? 'production'
-      : null;
+  const missing: string[] = [];
 
-  if (configuredEnvironment === 'sandbox' && !clientToken.startsWith('test_')) {
+  if (!clientToken) {
+    missing.push('PADDLE_CLIENT_TOKEN');
+  }
+
+  const environmentFromToken = clientToken
+    ? clientToken.startsWith('test_')
+      ? 'sandbox'
+      : clientToken.startsWith('live_')
+        ? 'production'
+        : null
+    : null;
+
+  if (configuredEnvironment === 'sandbox' && clientToken && !clientToken.startsWith('test_')) {
     throw new Error('PADDLE_ENV is sandbox but PADDLE_CLIENT_TOKEN is not a test_ token.');
   }
 
-  if (configuredEnvironment === 'production' && !clientToken.startsWith('live_')) {
+  if (configuredEnvironment === 'production' && clientToken && !clientToken.startsWith('live_')) {
     throw new Error('PADDLE_ENV is production but PADDLE_CLIENT_TOKEN is not a live_ token.');
   }
 
   const environment = (configuredEnvironment ?? environmentFromToken ?? 'sandbox') as PaddleEnvironment;
 
-  const price = assertAllowedPrice(environment === 'sandbox' ? SANDBOX_PRICE : PRODUCTION_PRICE);
+  const effectivePriceId =
+    environment === 'sandbox' ? sandboxPriceId || productionPriceId : productionPriceId;
+
+  if (!effectivePriceId) {
+    if (environment === 'sandbox') {
+      if (!sandboxPriceId) {
+        missing.push('PADDLE_SANDBOX_PRICE_ID');
+      }
+      if (!productionPriceId) {
+        missing.push('PADDLE_PRICE_ID');
+      }
+    } else {
+      missing.push('PADDLE_PRICE_ID');
+    }
+  }
+
+  if (missing.length > 0) {
+    return { checkout: null, reason: 'MISSING_ENV', missing };
+  }
+  const resolvedClientToken = clientToken ?? '';
+  const resolvedPriceId = effectivePriceId ?? '';
 
   return {
-    environment,
-    clientToken,
-    ...price
+    checkout: {
+      environment,
+      clientToken: resolvedClientToken,
+      ...buildPrice(resolvedPriceId)
+    }
   };
 }

@@ -11,8 +11,10 @@ import { Button } from '../ui/Button';
 
 const createOrderResponseSchema = z.object({
   order: orderRecordSchema,
-  checkout: checkoutConfigSchema,
-  providerSessionId: z.string().uuid().nullable()
+  checkout: checkoutConfigSchema.nullable(),
+  providerSessionId: z.string().uuid().nullable(),
+  reason: z.string().optional(),
+  missing: z.array(z.string()).optional()
 });
 
 type CheckoutButtonProps = {
@@ -94,7 +96,16 @@ export function CheckoutButton({ resultId }: CheckoutButtonProps) {
         throw new Error('Invalid checkout response.');
       }
 
-      const { order, checkout, providerSessionId } = parsedResponse.data;
+      const { order, checkout, providerSessionId, reason, missing } = parsedResponse.data;
+
+      if (!checkout) {
+        if (reason === 'MISSING_ENV') {
+          // eslint-disable-next-line no-console
+          console.error('Checkout not configured. Missing env vars:', missing);
+        }
+        setErrorMessage('Checkout not configured.');
+        return;
+      }
 
       await loadPaddleScript();
 

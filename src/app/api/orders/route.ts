@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
 import { randomUUID } from 'crypto';
-import { getCheckoutAmountCents, getCheckoutConfig } from '../../../../lib/payments';
+import { getCheckoutAmountCents, getCheckoutConfigResult } from '../../../../lib/payments';
 import { mapOrderRecord, orderStatusSchema } from '../../../../lib/orders';
 import { createProvisionalOrder, getOrderById, updateOrderStatus } from '../../../../lib/db';
 import { enforceRateLimit } from '../../../../lib/rate-limit';
@@ -86,8 +86,16 @@ export async function POST(request: Request) {
   }
 
   let checkoutConfig = null;
+  let checkoutReason: string | undefined;
+  let checkoutMissing: string[] | undefined;
   try {
-    checkoutConfig = getCheckoutConfig();
+    const checkoutResult = getCheckoutConfigResult();
+    checkoutConfig = checkoutResult.checkout;
+    checkoutReason = checkoutResult.reason;
+    checkoutMissing = checkoutResult.missing;
+    if (checkoutReason === 'MISSING_ENV') {
+      console.error('Missing Paddle checkout environment variables.', { missing: checkoutMissing });
+    }
   } catch (error) {
     console.error('Failed to load checkout config for order creation.', error);
   }
@@ -95,7 +103,13 @@ export async function POST(request: Request) {
   return NextResponse.json({
     order: mapOrderRecord(data),
     checkout: checkoutConfig,
-    providerSessionId
+    providerSessionId,
+    ...(checkoutConfig
+      ? {}
+      : {
+          reason: checkoutReason,
+          missing: checkoutMissing
+        })
   });
 }
 

@@ -13,31 +13,25 @@ type ResendEmailPayload = {
 
 const RESEND_API_URL = 'https://api.resend.com/emails';
 
-const getResendApiKey = () => {
-  const apiKey = process.env.RESEND_API_KEY;
-  if (!apiKey) {
-    throw new Error('Missing RESEND_API_KEY.');
-  }
-  return apiKey;
-};
+const RESEND_API_KEY = process.env.RESEND_API_KEY;
+if (!RESEND_API_KEY) {
+  throw new Error('Missing RESEND_API_KEY.');
+}
 
-const getEmailFrom = () => {
-  const emailFrom = process.env.EMAIL_FROM;
-  if (!emailFrom) {
-    throw new Error('Missing EMAIL_FROM.');
-  }
-  return emailFrom;
-};
+const EMAIL_FROM = process.env.EMAIL_FROM;
+if (!EMAIL_FROM) {
+  throw new Error('Missing EMAIL_FROM.');
+}
 
 const sendResendEmail = async ({ to, subject, html, text }: ResendEmailPayload) => {
   const response = await fetch(RESEND_API_URL, {
     method: 'POST',
     headers: {
-      Authorization: `Bearer ${getResendApiKey()}`,
+      Authorization: `Bearer ${RESEND_API_KEY}`,
       'Content-Type': 'application/json'
     },
     body: JSON.stringify({
-      from: getEmailFrom(),
+      from: EMAIL_FROM,
       to: [to],
       subject,
       html,
@@ -56,12 +50,12 @@ const sendResendEmail = async ({ to, subject, html, text }: ResendEmailPayload) 
 export async function sendReportEmail(payload: ReportEmailPayload) {
   const subject = 'Your Trait Harbor report is ready';
   const text = `Your report is ready.\n\nDownload your report any time: ${payload.reportUrl}\n\nOrder ID: ${payload.orderId}`;
-  const html = `
-    <p>Your report is ready.</p>
-    <p><a href="${payload.reportUrl}">Download your report</a></p>
-    <p>This link stays active and will always generate a fresh download.</p>
-    <p>Order ID: ${payload.orderId}</p>
-  `;
+  const html = [
+    '<p>Your report is ready.</p>',
+    `<p><a href="${payload.reportUrl}">Download your report</a></p>`,
+    '<p>This link stays active and will always generate a fresh download.</p>',
+    `<p>Order ID: ${payload.orderId}</p>`
+  ].join('');
 
   return sendResendEmail({
     to: payload.email,
@@ -80,11 +74,11 @@ export type ReportAccessLinkEmailPayload = {
 export async function sendReportAccessLinkEmail(payload: ReportAccessLinkEmailPayload) {
   const subject = 'Your Trait Harbor report access link';
   const text = `Use this secure link to access your reports:\n${payload.accessUrl}\n\nIf this link has expired, request another here: ${payload.requestUrl}`;
-  const html = `
-    <p>Use this secure link to access your reports:</p>
-    <p><a href="${payload.accessUrl}">Access your report</a></p>
-    <p>If this link has expired, request another here: <a href="${payload.requestUrl}">${payload.requestUrl}</a></p>
-  `;
+  const html = [
+    '<p>Use this secure link to access your reports:</p>',
+    `<p><a href="${payload.accessUrl}">Access your report</a></p>`,
+    `<p>If this link has expired, request another here: <a href="${payload.requestUrl}">${payload.requestUrl}</a></p>`
+  ].join('');
 
   return sendResendEmail({
     to: payload.email,

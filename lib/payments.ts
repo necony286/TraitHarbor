@@ -24,7 +24,7 @@ export const checkoutConfigSchema = z.object({
 });
 
 const SANDBOX_PRICE: CheckoutPrice = {
-  priceId: process.env.PADDLE_SANDBOX_PRICE_ID ?? process.env.PADDLE_PRICE_ID ?? '',
+  priceId: process.env.PADDLE_SANDBOX_PRICE_ID ?? '',
   currency: 'EUR',
   amount: 900,
   description: 'Starter PDF'

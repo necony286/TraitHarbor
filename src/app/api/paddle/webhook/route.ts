@@ -1,10 +1,13 @@
 import { NextResponse } from 'next/server';
-import { getOrderById, updateOrderFromWebhook } from '../../../../../lib/db';
+import { getOrderById, updateOrderFromWebhook, updateOrderReportAccessToken } from '../../../../../lib/db';
+import { sendReportEmail } from '../../../../../lib/email';
 import { logError, logInfo, logWarn } from '../../../../../lib/logger';
 import { parsePaddleWebhook, shouldUpdateOrder } from '../../../../../lib/paddle-webhook';
 import { verifyPaddleSignature } from '../../../../../lib/signature';
 import { orderStatusSchema } from '../../../../../lib/orders';
 import { enforceRateLimit, getClientIdentifier } from '../../../../../lib/rate-limit';
+import { generateReportAccessToken, hashReportAccessToken } from '../../../../../lib/report-access';
+import { absoluteUrl } from '@/lib/siteUrl';
 
 const getWebhookSecret = () => {
   const secret = process.env.PADDLE_WEBHOOK_SECRET;
@@ -131,7 +134,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ received: true, ignored: true });
   }
 
-  const { error: updateError } = await updateOrderFromWebhook({
+  const { data: updatedOrder, error: updateError } = await updateOrderFromWebhook({
     orderId: order.id,
     status: parsedEvent.status,
     paddleOrderId: parsedEvent.paddleOrderId,
@@ -149,6 +152,48 @@ export async function POST(request: Request) {
 
   if (parsedEvent.status === 'paid') {
     requestPdfGeneration(order.id);
+
+    const customerEmail = updatedOrder?.email;
+    if (!customerEmail) {
+      logWarn('Paid order missing customer email for report delivery.', { orderId: order.id });
+      return NextResponse.json({ received: true });
+    }
+
+    let reportToken = '';
+    let reportTokenHash = '';
+    try {
+      reportToken = generateReportAccessToken();
+      reportTokenHash = hashReportAccessToken(reportToken);
+    } catch (error) {
+      logError('Failed to generate report access token for paid order.', { orderId: order.id, error });
+      return NextResponse.json({ received: true });
+    }
+
+    try {
+      const { error } = await updateOrderReportAccessToken({
+        orderId: order.id,
+        reportAccessTokenHash: reportTokenHash
+      });
+      if (error) {
+        logWarn('Failed to persist report access token for paid order.', { orderId: order.id, error });
+        return NextResponse.json({ received: true });
+      }
+    } catch (error) {
+      logError('Failed to update report access token for paid order.', { orderId: order.id, error });
+      return NextResponse.json({ received: true });
+    }
+
+    const reportUrl = absoluteUrl(`/r/${order.id}?token=${encodeURIComponent(reportToken)}`);
+
+    try {
+      await sendReportEmail({
+        orderId: order.id,
+        email: customerEmail,
+        reportUrl
+      });
+    } catch (error) {
+      logWarn('Failed to send paid report email.', { orderId: order.id, error });
+    }
   }
 
   return NextResponse.json({ received: true });

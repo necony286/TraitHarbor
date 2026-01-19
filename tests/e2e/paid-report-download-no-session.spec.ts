@@ -84,6 +84,26 @@ test('paid report download works without session storage', async ({ page, browse
     });
   });
 
+  await page.route('**/api/orders/by-session*', (route) =>
+    route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({
+        order: {
+          id: ORDER_ID,
+          status: 'paid',
+          resultId: FIXTURE_RESULT_ID,
+          createdAt: new Date().toISOString(),
+          paidAt: new Date().toISOString(),
+          email: 'guest@example.com',
+          userId: null,
+          reportReady: true,
+          providerSessionId: SESSION_ID
+        }
+      })
+    })
+  );
+
   await page.route('**/api/report-access/request-link', (route) => {
     reportAccessUrl = new URL('/report-access?token=test-token', page.url()).toString();
     return route.fulfill({

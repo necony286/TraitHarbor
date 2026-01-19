@@ -80,6 +80,26 @@ test('quiz to paid flow with report download', async ({ page }) => {
     });
   });
 
+  await page.route('**/api/orders/by-session*', (route) =>
+    route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({
+        order: {
+          id: ORDER_ID,
+          status: 'paid',
+          resultId: FIXTURE_RESULT_ID,
+          createdAt: new Date().toISOString(),
+          paidAt: new Date().toISOString(),
+          email: BUYER_EMAIL,
+          userId: null,
+          reportReady: true,
+          providerSessionId: SESSION_ID
+        }
+      })
+    })
+  );
+
   await page.route(`**/api/reports/${ORDER_ID}/download-url`, (route) =>
     route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ url: PDF_URL }) })
   );

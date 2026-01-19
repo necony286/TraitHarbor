@@ -1,5 +1,12 @@
 import { NextResponse } from 'next/server';
-import { getOrderById, updateOrderFromWebhook, updateOrderReportAccessToken } from '../../../../../lib/db';
+import {
+  getOrderById,
+  getScoresByResultId,
+  storeReportAsset,
+  updateOrderFromWebhook,
+  updateOrderReportAccessToken,
+  updateOrderReportFileKey
+} from '../../../../../lib/db';
 import { sendReportEmail } from '../../../../../lib/email';
 import { logError, logInfo, logWarn } from '../../../../../lib/logger';
 import { parsePaddleWebhook, shouldUpdateOrder } from '../../../../../lib/paddle-webhook';
@@ -7,7 +14,11 @@ import { verifyPaddleSignature } from '../../../../../lib/signature';
 import { orderStatusSchema } from '../../../../../lib/orders';
 import { enforceRateLimit, getClientIdentifier } from '../../../../../lib/rate-limit';
 import { generateReportAccessToken, hashReportAccessToken } from '../../../../../lib/report-access';
+import { PdfRenderConcurrencyError, generateReportPdf } from '../../../../../lib/pdf';
+import { getReportPath, uploadReport } from '../../../../../lib/storage';
 import { absoluteUrl } from '@/lib/siteUrl';
+
+export const runtime = 'nodejs';
 
 const getWebhookSecret = () => {
   const secret = process.env.PADDLE_WEBHOOK_SECRET;
@@ -153,7 +164,7 @@ export async function POST(request: Request) {
   if (parsedEvent.status === 'paid') {
     requestPdfGeneration(order.id);
 
-    const customerEmail = updatedOrder?.email;
+    const customerEmail = updatedOrder?.email ?? parsedEvent.customerEmail;
     if (!customerEmail) {
       logWarn('Paid order missing customer email for report delivery.', { orderId: order.id });
       return NextResponse.json({ received: true });
@@ -183,16 +194,70 @@ export async function POST(request: Request) {
       return NextResponse.json({ received: true });
     }
 
-    const reportUrl = absoluteUrl(`/r/${order.id}?token=${encodeURIComponent(reportToken)}`);
+    const reportUrl = absoluteUrl('/retrieve-report');
 
-    try {
-      await sendReportEmail({
-        orderId: order.id,
-        email: customerEmail,
-        reportUrl
-      });
-    } catch (error) {
-      logWarn('Failed to send paid report email.', { orderId: order.id, error });
+    if (!process.env.RESEND_API_KEY || !process.env.EMAIL_FROM) {
+      logInfo('Skipping report PDF email because Resend is not configured.', { orderId: order.id });
+    } else if (!updatedOrder) {
+      logWarn('Paid order missing updated order data for report delivery.', { orderId: order.id });
+    } else if (!updatedOrder.response_id) {
+      logWarn('Paid order missing response id for report generation.', { orderId: order.id });
+    } else {
+      try {
+        const { data: traits, error: scoresError } = await getScoresByResultId(updatedOrder.response_id);
+        if (scoresError) {
+          throw new Error(scoresError.message);
+        }
+        if (!traits) {
+          logWarn('Paid order missing trait scores for report generation.', { orderId: order.id });
+          return NextResponse.json({ received: true });
+        }
+
+        const pdf = await generateReportPdf({
+          name: 'You',
+          date: new Date(updatedOrder.created_at),
+          traits
+        });
+        const pdfBase64 = Buffer.from(pdf).toString('base64');
+
+        await uploadReport(updatedOrder.id, pdf);
+        const reportPath = getReportPath(updatedOrder.id);
+        const { error: reportFileError } = await updateOrderReportFileKey({
+          orderId: updatedOrder.id,
+          reportFileKey: reportPath
+        });
+        if (reportFileError) {
+          throw new Error(reportFileError.message);
+        }
+
+        if (updatedOrder.user_id) {
+          const { error: assetError } = await storeReportAsset({
+            orderId: updatedOrder.id,
+            userId: updatedOrder.user_id,
+            reportPath,
+            kind: 'report_pdf'
+          });
+          if (assetError) {
+            logWarn('Failed to store report asset for paid order.', {
+              orderId: updatedOrder.id,
+              error: assetError.message
+            });
+          }
+        }
+
+        await sendReportEmail({
+          orderId: updatedOrder.id,
+          email: customerEmail,
+          reportUrl,
+          pdfBase64
+        });
+      } catch (error) {
+        if (error instanceof PdfRenderConcurrencyError) {
+          logWarn('PDF generation busy for paid order email.', { orderId: order.id });
+        } else {
+          logWarn('Failed to send paid report email with PDF.', { orderId: order.id, error });
+        }
+      }
     }
   }
 

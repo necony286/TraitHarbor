@@ -1,7 +1,16 @@
+import { Resend } from 'resend';
+
 export type ReportEmailPayload = {
   orderId: string;
   email: string;
   reportUrl: string;
+  pdfBase64: string;
+  filename?: string;
+};
+
+type ResendAttachment = {
+  filename: string;
+  content: string;
 };
 
 type ResendEmailPayload = {
@@ -9,11 +18,12 @@ type ResendEmailPayload = {
   subject: string;
   html: string;
   text: string;
+  attachments?: ResendAttachment[];
 };
 
 type ResendConfig = { readonly resendApiKey: string; readonly emailFrom: string };
 
-const RESEND_API_URL = 'https://api.resend.com/emails';
+const shouldSkipEmail = () => process.env.NODE_ENV === 'test' || process.env.PLAYWRIGHT === '1';
 
 const getResendConfig = (() => {
   let resendConfig: ResendConfig | null = null;
@@ -38,46 +48,58 @@ const getResendConfig = (() => {
   };
 })();
 
-const sendResendEmail = async ({ to, subject, html, text }: ResendEmailPayload) => {
-  const { resendApiKey, emailFrom } = getResendConfig();
-  const response = await fetch(RESEND_API_URL, {
-    method: 'POST',
-    headers: {
-      Authorization: `Bearer ${resendApiKey}`,
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify({
-      from: emailFrom,
-      to: [to],
-      subject,
-      html,
-      text
-    })
-  });
+const getResendClient = (() => {
+  let client: Resend | null = null;
 
-  if (!response.ok) {
-    const message = await response.text();
-    throw new Error(`Resend API error: ${response.status} ${message}`);
+  return (apiKey: string) => {
+    if (!client) {
+      client = new Resend(apiKey);
+    }
+    return client;
+  };
+})();
+
+const sendResendEmail = async ({ to, subject, html, text, attachments }: ResendEmailPayload) => {
+  if (shouldSkipEmail()) {
+    console.info('Resend email skipped in test mode.', { to, subject });
+    return { ok: true as const };
   }
 
-  return response.json();
+  const { resendApiKey, emailFrom } = getResendConfig();
+  const resend = getResendClient(resendApiKey);
+  const { data, error } = await resend.emails.send({
+    from: emailFrom,
+    to,
+    subject,
+    html,
+    text,
+    attachments
+  });
+
+  if (error) {
+    throw new Error(`Resend API error: ${error.message}`);
+  }
+
+  return { ok: true as const, id: data?.id };
 };
 
 export async function sendReportEmail(payload: ReportEmailPayload) {
-  const subject = 'Your Trait Harbor report is ready';
-  const text = `Your report is ready.\n\nDownload your report any time: ${payload.reportUrl}\n\nOrder ID: ${payload.orderId}`;
+  const subject = 'Your TraitHarbor report is ready';
+  const text = `Your report is ready.\n\nYou can also retrieve your report here: ${payload.reportUrl}\n\nOrder ID: ${payload.orderId}`;
   const html = [
-    '<p>Your report is ready.</p>',
-    `<p><a href="${payload.reportUrl}">Download your report</a></p>`,
-    '<p>This link stays active and will always generate a fresh download.</p>',
+    '<p>Your report is ready. Your PDF is attached.</p>',
+    `<p>If you need another copy later, visit <a href="${payload.reportUrl}">${payload.reportUrl}</a>.</p>`,
     `<p>Order ID: ${payload.orderId}</p>`
   ].join('');
+  const filename =
+    payload.filename ?? `TraitHarbor-Report-${payload.orderId.slice(0, 8)}.pdf`;
 
   return sendResendEmail({
     to: payload.email,
     subject,
     html,
-    text
+    text,
+    attachments: [{ filename, content: payload.pdfBase64 }]
   });
 }
 
@@ -88,7 +110,7 @@ export type ReportAccessLinkEmailPayload = {
 };
 
 export async function sendReportAccessLinkEmail(payload: ReportAccessLinkEmailPayload) {
-  const subject = 'Your Trait Harbor report access link';
+  const subject = 'Your secure TraitHarbor access link';
   const text = `Use this secure link to access your reports:\n${payload.accessUrl}\n\nIf this link has expired, request another here: ${payload.requestUrl}`;
   const html = [
     '<p>Use this secure link to access your reports:</p>',

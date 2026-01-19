@@ -104,8 +104,7 @@ test('my reports lists orders and triggers downloads', async ({ page }) => {
   expect(downloadUrlResp.status()).toBe(200);
 
   const { url } = await downloadUrlResp.json();
-  expect(typeof url).toBe('string');
-  expect(url.length).toBeGreaterThan(0);
+  expect(url).toBe(PDF_URL);
 
   const pdfResp = await page.request.get(url);
   expect(pdfResp.status()).toBe(200);

@@ -21,21 +21,26 @@ describe('email config validation', () => {
     vi.unstubAllGlobals();
   });
 
-  it('throws when RESEND_API_KEY is missing', async () => {
-    process.env = { ...env, EMAIL_FROM: 'sender@example.com' };
-    delete process.env.RESEND_API_KEY;
+  it.each([
+    {
+      envVar: 'RESEND_API_KEY',
+      setup: () => {
+        process.env = { ...env, EMAIL_FROM: 'sender@example.com' };
+        delete process.env.RESEND_API_KEY;
+      }
+    },
+    {
+      envVar: 'EMAIL_FROM',
+      setup: () => {
+        process.env = { ...env, RESEND_API_KEY: 'test-key' };
+        delete process.env.EMAIL_FROM;
+      }
+    }
+  ])('throws when $envVar is missing', async ({ envVar, setup }) => {
+    setup();
     const { sendReportEmail } = await import('../lib/email');
 
-    await expect(sendReportEmail(reportPayload)).rejects.toThrow('Missing RESEND_API_KEY.');
-    expect(fetch).not.toHaveBeenCalled();
-  });
-
-  it('throws when EMAIL_FROM is missing', async () => {
-    process.env = { ...env, RESEND_API_KEY: 'test-key' };
-    delete process.env.EMAIL_FROM;
-    const { sendReportEmail } = await import('../lib/email');
-
-    await expect(sendReportEmail(reportPayload)).rejects.toThrow('Missing EMAIL_FROM.');
+    await expect(sendReportEmail(reportPayload)).rejects.toThrow(`Missing ${envVar}.`);
     expect(fetch).not.toHaveBeenCalled();
   });
 

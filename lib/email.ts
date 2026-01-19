@@ -14,9 +14,10 @@ type ResendEmailPayload = {
 const RESEND_API_URL = 'https://api.resend.com/emails';
 
 const getResendConfig = (() => {
-  let resendConfig: { resendApiKey: string; emailFrom: string } | null = null;
+  type ResendConfig = { resendApiKey: string; emailFrom: string };
+  let resendConfig: ResendConfig | null = null;
 
-  return () => {
+  return (): ResendConfig => {
     if (resendConfig) {
       return resendConfig;
     }

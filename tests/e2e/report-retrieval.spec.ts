@@ -4,7 +4,7 @@ const ACCESS_LINK_MESSAGE = 'Check your email for a secure link to access your p
 const ERROR_MESSAGE = 'We could not send the email right now. Please try again shortly.';
 const REPORT_EMAIL = 'buyer@example.com';
 const REPORT_FILENAME = 'report.pdf';
-const PDF_URL = `https://example.com/${REPORT_FILENAME}`;
+const PDF_URL = new URL(REPORT_FILENAME, 'https://example.com').toString();
 
 const paidOrder = {
   id: '11111111-1111-1111-1111-111111111111',

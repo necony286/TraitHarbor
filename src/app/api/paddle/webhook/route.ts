@@ -259,7 +259,7 @@ export async function POST(request: Request) {
             { status: 503 }
           );
         }
-        logError('Failed to send paid report email with PDF.', { orderId: order.id, error });
+        logError('Failed to deliver paid report after payment.', { orderId: order.id, error });
         return NextResponse.json({ error: 'Failed to deliver paid report.' }, { status: 500 });
       }
     }

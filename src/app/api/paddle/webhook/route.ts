@@ -254,9 +254,13 @@ export async function POST(request: Request) {
       } catch (error) {
         if (error instanceof PdfRenderConcurrencyError) {
           logWarn('PDF generation busy for paid order email.', { orderId: order.id });
-        } else {
-          logWarn('Failed to send paid report email with PDF.', { orderId: order.id, error });
+          return NextResponse.json(
+            { error: 'PDF generation busy for paid order.' },
+            { status: 503 }
+          );
         }
+        logError('Failed to deliver paid report after payment.', { orderId: order.id, error });
+        return NextResponse.json({ error: 'Failed to deliver paid report.' }, { status: 500 });
       }
     }
   }

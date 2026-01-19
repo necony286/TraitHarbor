@@ -82,16 +82,19 @@ test('my reports lists orders and triggers downloads', async ({ page }) => {
   await page.route(PDF_URL, (route) =>
     route.fulfill({
       status: 200,
+      headers: { 'Content-Disposition': 'attachment; filename="report.pdf"' },
       contentType: 'application/pdf',
-      body: '%PDF-1.4\n%EOF'
+      body: Buffer.from('%PDF-1.4\n%EOF')
     })
   );
 
-  const downloadRequest = page.waitForRequest(PDF_URL);
+  const downloadPromise = page.waitForEvent('download');
 
   await page.goto('/my-reports');
-  await expect(page.getByText('Order #11111111')).toBeVisible();
+  await expect(page.getByText(`Order #${paidOrder.id.slice(0, 8)}`)).toBeVisible();
 
   await page.getByRole('button', { name: 'Download report' }).click();
-  await downloadRequest;
+
+  const download = await downloadPromise;
+  expect(download.suggestedFilename()).toBe('report.pdf');
 });

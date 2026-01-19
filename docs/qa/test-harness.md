@@ -10,10 +10,9 @@ pnpm install
 ## 2) Install Playwright browsers + OS deps (Linux)
 ```bash
 pnpm exec playwright install --with-deps
-pnpm exec playwright install-deps
 ```
 
-> The `install-deps` step is required on minimal containers to provide GTK/ATK/X11 libs.
+> The `--with-deps` flag covers minimal containers by installing GTK/ATK/X11 libs.
 
 ## 3) Environment setup
 ```bash

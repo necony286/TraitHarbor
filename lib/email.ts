@@ -13,19 +13,28 @@ type ResendEmailPayload = {
 
 const RESEND_API_URL = 'https://api.resend.com/emails';
 
-const getResendConfig = () => {
-  const resendApiKey = process.env.RESEND_API_KEY;
-  if (!resendApiKey) {
-    throw new Error('Missing RESEND_API_KEY.');
-  }
+const getResendConfig = (() => {
+  let resendConfig: { resendApiKey: string; emailFrom: string } | null = null;
 
-  const emailFrom = process.env.EMAIL_FROM;
-  if (!emailFrom) {
-    throw new Error('Missing EMAIL_FROM.');
-  }
+  return () => {
+    if (resendConfig) {
+      return resendConfig;
+    }
 
-  return { resendApiKey, emailFrom };
-};
+    const resendApiKey = process.env.RESEND_API_KEY;
+    if (!resendApiKey) {
+      throw new Error('Missing RESEND_API_KEY.');
+    }
+
+    const emailFrom = process.env.EMAIL_FROM;
+    if (!emailFrom) {
+      throw new Error('Missing EMAIL_FROM.');
+    }
+
+    resendConfig = { resendApiKey, emailFrom };
+    return resendConfig;
+  };
+})();
 
 const sendResendEmail = async ({ to, subject, html, text }: ResendEmailPayload) => {
   const { resendApiKey, emailFrom } = getResendConfig();

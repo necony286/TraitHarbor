@@ -43,6 +43,7 @@ type ChromiumContext = {
 };
 
 type Chromium = {
+  connect: (wsEndpoint: string) => Promise<ChromiumBrowser>;
   launch: () => Promise<ChromiumBrowser>;
 };
 
@@ -62,7 +63,7 @@ export type ReportPayload = {
 
 const MAX_PDF_BYTES = 700 * 1024;
 const MAX_CONCURRENT_PDF = 2;
-const PDF_TIMEOUT_MS = 15_000;
+const PDF_TIMEOUT_MS = 30_000;
 
 export class PdfRenderConcurrencyError extends Error {
   constructor() {
@@ -103,11 +104,27 @@ const withPdfConcurrencyGuard = async <T>(task: () => Promise<T>) => {
 
 const getChromium = () => {
   if (!chromiumPromise) {
-    chromiumPromise = import(/* webpackIgnore: true */ 'playwright').then(
+    chromiumPromise = import(/* webpackIgnore: true */ 'playwright-core').then(
       (playwright) => playwright.chromium
     );
   }
   return chromiumPromise;
+};
+
+const shouldUseBrowserless = () =>
+  Boolean(process.env.BROWSERLESS_WS_ENDPOINT) &&
+  process.env.NODE_ENV !== 'test' &&
+  process.env.PLAYWRIGHT !== '1';
+
+const getBrowser = async () => {
+  const chromium = await getChromium();
+  const browserlessEndpoint = process.env.BROWSERLESS_WS_ENDPOINT;
+
+  if (browserlessEndpoint && shouldUseBrowserless()) {
+    return chromium.connect(browserlessEndpoint);
+  }
+
+  return chromium.launch();
 };
 
 export async function buildReportHtml(payload: ReportPayload) {
@@ -138,8 +155,7 @@ export async function buildReportHtml(payload: ReportPayload) {
 export async function generateReportPdf(payload: ReportPayload) {
   return withPdfConcurrencyGuard(async () => {
     const html = await buildReportHtml(payload);
-    const chromium = await getChromium();
-    const browser = await chromium.launch();
+    const browser = await getBrowser();
     let context: ChromiumContext | null = null;
     let page: ChromiumPage | null = null;
 

@@ -11,7 +11,7 @@ type ResendEmailPayload = {
   text: string;
 };
 
-type ResendConfig = { resendApiKey: string; emailFrom: string };
+type ResendConfig = { readonly resendApiKey: string; readonly emailFrom: string };
 
 const RESEND_API_URL = 'https://api.resend.com/emails';
 

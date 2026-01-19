@@ -3,6 +3,7 @@ import { expect, test } from '@playwright/test';
 const ACCESS_LINK_MESSAGE = 'Check your email for a secure link to access your paid report.';
 const ERROR_MESSAGE = 'We could not send the email right now. Please try again shortly.';
 const REPORT_EMAIL = 'buyer@example.com';
+const REPORT_FILENAME = 'report.pdf';
 const PDF_URL = 'https://example.com/report.pdf';
 
 const paidOrder = {
@@ -82,7 +83,7 @@ test('my reports lists orders and triggers downloads', async ({ page }) => {
   await page.route(PDF_URL, (route) =>
     route.fulfill({
       status: 200,
-      headers: { 'Content-Disposition': 'attachment; filename="report.pdf"' },
+      headers: { 'Content-Disposition': `attachment; filename="${REPORT_FILENAME}"` },
       contentType: 'application/pdf',
       body: Buffer.from('%PDF-1.4\n%EOF')
     })
@@ -96,5 +97,5 @@ test('my reports lists orders and triggers downloads', async ({ page }) => {
   await page.getByRole('button', { name: 'Download report' }).click();
 
   const download = await downloadPromise;
-  expect(download.suggestedFilename()).toBe('report.pdf');
+  expect(download.suggestedFilename()).toBe(REPORT_FILENAME);
 });

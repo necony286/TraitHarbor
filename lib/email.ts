@@ -11,10 +11,11 @@ type ResendEmailPayload = {
   text: string;
 };
 
+type ResendConfig = { readonly resendApiKey: string; readonly emailFrom: string };
+
 const RESEND_API_URL = 'https://api.resend.com/emails';
 
 const getResendConfig = (() => {
-  type ResendConfig = { resendApiKey: string; emailFrom: string };
   let resendConfig: ResendConfig | null = null;
 
   return (): ResendConfig => {

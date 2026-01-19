@@ -89,13 +89,25 @@ test('my reports lists orders and triggers downloads', async ({ page }) => {
     })
   );
 
-  const downloadPromise = page.waitForEvent('download');
-
   await page.goto('/my-reports');
   await expect(page.getByText(`Order #${paidOrder.id.slice(0, 8)}`)).toBeVisible();
 
+  const downloadUrlRespPromise = page.waitForResponse(
+    (response) =>
+      response.request().method() === 'POST' &&
+      response.url().includes(`/api/reports/${paidOrder.id}/download-url`)
+  );
+
   await page.getByRole('button', { name: 'Download report' }).click();
 
-  const download = await downloadPromise;
-  expect(download.suggestedFilename()).toBe(REPORT_FILENAME);
+  const downloadUrlResp = await downloadUrlRespPromise;
+  expect(downloadUrlResp.status()).toBe(200);
+
+  const { url } = await downloadUrlResp.json();
+  expect(typeof url).toBe('string');
+  expect(url.length).toBeGreaterThan(0);
+
+  const pdfResp = await page.request.get(url);
+  expect(pdfResp.status()).toBe(200);
+  expect(pdfResp.headers()['content-type'] ?? '').toContain('application/pdf');
 });

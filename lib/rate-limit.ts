@@ -189,7 +189,22 @@ export const enforceRateLimit = async ({
 
   const clientIdentifier = identifier ?? getClientIdentifier(request);
   const key = buildRateLimitKey(route, clientIdentifier);
-  const result = await limiter.limit(key);
+  let result: RateLimitResult;
+
+  try {
+    result = await limiter.limit(key);
+  } catch (error) {
+    const shouldAllowFailOpen = mode === 'fail-open' && (!isProductionLike() || allowFailOpen());
+    if (shouldAllowFailOpen) {
+      logRateLimitOnce('warn', 'Rate limiter failed. Allowing request to proceed.', { route, mode });
+      logWarn('Rate limiter error details.', { route, mode, error });
+      return null;
+    }
+
+    logRateLimitOnce('error', 'Rate limiter failed. Blocking request.', { route, mode });
+    logError('Rate limiter error details.', { route, mode, error });
+    return NextResponse.json({ error: 'Rate limiter unavailable.' }, { status: 503 });
+  }
 
   if (!result.success) {
     return NextResponse.json({ error: 'Too many requests.' }, { status: 429 });

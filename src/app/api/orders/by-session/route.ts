@@ -54,7 +54,7 @@ export async function GET(request: Request) {
   const supabaseUrl = process.env.SUPABASE_URL;
   const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
-  if (useFixture && (!supabaseUrl || !supabaseServiceKey)) {
+  if (useFixture) {
     return NextResponse.json({
       order: serializeOrder({
         id: sessionId,

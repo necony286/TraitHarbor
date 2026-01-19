@@ -97,6 +97,7 @@ test('my reports lists orders and triggers downloads', async ({ page }) => {
       response.request().method() === 'POST' &&
       response.url().endsWith(`/api/reports/${paidOrder.id}/download-url`)
   );
+  const pdfResponsePromise = page.waitForResponse(PDF_URL);
 
   await page.getByRole('button', { name: 'Download report' }).click();
 
@@ -106,7 +107,7 @@ test('my reports lists orders and triggers downloads', async ({ page }) => {
   const { url } = await downloadUrlResp.json();
   expect(url).toBe(PDF_URL);
 
-  const pdfResp = await page.request.get(url);
+  const pdfResp = await pdfResponsePromise;
   expect(pdfResp.status()).toBe(200);
   expect(pdfResp.headers()['content-type'] ?? '').toContain('application/pdf');
 });

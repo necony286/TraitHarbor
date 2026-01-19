@@ -195,14 +195,19 @@ export const enforceRateLimit = async ({
     result = await limiter.limit(key);
   } catch (error) {
     const shouldAllowFailOpen = mode === 'fail-open' && (!isProductionLike() || allowFailOpen());
+    const level = shouldAllowFailOpen ? 'warn' : 'error';
+    const summary = shouldAllowFailOpen
+      ? 'Rate limiter failed. Allowing request to proceed.'
+      : 'Rate limiter failed. Blocking request.';
+    const log = shouldAllowFailOpen ? logWarn : logError;
+
+    logRateLimitOnce(level, summary, { route, mode });
+    log('Rate limiter error details.', { route, mode, error });
+
     if (shouldAllowFailOpen) {
-      logRateLimitOnce('warn', 'Rate limiter failed. Allowing request to proceed.', { route, mode });
-      logWarn('Rate limiter error details.', { route, mode, error });
       return null;
     }
 
-    logRateLimitOnce('error', 'Rate limiter failed. Blocking request.', { route, mode });
-    logError('Rate limiter error details.', { route, mode, error });
     return NextResponse.json({ error: 'Rate limiter unavailable.' }, { status: 503 });
   }
 

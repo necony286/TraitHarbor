@@ -21,7 +21,7 @@ const reportPayload = {
   orderId: 'order_123',
   email: 'user@example.com',
   reportUrl: 'https://example.com/retrieve-report',
-  pdfBase64: 'dGVzdC1wZGY='
+  attachmentUrl: 'https://example.com/report.pdf'
 };
 
 describe('email config validation', () => {

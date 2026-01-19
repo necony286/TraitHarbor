@@ -43,7 +43,7 @@ type ChromiumContext = {
 };
 
 type Chromium = {
-  connect: (wsEndpoint: string) => Promise<ChromiumBrowser>;
+  connectOverCDP: (wsEndpoint: string) => Promise<ChromiumBrowser>;
   launch: () => Promise<ChromiumBrowser>;
 };
 
@@ -111,16 +111,41 @@ const getChromium = () => {
   return chromiumPromise;
 };
 
-const shouldUseBrowserless = () =>
-  Boolean(process.env.BROWSERLESS_WS_ENDPOINT) &&
-  process.env.NODE_ENV !== 'test' &&
-  process.env.PLAYWRIGHT !== '1';
+const shouldSkipBrowserless = () =>
+  process.env.NODE_ENV === 'test' || process.env.PLAYWRIGHT === '1';
+
+const isVercelRuntime = () => Boolean(process.env.VERCEL);
+
+const resolveBrowserlessWsUrl = () => {
+  const wsEndpoint = process.env.BROWSERLESS_WS_ENDPOINT;
+  if (wsEndpoint) {
+    if (!wsEndpoint.startsWith('ws://') && !wsEndpoint.startsWith('wss://')) {
+      throw new Error(
+        'BROWSERLESS_WS_ENDPOINT must be a full ws/wss URL. Provide wss://.../?token=... or use BROWSERLESS_TOKEN.'
+      );
+    }
+    return wsEndpoint;
+  }
+
+  const token = process.env.BROWSERLESS_TOKEN;
+  if (token) {
+    const host = process.env.BROWSERLESS_HOST ?? 'production-sfo.browserless.io';
+    return `wss://${host}/?token=${token}`;
+  }
+
+  return null;
+};
 
 const getBrowser = async () => {
   const chromium = await getChromium();
+  const wsUrl = shouldSkipBrowserless() ? null : resolveBrowserlessWsUrl();
 
-  if (shouldUseBrowserless() && process.env.BROWSERLESS_WS_ENDPOINT) {
-    return chromium.connect(process.env.BROWSERLESS_WS_ENDPOINT);
+  if (wsUrl) {
+    return chromium.connectOverCDP(wsUrl);
+  }
+
+  if (isVercelRuntime()) {
+    throw new Error('Browserless is required on Vercel. Set BROWSERLESS_WS_ENDPOINT or BROWSERLESS_TOKEN.');
   }
 
   return chromium.launch();

@@ -4,13 +4,13 @@ export type ReportEmailPayload = {
   orderId: string;
   email: string;
   reportUrl: string;
-  pdfBase64?: string;
-  filename?: string;
+  attachmentUrl?: string;
+  attachmentFilename?: string;
 };
 
 type ResendAttachment = {
-  filename: string;
-  content: string;
+  filename?: string;
+  path: string;
 };
 
 type ResendEmailPayload = {
@@ -24,6 +24,7 @@ type ResendEmailPayload = {
 type ResendConfig = { readonly resendApiKey: string; readonly emailFrom: string };
 
 const shouldSkipEmail = () => process.env.NODE_ENV === 'test' || process.env.PLAYWRIGHT === '1';
+const getOverrideRecipient = () => process.env.RESEND_OVERRIDE_TO;
 
 const getResendConfig = (() => {
   let resendConfig: ResendConfig | null = null;
@@ -67,9 +68,17 @@ const sendResendEmail = async ({ to, subject, html, text, attachments }: ResendE
 
   const { resendApiKey, emailFrom } = getResendConfig();
   const resend = getResendClient(resendApiKey);
+  const overrideTo = getOverrideRecipient();
+  const resolvedTo = overrideTo ?? to;
+  if (overrideTo) {
+    console.info('Resend override active. Redirecting email recipient.', {
+      overrideTo,
+      originalTo: to
+    });
+  }
   const { data, error } = await resend.emails.send({
     from: emailFrom,
-    to,
+    to: resolvedTo,
     subject,
     html,
     text,
@@ -77,7 +86,13 @@ const sendResendEmail = async ({ to, subject, html, text, attachments }: ResendE
   });
 
   if (error) {
-    throw new Error(`Resend API error: ${error.message}`);
+    const message = error.message ?? 'Unknown error';
+    if (message.includes('testing emails')) {
+      console.warn(
+        'Verify a domain in Resend and set EMAIL_FROM to that domain, or set RESEND_OVERRIDE_TO for testing.'
+      );
+    }
+    throw new Error(`Resend API error: ${message}`);
   }
 
   return { ok: true as const, id: data?.id };
@@ -85,7 +100,7 @@ const sendResendEmail = async ({ to, subject, html, text, attachments }: ResendE
 
 export async function sendReportEmail(payload: ReportEmailPayload) {
   const subject = 'Your TraitHarbor report is ready';
-  const hasAttachment = Boolean(payload.pdfBase64);
+  const hasAttachment = Boolean(payload.attachmentUrl);
   const text = [
     'Your report is ready.',
     '',
@@ -99,9 +114,9 @@ export async function sendReportEmail(payload: ReportEmailPayload) {
     `<p>Order ID: ${payload.orderId}</p>`
   ].join('');
   const filename =
-    payload.filename ?? `TraitHarbor-Report-${payload.orderId.slice(0, 8)}.pdf`;
+    payload.attachmentFilename ?? `TraitHarbor-Report-${payload.orderId.slice(0, 8)}.pdf`;
   const attachments = hasAttachment
-    ? [{ filename, content: payload.pdfBase64 as string }]
+    ? [{ filename, path: payload.attachmentUrl as string }]
     : undefined;
 
   return sendResendEmail({

@@ -7,7 +7,7 @@ import { verifyPaddleSignature } from '../../../../../lib/signature';
 import { orderStatusSchema } from '../../../../../lib/orders';
 import { enforceRateLimit, getClientIdentifier } from '../../../../../lib/rate-limit';
 import { generateReportAccessToken, hashReportAccessToken } from '../../../../../lib/report-access';
-import { PdfRenderConcurrencyError, getOrCreateReportDownloadUrl } from '../../../../../lib/report-download';
+import { getOrCreateReportDownloadUrl } from '../../../../../lib/report-download';
 import { absoluteUrl } from '@/lib/siteUrl';
 
 export const runtime = 'nodejs';
@@ -186,7 +186,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ received: true });
     }
 
-    const reportUrl = absoluteUrl('/retrieve-report');
+    const reportUrl = absoluteUrl('/my-reports');
     const shouldSkipDelivery =
       process.env.NODE_ENV === 'test' || process.env.PLAYWRIGHT === '1';
 
@@ -202,30 +202,23 @@ export async function POST(request: Request) {
     } else if (!updatedOrder.response_id) {
       logWarn('Paid order missing response id for report generation.', { orderId: order.id });
     } else {
-      let pdfBase64: string | undefined;
-      let filename: string | undefined;
+      let attachmentUrl: string | undefined;
+      let attachmentFilename: string | undefined;
 
       try {
         const { url } = await getOrCreateReportDownloadUrl({
           order: updatedOrder,
-          ttlSeconds: 15 * 60,
+          ttlSeconds: 900,
           name: 'You'
         });
 
-        const response = await fetch(url);
-        if (!response.ok) {
-          throw new Error(`Failed to download report PDF (${response.status}).`);
-        }
-
-        const pdfBuffer = await response.arrayBuffer();
-        pdfBase64 = Buffer.from(pdfBuffer).toString('base64');
-        filename = `TraitHarbor-Report-${updatedOrder.id.slice(0, 8)}.pdf`;
+        attachmentUrl = url;
+        attachmentFilename = `TraitHarbor-Report-${updatedOrder.id.slice(0, 8)}.pdf`;
       } catch (error) {
-        if (error instanceof PdfRenderConcurrencyError) {
-          logWarn('PDF generation busy for paid order email.', { orderId: order.id });
-        } else {
-          logError('Failed to generate or fetch PDF for paid report.', { orderId: order.id, error });
-        }
+        logWarn('Failed to generate signed PDF URL for paid order email.', {
+          orderId: order.id,
+          error
+        });
       }
 
       try {
@@ -233,14 +226,14 @@ export async function POST(request: Request) {
           orderId: updatedOrder.id,
           email: customerEmail,
           reportUrl,
-          pdfBase64,
-          filename
+          attachmentUrl,
+          attachmentFilename
         });
       } catch (emailError) {
         logError('Failed to deliver report email.', {
           orderId: order.id,
           error: emailError,
-          withAttachment: Boolean(pdfBase64)
+          withAttachment: Boolean(attachmentUrl)
         });
       }
     }

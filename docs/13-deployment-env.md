@@ -24,9 +24,13 @@ This document defines the environments, branching, and required environment vari
 **Email delivery (Resend)**
 - `RESEND_API_KEY`
 - `EMAIL_FROM` (e.g., `Trait Harbor <support@traitharbor.com>`)
+- `RESEND_OVERRIDE_TO` (optional; sends all emails to this address for testing until a domain is verified)
 
 **PDF rendering (Browserless)**
-- `BROWSERLESS_WS_ENDPOINT` (required on Vercel for PDF generation; full wss URL with token)
+- `BROWSERLESS_WS_ENDPOINT` (required on Vercel for PDF generation; full `wss://.../?token=...` URL)
+- Alternatively, set `BROWSERLESS_TOKEN` and optional `BROWSERLESS_HOST` (defaults to `production-sfo.browserless.io`) to build the wss URL.
+
+> **Note:** Resend only delivers to verified domains in production. Verify a domain in Resend and set `EMAIL_FROM` to that domain, or set `RESEND_OVERRIDE_TO` for testing only.
 
 ## Optional environment variables
 

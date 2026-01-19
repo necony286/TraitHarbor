@@ -128,6 +128,12 @@ describe('rate limiting safeguards', () => {
 
   describe('when the limiter throws', () => {
     const error = new Error('Upstash failed');
+    const getRateLimitParams = () => ({
+      request: new Request('http://localhost/api/orders'),
+      route: 'orders',
+      limit: 1,
+      window: '1 m' as const
+    });
 
     beforeEach(() => {
       process.env.NODE_ENV = 'production';
@@ -141,10 +147,7 @@ describe('rate limiting safeguards', () => {
       const { enforceRateLimit } = await loadRateLimit();
 
       const response = await enforceRateLimit({
-        request: new Request('http://localhost/api/orders'),
-        route: 'orders',
-        limit: 1,
-        window: '1 m',
+        ...getRateLimitParams(),
         mode: 'fail-open'
       });
 
@@ -165,10 +168,7 @@ describe('rate limiting safeguards', () => {
       const { enforceRateLimit } = await loadRateLimit();
 
       const response = await enforceRateLimit({
-        request: new Request('http://localhost/api/orders'),
-        route: 'orders',
-        limit: 1,
-        window: '1 m',
+        ...getRateLimitParams(),
         mode: 'fail-closed'
       });
 

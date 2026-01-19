@@ -4,7 +4,7 @@ export type ReportEmailPayload = {
   orderId: string;
   email: string;
   reportUrl: string;
-  pdfBase64: string;
+  pdfBase64?: string;
   filename?: string;
 };
 
@@ -85,21 +85,31 @@ const sendResendEmail = async ({ to, subject, html, text, attachments }: ResendE
 
 export async function sendReportEmail(payload: ReportEmailPayload) {
   const subject = 'Your TraitHarbor report is ready';
-  const text = `Your report is ready.\n\nYou can also retrieve your report here: ${payload.reportUrl}\n\nOrder ID: ${payload.orderId}`;
+  const hasAttachment = Boolean(payload.pdfBase64);
+  const text = [
+    'Your report is ready.',
+    '',
+    `You can also retrieve your report here: ${payload.reportUrl}`,
+    '',
+    `Order ID: ${payload.orderId}`
+  ].join('\n');
   const html = [
-    '<p>Your report is ready. Your PDF is attached.</p>',
+    `<p>Your report is ready${hasAttachment ? '. Your PDF is attached.' : ''}</p>`,
     `<p>If you need another copy later, visit <a href="${payload.reportUrl}">${payload.reportUrl}</a>.</p>`,
     `<p>Order ID: ${payload.orderId}</p>`
   ].join('');
   const filename =
     payload.filename ?? `TraitHarbor-Report-${payload.orderId.slice(0, 8)}.pdf`;
+  const attachments = hasAttachment
+    ? [{ filename, content: payload.pdfBase64 as string }]
+    : undefined;
 
   return sendResendEmail({
     to: payload.email,
     subject,
     html,
     text,
-    attachments: [{ filename, content: payload.pdfBase64 }]
+    attachments
   });
 }
 

@@ -1,12 +1,5 @@
 import { NextResponse } from 'next/server';
-import {
-  getOrderById,
-  getScoresByResultId,
-  storeReportAsset,
-  updateOrderFromWebhook,
-  updateOrderReportAccessToken,
-  updateOrderReportFileKey
-} from '../../../../../lib/db';
+import { getOrderById, updateOrderFromWebhook, updateOrderReportAccessToken } from '../../../../../lib/db';
 import { sendReportEmail } from '../../../../../lib/email';
 import { logError, logInfo, logWarn } from '../../../../../lib/logger';
 import { parsePaddleWebhook, shouldUpdateOrder } from '../../../../../lib/paddle-webhook';
@@ -14,8 +7,7 @@ import { verifyPaddleSignature } from '../../../../../lib/signature';
 import { orderStatusSchema } from '../../../../../lib/orders';
 import { enforceRateLimit, getClientIdentifier } from '../../../../../lib/rate-limit';
 import { generateReportAccessToken, hashReportAccessToken } from '../../../../../lib/report-access';
-import { PdfRenderConcurrencyError, generateReportPdf } from '../../../../../lib/pdf';
-import { getReportPath, uploadReport } from '../../../../../lib/storage';
+import { PdfRenderConcurrencyError, getOrCreateReportDownloadUrl } from '../../../../../lib/report-download';
 import { absoluteUrl } from '@/lib/siteUrl';
 
 export const runtime = 'nodejs';
@@ -195,6 +187,13 @@ export async function POST(request: Request) {
     }
 
     const reportUrl = absoluteUrl('/retrieve-report');
+    const shouldSkipDelivery =
+      process.env.NODE_ENV === 'test' || process.env.PLAYWRIGHT === '1';
+
+    if (shouldSkipDelivery) {
+      logInfo('Skipping paid report delivery in test mode.', { orderId: order.id });
+      return NextResponse.json({ received: true });
+    }
 
     if (!process.env.RESEND_API_KEY || !process.env.EMAIL_FROM) {
       logInfo('Skipping report PDF email because Resend is not configured.', { orderId: order.id });
@@ -204,63 +203,47 @@ export async function POST(request: Request) {
       logWarn('Paid order missing response id for report generation.', { orderId: order.id });
     } else {
       try {
-        const { data: traits, error: scoresError } = await getScoresByResultId(updatedOrder.response_id);
-        if (scoresError) {
-          throw new Error(scoresError.message);
-        }
-        if (!traits) {
-          logWarn('Paid order missing trait scores for report generation.', { orderId: order.id });
-          return NextResponse.json({ received: true });
-        }
-
-        const pdf = await generateReportPdf({
-          name: 'You',
-          date: new Date(updatedOrder.created_at),
-          traits
+        const { url } = await getOrCreateReportDownloadUrl({
+          order: updatedOrder,
+          ttlSeconds: 15 * 60,
+          name: 'You'
         });
-        const pdfBase64 = Buffer.from(pdf).toString('base64');
 
-        await uploadReport(updatedOrder.id, pdf);
-        const reportPath = getReportPath(updatedOrder.id);
-        const { error: reportFileError } = await updateOrderReportFileKey({
-          orderId: updatedOrder.id,
-          reportFileKey: reportPath
-        });
-        if (reportFileError) {
-          throw new Error(reportFileError.message);
+        const response = await fetch(url);
+        if (!response.ok) {
+          throw new Error(`Failed to download report PDF (${response.status}).`);
         }
 
-        if (updatedOrder.user_id) {
-          const { error: assetError } = await storeReportAsset({
-            orderId: updatedOrder.id,
-            userId: updatedOrder.user_id,
-            reportPath,
-            kind: 'report_pdf'
-          });
-          if (assetError) {
-            logWarn('Failed to store report asset for paid order.', {
-              orderId: updatedOrder.id,
-              error: assetError.message
-            });
-          }
-        }
+        const pdfBuffer = await response.arrayBuffer();
+        const pdfBase64 = Buffer.from(pdfBuffer).toString('base64');
+        const filename = `TraitHarbor-Report-${updatedOrder.id.slice(0, 8)}.pdf`;
 
         await sendReportEmail({
           orderId: updatedOrder.id,
           email: customerEmail,
           reportUrl,
-          pdfBase64
+          pdfBase64,
+          filename
         });
       } catch (error) {
         if (error instanceof PdfRenderConcurrencyError) {
           logWarn('PDF generation busy for paid order email.', { orderId: order.id });
-          return NextResponse.json(
-            { error: 'PDF generation busy for paid order.' },
-            { status: 503 }
-          );
+        } else {
+          logError('Failed to deliver paid report after payment.', { orderId: order.id, error });
         }
-        logError('Failed to deliver paid report after payment.', { orderId: order.id, error });
-        return NextResponse.json({ error: 'Failed to deliver paid report.' }, { status: 500 });
+
+        try {
+          await sendReportEmail({
+            orderId: updatedOrder.id,
+            email: customerEmail,
+            reportUrl
+          });
+        } catch (emailError) {
+          logError('Failed to deliver paid report fallback email.', {
+            orderId: order.id,
+            error: emailError
+          });
+        }
       }
     }
   }

@@ -25,6 +25,9 @@ This document defines the environments, branching, and required environment vari
 - `RESEND_API_KEY`
 - `EMAIL_FROM` (e.g., `Trait Harbor <support@traitharbor.com>`)
 
+**PDF rendering (Browserless)**
+- `BROWSERLESS_WS_ENDPOINT` (required on Vercel for PDF generation; full wss URL with token)
+
 ## Optional environment variables
 
 **App behavior / analytics**

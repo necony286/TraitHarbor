@@ -119,7 +119,12 @@ const isVercelRuntime = () => Boolean(process.env.VERCEL);
 const resolveBrowserlessWsUrl = () => {
   const wsEndpoint = process.env.BROWSERLESS_WS_ENDPOINT;
   if (wsEndpoint) {
-    if (!wsEndpoint.startsWith('ws://') && !wsEndpoint.startsWith('wss://')) {
+    try {
+      const url = new URL(wsEndpoint);
+      if (url.protocol !== 'ws:' && url.protocol !== 'wss:') {
+        throw new Error('Protocol must be ws: or wss:');
+      }
+    } catch {
       throw new Error(
         'BROWSERLESS_WS_ENDPOINT must be a full ws/wss URL. Provide wss://.../?token=... or use BROWSERLESS_TOKEN.'
       );

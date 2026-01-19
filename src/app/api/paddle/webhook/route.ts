@@ -202,6 +202,9 @@ export async function POST(request: Request) {
     } else if (!updatedOrder.response_id) {
       logWarn('Paid order missing response id for report generation.', { orderId: order.id });
     } else {
+      let pdfBase64: string | undefined;
+      let filename: string | undefined;
+
       try {
         const { url } = await getOrCreateReportDownloadUrl({
           order: updatedOrder,
@@ -215,9 +218,17 @@ export async function POST(request: Request) {
         }
 
         const pdfBuffer = await response.arrayBuffer();
-        const pdfBase64 = Buffer.from(pdfBuffer).toString('base64');
-        const filename = `TraitHarbor-Report-${updatedOrder.id.slice(0, 8)}.pdf`;
+        pdfBase64 = Buffer.from(pdfBuffer).toString('base64');
+        filename = `TraitHarbor-Report-${updatedOrder.id.slice(0, 8)}.pdf`;
+      } catch (error) {
+        if (error instanceof PdfRenderConcurrencyError) {
+          logWarn('PDF generation busy for paid order email.', { orderId: order.id });
+        } else {
+          logError('Failed to generate or fetch PDF for paid report.', { orderId: order.id, error });
+        }
+      }
 
+      try {
         await sendReportEmail({
           orderId: updatedOrder.id,
           email: customerEmail,
@@ -225,25 +236,12 @@ export async function POST(request: Request) {
           pdfBase64,
           filename
         });
-      } catch (error) {
-        if (error instanceof PdfRenderConcurrencyError) {
-          logWarn('PDF generation busy for paid order email.', { orderId: order.id });
-        } else {
-          logError('Failed to deliver paid report after payment.', { orderId: order.id, error });
-        }
-
-        try {
-          await sendReportEmail({
-            orderId: updatedOrder.id,
-            email: customerEmail,
-            reportUrl
-          });
-        } catch (emailError) {
-          logError('Failed to deliver paid report fallback email.', {
-            orderId: order.id,
-            error: emailError
-          });
-        }
+      } catch (emailError) {
+        logError('Failed to deliver report email.', {
+          orderId: order.id,
+          error: emailError,
+          withAttachment: Boolean(pdfBase64)
+        });
       }
     }
   }

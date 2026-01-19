@@ -118,10 +118,9 @@ const shouldUseBrowserless = () =>
 
 const getBrowser = async () => {
   const chromium = await getChromium();
-  const browserlessEndpoint = process.env.BROWSERLESS_WS_ENDPOINT;
 
-  if (browserlessEndpoint && shouldUseBrowserless()) {
-    return chromium.connect(browserlessEndpoint);
+  if (shouldUseBrowserless() && process.env.BROWSERLESS_WS_ENDPOINT) {
+    return chromium.connect(process.env.BROWSERLESS_WS_ENDPOINT);
   }
 
   return chromium.launch();

@@ -1,9 +1,27 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
+const sendMock = vi.fn();
+const resendConstructorMock = vi.fn();
+
+class ResendMock {
+  emails = {
+    send: sendMock
+  };
+
+  constructor(...args: unknown[]) {
+    resendConstructorMock(...args);
+  }
+}
+
+vi.mock('resend', () => ({
+  Resend: ResendMock
+}));
+
 const reportPayload = {
   orderId: 'order_123',
   email: 'user@example.com',
-  reportUrl: 'https://example.com/report.pdf'
+  reportUrl: 'https://example.com/retrieve-report',
+  pdfBase64: 'dGVzdC1wZGY='
 };
 
 describe('email config validation', () => {
@@ -12,27 +30,25 @@ describe('email config validation', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     vi.resetModules();
-    process.env = { ...env };
-    vi.stubGlobal('fetch', vi.fn());
+    process.env = { ...env, NODE_ENV: 'development' };
   });
 
   afterEach(() => {
     process.env = env;
-    vi.unstubAllGlobals();
   });
 
   it.each([
     {
       envVar: 'RESEND_API_KEY',
       setup: () => {
-        process.env = { ...env, EMAIL_FROM: 'sender@example.com' };
+        process.env = { ...env, NODE_ENV: 'development', EMAIL_FROM: 'sender@example.com' };
         delete process.env.RESEND_API_KEY;
       }
     },
     {
       envVar: 'EMAIL_FROM',
       setup: () => {
-        process.env = { ...env, RESEND_API_KEY: 'test-key' };
+        process.env = { ...env, NODE_ENV: 'development', RESEND_API_KEY: 'test-key' };
         delete process.env.EMAIL_FROM;
       }
     }
@@ -41,33 +57,33 @@ describe('email config validation', () => {
     const { sendReportEmail } = await import('../lib/email');
 
     await expect(sendReportEmail(reportPayload)).rejects.toThrow(`Missing ${envVar}.`);
-    expect(fetch).not.toHaveBeenCalled();
+    expect(sendMock).not.toHaveBeenCalled();
   });
 
   it('caches resend configuration after first load', async () => {
-    process.env = { ...env, RESEND_API_KEY: 'test-key', EMAIL_FROM: 'sender@example.com' };
-    const fetchMock = vi.fn().mockResolvedValue({
-      ok: true,
-      json: async () => ({ id: 'email_123' })
-    });
-    vi.stubGlobal('fetch', fetchMock);
+    process.env = { ...env, NODE_ENV: 'development', RESEND_API_KEY: 'test-key', EMAIL_FROM: 'sender@example.com' };
+    sendMock.mockResolvedValue({ data: { id: 'email_123' }, error: null });
 
     const { sendReportEmail } = await import('../lib/email');
 
-    await expect(sendReportEmail(reportPayload)).resolves.toEqual({ id: 'email_123' });
+    await expect(sendReportEmail(reportPayload)).resolves.toEqual({ ok: true, id: 'email_123' });
 
     delete process.env.RESEND_API_KEY;
     delete process.env.EMAIL_FROM;
 
-    await expect(sendReportEmail(reportPayload)).resolves.toEqual({ id: 'email_123' });
+    await expect(sendReportEmail(reportPayload)).resolves.toEqual({ ok: true, id: 'email_123' });
 
-    expect(fetchMock).toHaveBeenCalledTimes(2);
-    expect(fetchMock.mock.calls[1]?.[1]).toEqual(
-      expect.objectContaining({
-        headers: expect.objectContaining({
-          Authorization: 'Bearer test-key'
-        })
-      })
-    );
+    expect(sendMock).toHaveBeenCalledTimes(2);
+    expect(resendConstructorMock).toHaveBeenCalledWith('test-key');
+  });
+
+  it('skips sending in test mode', async () => {
+    process.env = { ...env, NODE_ENV: 'test' };
+    sendMock.mockResolvedValue({ data: { id: 'email_123' }, error: null });
+
+    const { sendReportEmail } = await import('../lib/email');
+
+    await expect(sendReportEmail(reportPayload)).resolves.toEqual({ ok: true });
+    expect(sendMock).not.toHaveBeenCalled();
   });
 });

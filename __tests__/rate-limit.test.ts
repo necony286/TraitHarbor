@@ -126,60 +126,62 @@ describe('rate limiting safeguards', () => {
     expect(logWarnMock).not.toHaveBeenCalled();
   });
 
-  it('allows fail-open requests when the limiter throws and opt-in is enabled', async () => {
-    process.env.NODE_ENV = 'production';
-    process.env.UPSTASH_REDIS_REST_URL = 'https://example.com';
-    process.env.UPSTASH_REDIS_REST_TOKEN = 'token';
-    process.env.RATE_LIMIT_ALLOW_FAIL_OPEN = 'true';
+  describe('when the limiter throws', () => {
     const error = new Error('Upstash failed');
-    ratelimitLimitMock.mockRejectedValueOnce(error);
-    const { enforceRateLimit } = await loadRateLimit();
 
-    const response = await enforceRateLimit({
-      request: new Request('http://localhost/api/orders'),
-      route: 'orders',
-      limit: 1,
-      window: '1 m',
-      mode: 'fail-open'
+    beforeEach(() => {
+      process.env.NODE_ENV = 'production';
+      process.env.UPSTASH_REDIS_REST_URL = 'https://example.com';
+      process.env.UPSTASH_REDIS_REST_TOKEN = 'token';
     });
 
-    expect(response).toBeNull();
-    expect(logWarnMock).toHaveBeenCalledWith('Rate limiter failed. Allowing request to proceed.', {
-      route: 'orders',
-      mode: 'fail-open'
-    });
-    expect(logWarnMock).toHaveBeenCalledWith('Rate limiter error details.', {
-      route: 'orders',
-      mode: 'fail-open',
-      error
-    });
-  });
+    it('allows fail-open requests when the limiter throws and opt-in is enabled', async () => {
+      process.env.RATE_LIMIT_ALLOW_FAIL_OPEN = 'true';
+      ratelimitLimitMock.mockRejectedValueOnce(error);
+      const { enforceRateLimit } = await loadRateLimit();
 
-  it('blocks requests when the limiter throws in fail-closed mode', async () => {
-    process.env.NODE_ENV = 'production';
-    process.env.UPSTASH_REDIS_REST_URL = 'https://example.com';
-    process.env.UPSTASH_REDIS_REST_TOKEN = 'token';
-    const error = new Error('Upstash failed');
-    ratelimitLimitMock.mockRejectedValueOnce(error);
-    const { enforceRateLimit } = await loadRateLimit();
+      const response = await enforceRateLimit({
+        request: new Request('http://localhost/api/orders'),
+        route: 'orders',
+        limit: 1,
+        window: '1 m',
+        mode: 'fail-open'
+      });
 
-    const response = await enforceRateLimit({
-      request: new Request('http://localhost/api/orders'),
-      route: 'orders',
-      limit: 1,
-      window: '1 m',
-      mode: 'fail-closed'
+      expect(response).toBeNull();
+      expect(logWarnMock).toHaveBeenCalledWith('Rate limiter failed. Allowing request to proceed.', {
+        route: 'orders',
+        mode: 'fail-open'
+      });
+      expect(logWarnMock).toHaveBeenCalledWith('Rate limiter error details.', {
+        route: 'orders',
+        mode: 'fail-open',
+        error
+      });
     });
 
-    expect(response?.status).toBe(503);
-    expect(logErrorMock).toHaveBeenCalledWith('Rate limiter failed. Blocking request.', {
-      route: 'orders',
-      mode: 'fail-closed'
-    });
-    expect(logErrorMock).toHaveBeenCalledWith('Rate limiter error details.', {
-      route: 'orders',
-      mode: 'fail-closed',
-      error
+    it('blocks requests when the limiter throws in fail-closed mode', async () => {
+      ratelimitLimitMock.mockRejectedValueOnce(error);
+      const { enforceRateLimit } = await loadRateLimit();
+
+      const response = await enforceRateLimit({
+        request: new Request('http://localhost/api/orders'),
+        route: 'orders',
+        limit: 1,
+        window: '1 m',
+        mode: 'fail-closed'
+      });
+
+      expect(response?.status).toBe(503);
+      expect(logErrorMock).toHaveBeenCalledWith('Rate limiter failed. Blocking request.', {
+        route: 'orders',
+        mode: 'fail-closed'
+      });
+      expect(logErrorMock).toHaveBeenCalledWith('Rate limiter error details.', {
+        route: 'orders',
+        mode: 'fail-closed',
+        error
+      });
     });
   });
 });

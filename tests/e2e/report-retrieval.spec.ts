@@ -95,7 +95,7 @@ test('my reports lists orders and triggers downloads', async ({ page }) => {
   const downloadUrlRespPromise = page.waitForResponse(
     (response) =>
       response.request().method() === 'POST' &&
-      response.url().includes(`/api/reports/${paidOrder.id}/download-url`)
+      response.url().endsWith(`/api/reports/${paidOrder.id}/download-url`)
   );
 
   await page.getByRole('button', { name: 'Download report' }).click();

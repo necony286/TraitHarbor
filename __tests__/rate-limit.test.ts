@@ -147,7 +147,7 @@ describe('rate limiting safeguards', () => {
       const { enforceRateLimit } = await loadRateLimit();
 
       const response = await enforceRateLimit({
-        ...rateLimitParams,
+        ...getRateLimitParams(),
         mode: 'fail-open'
       });
 

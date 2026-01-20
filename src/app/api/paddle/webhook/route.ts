@@ -155,10 +155,15 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Unable to update order.' }, { status: 500 });
   }
 
+  if (parsedEvent.status === 'paid' && !updatedOrder) {
+    logWarn('Paid order missing updated order data for report delivery.', { orderId: order.id });
+    return NextResponse.json({ received: true });
+  }
+
   if (parsedEvent.status === 'paid') {
     requestPdfGeneration(order.id);
 
-    const customerEmail = updatedOrder?.email ?? parsedEvent.customerEmail;
+    const customerEmail = updatedOrder.email ?? parsedEvent.customerEmail;
     if (!customerEmail) {
       logWarn('Paid order missing customer email for report delivery.', { orderId: order.id });
       return NextResponse.json({ received: true });
@@ -188,9 +193,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ received: true });
     }
 
-    const reportUrl = absoluteUrl(
-      `/r/${updatedOrder?.id ?? order.id}?token=${encodeURIComponent(reportToken)}`
-    );
+    const reportUrl = absoluteUrl(`/r/${updatedOrder.id}?token=${encodeURIComponent(reportToken)}`);
     const shouldSkipDelivery =
       process.env.NODE_ENV === 'test' || process.env.PLAYWRIGHT === '1';
 
@@ -201,8 +204,6 @@ export async function POST(request: Request) {
 
     if (!process.env.RESEND_API_KEY || !process.env.EMAIL_FROM) {
       logInfo('Skipping report PDF email because Resend is not configured.', { orderId: order.id });
-    } else if (!updatedOrder) {
-      logWarn('Paid order missing updated order data for report delivery.', { orderId: order.id });
     } else if (!updatedOrder.response_id) {
       logWarn('Paid order missing response id for report generation.', { orderId: order.id });
     } else {

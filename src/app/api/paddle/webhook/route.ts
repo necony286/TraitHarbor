@@ -12,6 +12,8 @@ import { absoluteUrl } from '@/lib/siteUrl';
 
 export const runtime = 'nodejs';
 
+const REPORT_ATTACHMENT_TTL_SECONDS = 60 * 60;
+
 const getWebhookSecret = () => {
   const secret = process.env.PADDLE_WEBHOOK_SECRET;
   if (!secret) {
@@ -187,7 +189,7 @@ export async function POST(request: Request) {
     }
 
     const reportUrl = absoluteUrl(
-      `/r/${updatedOrder.id}?token=${encodeURIComponent(reportToken)}`
+      `/r/${updatedOrder?.id ?? order.id}?token=${encodeURIComponent(reportToken)}`
     );
     const shouldSkipDelivery =
       process.env.NODE_ENV === 'test' || process.env.PLAYWRIGHT === '1';
@@ -210,7 +212,7 @@ export async function POST(request: Request) {
       try {
         const { url } = await getOrCreateReportDownloadUrl({
           order: updatedOrder,
-          ttlSeconds: 60 * 60,
+          ttlSeconds: REPORT_ATTACHMENT_TTL_SECONDS,
           name: 'You'
         });
 

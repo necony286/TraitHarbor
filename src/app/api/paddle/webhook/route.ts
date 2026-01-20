@@ -155,12 +155,12 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Unable to update order.' }, { status: 500 });
   }
 
-  if (parsedEvent.status === 'paid' && !updatedOrder) {
-    logWarn('Paid order missing updated order data for report delivery.', { orderId: order.id });
-    return NextResponse.json({ received: true });
-  }
-
   if (parsedEvent.status === 'paid') {
+    if (!updatedOrder) {
+      logWarn('Paid order missing updated order data for report delivery.', { orderId: order.id });
+      return NextResponse.json({ received: true });
+    }
+
     requestPdfGeneration(order.id);
 
     const customerEmail = updatedOrder.email ?? parsedEvent.customerEmail;

@@ -1,5 +1,6 @@
 import { describe, expect, it, beforeEach, afterEach, vi } from 'vitest';
 import { POST } from '../src/app/api/paddle/webhook/route';
+import { logWarn } from '../lib/logger';
 
 const orderId = '6a8bdef2-5c72-4c1b-9b89-2fb3b52b70b7';
 const userId = 'd3f392f9-5422-4d1a-b3f6-179b0b85a45b';
@@ -88,6 +89,32 @@ describe('paddle webhook route', () => {
       status: 'paid',
       paddleOrderId: 'txn_123',
       customerEmail: 'Customer@example.com'
+    });
+  });
+
+  it('logs a warning when a paid webhook update returns no order data', async () => {
+    updateOrderFromWebhookMock.mockResolvedValueOnce({ data: null, error: null });
+
+    const payload = {
+      event_type: 'payment_succeeded',
+      data: {
+        id: 'txn_123',
+        custom_data: { order_id: orderId }
+      }
+    };
+
+    const response = await POST(
+      new Request('http://localhost/api/paddle/webhook', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      })
+    );
+
+    expect(response.status).toBe(200);
+    await expect(response.json()).resolves.toEqual({ received: true });
+    expect(logWarn).toHaveBeenCalledWith('Paid order missing updated order data for report delivery.', {
+      orderId
     });
   });
 

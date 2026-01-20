@@ -19,12 +19,12 @@ const createWebhookPayload = (
   } = {}
 ) => ({
   event_type: 'payment_succeeded',
+  ...overrides,
   data: {
     id: 'txn_123',
     custom_data: { order_id: orderId },
     ...overrides.data
-  },
-  ...overrides
+  }
 });
 
 const postWebhook = (payload: ReturnType<typeof createWebhookPayload>) =>

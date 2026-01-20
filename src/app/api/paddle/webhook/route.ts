@@ -186,7 +186,9 @@ export async function POST(request: Request) {
       return NextResponse.json({ received: true });
     }
 
-    const reportUrl = absoluteUrl('/my-reports');
+    const reportUrl = absoluteUrl(
+      `/r/${updatedOrder.id}?token=${encodeURIComponent(reportToken)}`
+    );
     const shouldSkipDelivery =
       process.env.NODE_ENV === 'test' || process.env.PLAYWRIGHT === '1';
 
@@ -208,7 +210,7 @@ export async function POST(request: Request) {
       try {
         const { url } = await getOrCreateReportDownloadUrl({
           order: updatedOrder,
-          ttlSeconds: 15 * 60,
+          ttlSeconds: 60 * 60,
           name: 'You'
         });
 

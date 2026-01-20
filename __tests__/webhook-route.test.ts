@@ -8,6 +8,34 @@ const userId = 'd3f392f9-5422-4d1a-b3f6-179b0b85a45b';
 const getOrderByIdMock = vi.fn();
 const updateOrderFromWebhookMock = vi.fn();
 
+const createWebhookPayload = (
+  overrides: {
+    event_type?: string;
+    data?: Partial<{
+      id: string;
+      custom_data: { order_id: string };
+      customer_email?: string;
+    }>;
+  } = {}
+) => ({
+  event_type: 'payment_succeeded',
+  data: {
+    id: 'txn_123',
+    custom_data: { order_id: orderId },
+    ...overrides.data
+  },
+  ...overrides
+});
+
+const postWebhook = (payload: ReturnType<typeof createWebhookPayload>) =>
+  POST(
+    new Request('http://localhost/api/paddle/webhook', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    })
+  );
+
 vi.mock('../lib/db', () => ({
   getOrderById: (...args: unknown[]) => getOrderByIdMock(...args),
   updateOrderFromWebhook: (...args: unknown[]) => updateOrderFromWebhookMock(...args)
@@ -65,22 +93,13 @@ describe('paddle webhook route', () => {
   });
 
   it('updates the user email when a paid webhook includes customer email', async () => {
-    const payload = {
-      event_type: 'payment_succeeded',
+    const payload = createWebhookPayload({
       data: {
-        id: 'txn_123',
-        custom_data: { order_id: orderId },
         customer_email: 'Customer@example.com'
       }
-    };
+    });
 
-    const response = await POST(
-      new Request('http://localhost/api/paddle/webhook', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-      })
-    );
+    const response = await postWebhook(payload);
 
     expect(response.status).toBe(200);
     expect(getOrderByIdMock).toHaveBeenCalledWith({ orderId, paddleOrderId: 'txn_123' });
@@ -95,21 +114,9 @@ describe('paddle webhook route', () => {
   it('logs a warning when a paid webhook update returns no order data', async () => {
     updateOrderFromWebhookMock.mockResolvedValueOnce({ data: null, error: null });
 
-    const payload = {
-      event_type: 'payment_succeeded',
-      data: {
-        id: 'txn_123',
-        custom_data: { order_id: orderId }
-      }
-    };
+    const payload = createWebhookPayload();
 
-    const response = await POST(
-      new Request('http://localhost/api/paddle/webhook', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-      })
-    );
+    const response = await postWebhook(payload);
 
     expect(response.status).toBe(200);
     await expect(response.json()).resolves.toEqual({ received: true });
@@ -126,21 +133,9 @@ describe('paddle webhook route', () => {
       PADDLE_WEBHOOK_SECRET: 'secret'
     };
 
-    const payload = {
-      event_type: 'payment_succeeded',
-      data: {
-        id: 'txn_123',
-        custom_data: { order_id: orderId }
-      }
-    };
+    const payload = createWebhookPayload();
 
-    const response = await POST(
-      new Request('http://localhost/api/paddle/webhook', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-      })
-    );
+    const response = await postWebhook(payload);
 
     expect(response.status).toBe(400);
     expect(getOrderByIdMock).not.toHaveBeenCalled();

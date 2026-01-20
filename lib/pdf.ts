@@ -117,7 +117,7 @@ const shouldSkipBrowserless = () =>
 const isVercelRuntime = () => Boolean(process.env.VERCEL);
 
 const resolveBrowserlessWsUrl = () => {
-  const wsEndpoint = process.env.BROWSERLESS_WS_ENDPOINT;
+  const wsEndpoint = process.env.BROWSERLESS_WS_ENDPOINT?.trim();
   if (wsEndpoint) {
     try {
       const url = new URL(wsEndpoint);
@@ -132,9 +132,9 @@ const resolveBrowserlessWsUrl = () => {
     return wsEndpoint;
   }
 
-  const token = process.env.BROWSERLESS_TOKEN;
+  const token = process.env.BROWSERLESS_TOKEN?.trim();
   if (token) {
-    const host = process.env.BROWSERLESS_HOST ?? 'production-sfo.browserless.io';
+    const host = process.env.BROWSERLESS_HOST?.trim() || 'production-sfo.browserless.io';
     return `wss://${host}/?token=${token}`;
   }
 

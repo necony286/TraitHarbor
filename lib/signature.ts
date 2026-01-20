@@ -1,31 +1,40 @@
 import crypto from 'crypto';
 
-type SignatureParts = {
-  scheme: 'h1' | 'v1';
-  timestamp?: string;
-  signature: string;
-};
+type SignatureParts =
+  | {
+      scheme: 'h1';
+      timestamp: string;
+      signatures: string[];
+    }
+  | {
+      scheme: 'v1';
+      signature: string;
+    };
 
 const parseSignatureHeader = (header: string): SignatureParts | null => {
   const parts = header.split(';').map((part) => part.trim());
   const map = new Map<string, string>();
+  const h1Signatures: string[] = [];
 
   parts.forEach((part) => {
     const [key, value] = part.split('=');
     if (key && value) {
-      map.set(key, value);
+      if (key === 'h1') {
+        h1Signatures.push(value);
+      } else {
+        map.set(key, value);
+      }
     }
   });
 
   const timestamp = map.get('ts') ?? map.get('t');
-  const h1Signature = map.get('h1');
   const v1Signature = map.get('v1');
 
-  if (h1Signature) {
+  if (h1Signatures.length > 0) {
     if (!timestamp) {
       return null;
     }
-    return { scheme: 'h1', timestamp, signature: h1Signature };
+    return { scheme: 'h1', timestamp, signatures: h1Signatures };
   }
 
   if (v1Signature) {
@@ -86,7 +95,7 @@ export const verifyPaddleSignature = (body: string, header: string | null, secre
     }
 
     const expectedSignature = createHmac(`${parsed.timestamp}:${body}`, secret);
-    return timingSafeEquals(parsed.signature, expectedSignature);
+    return parsed.signatures.some((signature) => timingSafeEquals(signature, expectedSignature));
   }
 
   if (parsed.scheme === 'v1') {

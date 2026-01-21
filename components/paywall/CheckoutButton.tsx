@@ -169,6 +169,10 @@ export function CheckoutButton({ resultId }: CheckoutButtonProps) {
         customData,
         successCallback: () => {
           const sessionId = providerSessionId ?? order.id;
+          if (typeof window !== 'undefined') {
+            window.location.assign(`/checkout/callback?session_id=${sessionId}`);
+            return;
+          }
           router.push(`/checkout/callback?session_id=${sessionId}`);
         }
       };

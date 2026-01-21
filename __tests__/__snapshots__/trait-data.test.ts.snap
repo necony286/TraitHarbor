@@ -1,4 +1,49 @@
-// Vitest Snapshot v1
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`traitData > should have TRAIT_DETAILS matching the snapshot 1`] = `
+{
+  "A": {
+    "description": "You focus on empathy, cooperation, and keeping relationships harmonious. High agreeableness often means you are a supportive teammate.",
+    "guidance": [
+      "Practice saying yes and no with the same kindness.",
+      "Ask for feedback directly when you need clarity.",
+    ],
+    "label": "Agreeableness",
+  },
+  "C": {
+    "description": "You value structure, follow-through, and steady progress. Strong conscientiousness supports reliability and goal achievement.",
+    "guidance": [
+      "Set one clear priority each morning.",
+      "Celebrate small wins to keep momentum.",
+    ],
+    "label": "Conscientiousness",
+  },
+  "E": {
+    "description": "You gain energy from people and active environments. Extraversion highlights social confidence and enthusiasm.",
+    "guidance": [
+      "Schedule one social recharge each week.",
+      "Build in quiet time after busy days.",
+    ],
+    "label": "Extraversion",
+  },
+  "N": {
+    "description": "You feel emotions intensely and notice potential risks quickly. This sensitivity can help you prepare, especially with healthy coping strategies.",
+    "guidance": [
+      "Use a calming ritual when stress spikes.",
+      "Name the feeling before reacting to it.",
+    ],
+    "label": "Neuroticism",
+  },
+  "O": {
+    "description": "You lean into curiosity, new ideas, and creative exploration. High openness often shows up as imagination and comfort with change.",
+    "guidance": [
+      "Try a new hobby or course this month.",
+      "Balance novelty with a simple routine to stay grounded.",
+    ],
+    "label": "Openness",
+  },
+}
+`;
 
 exports[`traitData should have TRAIT_DETAILS matching the snapshot 1`] = `
 Object {

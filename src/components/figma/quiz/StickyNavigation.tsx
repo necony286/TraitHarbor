@@ -23,7 +23,7 @@ export function StickyNavigation({
 }: StickyNavigationProps) {
   return (
     <nav
-      className="fixed bottom-0 left-0 right-0 border-t border-border/50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80 z-10 shadow-2xl pointer-events-none"
+      className="fixed bottom-0 left-0 right-0 border-t border-border/50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80 z-10 shadow-2xl"
       aria-label="Quiz navigation"
     >
       {errorMessage && (
@@ -44,7 +44,7 @@ export function StickyNavigation({
         </div>
       )}
 
-      <Container className="flex items-center justify-between gap-4 py-4 pointer-events-none">
+      <Container className="flex items-center justify-between gap-4 py-4">
         <button
           onClick={onPrevious}
           disabled={!canGoPrevious}

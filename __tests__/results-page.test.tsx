@@ -1,6 +1,7 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { vi } from 'vitest';
+import { TraitChart } from '../components/results/TraitChart';
 
 vi.mock('next/navigation', () => ({
   redirect: vi.fn()
@@ -29,5 +30,43 @@ describe('ResultsPage', () => {
     expect(screen.getByText(/results unavailable/i)).toBeInTheDocument();
     expect(screen.getByText(/couldn'?t load your results/i)).toBeInTheDocument();
     consoleErrorSpy.mockRestore();
+  });
+
+  it('renders the results page with fixture data', async () => {
+    vi.stubEnv('NEXT_PUBLIC_QUIZ_FIXTURE_MODE', '1');
+    const { default: ResultsPage } = await import('../src/app/results/[resultId]/page');
+    const ui = await ResultsPage({ params: Promise.resolve({ resultId: validResultId }) });
+
+    render(ui);
+
+    expect(screen.getByText('TraitHarbor personality snapshot')).toBeInTheDocument();
+    expect(screen.queryByText(/your key traits/i)).toBeNull();
+
+    const traitHeadings = [
+      '72% Openness',
+      '64% Conscientiousness',
+      '58% Extraversion',
+      '81% Agreeableness',
+      '46% Neuroticism'
+    ];
+
+    traitHeadings.forEach((heading) => {
+      expect(screen.getAllByText(heading)).toHaveLength(1);
+    });
+  });
+
+  it('shows a progress fill with width greater than zero for a score of 50', () => {
+    const { container } = render(
+      <TraitChart scores={{ O: 50, C: 0, E: 0, A: 0, N: 0 }} />
+    );
+
+    const fills = Array.from(container.querySelectorAll('div[style*="width"]'));
+    const hasNonZeroWidth = fills.some((fill) => {
+      const widthValue = fill.getAttribute('style') ?? '';
+      const match = widthValue.match(/width:\s*([0-9.]+)%/i);
+      return match ? Number(match[1]) > 0 : false;
+    });
+
+    expect(hasNonZeroWidth).toBe(true);
   });
 });

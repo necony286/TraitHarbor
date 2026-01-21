@@ -128,13 +128,7 @@ export function CheckoutButton({ resultId }: CheckoutButtonProps) {
 
       const redirectToCallback = (sid: string) => {
         const callbackUrl = `/checkout/callback?session_id=${sid}`;
-
-        if (typeof window !== 'undefined') {
-          window.location.assign(callbackUrl);
-          return;
-        }
-
-        router.push(callbackUrl);
+        window.location.assign(callbackUrl);
       };
 
       const isPlaywrightMode = process.env.NEXT_PUBLIC_PLAYWRIGHT === '1';

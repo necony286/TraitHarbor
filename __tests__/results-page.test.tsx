@@ -2,9 +2,15 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { vi } from 'vitest';
 import { TraitChart } from '../components/results/TraitChart';
+import resultsFixture from '../src/data/results.fixture.json';
+
+const pushMock = vi.fn();
 
 vi.mock('next/navigation', () => ({
-  redirect: vi.fn()
+  redirect: vi.fn(),
+  useRouter: () => ({
+    push: pushMock
+  })
 }));
 
 const validResultId = '11111111-1111-1111-1111-111111111111';
@@ -43,11 +49,11 @@ describe('ResultsPage', () => {
     expect(screen.queryByText(/your key traits/i)).toBeNull();
 
     const traitHeadings = [
-      '72% Openness',
-      '64% Conscientiousness',
-      '58% Extraversion',
-      '81% Agreeableness',
-      '46% Neuroticism'
+      `${resultsFixture.O}% Openness`,
+      `${resultsFixture.C}% Conscientiousness`,
+      `${resultsFixture.E}% Extraversion`,
+      `${resultsFixture.A}% Agreeableness`,
+      `${resultsFixture.N}% Neuroticism`
     ];
 
     traitHeadings.forEach((heading) => {
@@ -62,9 +68,8 @@ describe('ResultsPage', () => {
 
     const fills = Array.from(container.querySelectorAll('div[style*="width"]'));
     const hasNonZeroWidth = fills.some((fill) => {
-      const widthValue = fill.getAttribute('style') ?? '';
-      const match = widthValue.match(/width:\s*([0-9.]+)%/i);
-      return match ? Number(match[1]) > 0 : false;
+      const style = (fill as HTMLElement).style;
+      return parseFloat(style.width) > 0;
     });
 
     expect(hasNonZeroWidth).toBe(true);

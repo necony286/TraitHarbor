@@ -3,22 +3,12 @@ import { Badge } from '../../../components/ui/Badge';
 import { Card, CardContent } from '../../../components/ui/Card';
 import { Container } from '../../../components/ui/Container';
 import { TRAIT_DETAILS, TRAIT_ORDER, type TraitScores } from '../../../components/results/traitData';
-
 interface ResultsDisplayProps {
   traits: TraitScores;
   children: ReactNode;
 }
 
 export function ResultsDisplay({ traits, children }: ResultsDisplayProps) {
-  const keyTraits = [...TRAIT_ORDER]
-    .map((trait) => ({
-      id: trait,
-      label: TRAIT_DETAILS[trait].label,
-      score: traits[trait] ?? 0
-    }))
-    .sort((a, b) => b.score - a.score)
-    .slice(0, 4);
-
   return (
     <Container as="section" className="flex w-full flex-col gap-10">
       <Card className="shadow-sm">
@@ -36,21 +26,28 @@ export function ResultsDisplay({ traits, children }: ResultsDisplayProps) {
               </p>
             </div>
           </div>
+          <div className="mt-8 space-y-4">
+            {TRAIT_ORDER.map((trait) => {
+              const details = TRAIT_DETAILS[trait];
+              const score = traits[trait] ?? 0;
 
-          <div className="mt-8">
-            <h2 className="text-left text-lg font-medium text-foreground">Your key traits</h2>
-            <div className="mt-4 grid gap-3 sm:grid-cols-2">
-              {keyTraits.map((trait) => (
-                <div
-                  key={trait.id}
-                  className="flex items-center justify-between rounded-xl border border-border bg-muted/40 px-4 py-3 text-sm font-medium text-foreground"
-                >
-                  <span>{trait.label}</span>
-                  <span className="text-primary">{Math.round(trait.score)}%</span>
+              return (
+                <div className="flex flex-col gap-2" key={trait}>
+                  <div className="flex items-center justify-between text-sm font-medium text-foreground">
+                    <span>{details.label}</span>
+                    <span className="text-muted-foreground">{Math.round(score)}%</span>
+                  </div>
+                  <div className="h-3 w-full overflow-hidden rounded-full bg-muted/60">
+                    <div
+                      className="h-full rounded-full bg-gradient-to-r from-brand to-brand-strong"
+                      style={{ width: `${Math.max(0, Math.min(100, score))}%` }}
+                    />
+                  </div>
                 </div>
-              ))}
-            </div>
+              );
+            })}
           </div>
+
         </CardContent>
       </Card>
 

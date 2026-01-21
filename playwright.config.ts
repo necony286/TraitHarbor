@@ -15,7 +15,8 @@ export default defineConfig({
     reuseExistingServer: false,
     env: {
       NEXT_PUBLIC_QUIZ_FIXTURE_MODE: '1',
-      NEXT_PUBLIC_PLAUSIBLE_DOMAIN: 'analytics.traitharbor.example'
+      NEXT_PUBLIC_PLAUSIBLE_DOMAIN: 'analytics.traitharbor.example',
+      NEXT_PUBLIC_PLAYWRIGHT: '1'
     }
   },
   use: {

@@ -12,7 +12,7 @@ export type TraitDetails = {
 
 export const TRAIT_ORDER: TraitKey[] = TRAIT_DATA.map((trait) => trait.key);
 
-export const TRAIT_DETAILS: Record<TraitKey, TraitDetails> = Object.fromEntries(
+export const TRAIT_DETAILS = Object.fromEntries(
   TRAIT_DATA.map((trait) => [
     trait.key,
     {
@@ -21,4 +21,4 @@ export const TRAIT_DETAILS: Record<TraitKey, TraitDetails> = Object.fromEntries(
       guidance: trait.guidance
     }
   ])
-);
+) as Record<TraitKey, TraitDetails>;

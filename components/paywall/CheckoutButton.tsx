@@ -8,6 +8,8 @@ import { z } from 'zod';
 import { checkoutConfigSchema } from '../../lib/payments';
 import { orderRecordSchema } from '../../lib/orders';
 import { Button } from '../ui/Button';
+import { FormField } from '../ui/FormField';
+import { Input } from '../ui/Input';
 
 const createOrderResponseSchema = z.object({
   order: orderRecordSchema,
@@ -187,22 +189,16 @@ export function CheckoutButton({ resultId }: CheckoutButtonProps) {
 
   return (
     <div className="space-y-2">
-      <div className="space-y-2">
-        <label htmlFor={`checkout-email-${resultId}`} className="text-sm font-medium text-slate-700">
-          Email for receipt and access
-        </label>
-        <input
-          id={`checkout-email-${resultId}`}
+      <FormField id={`checkout-email-${resultId}`} label="Email for receipt and access" error={emailError}>
+        <Input
           type="email"
           inputMode="email"
           autoComplete="email"
-          className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-base text-slate-900 shadow-sm focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-200"
           placeholder="you@example.com"
           value={email}
           onChange={(event) => setEmail(event.target.value)}
         />
-        {emailError ? <p className="text-sm text-red-600">{emailError}</p> : null}
-      </div>
+      </FormField>
       <Button type="button" onClick={handleCheckout} disabled={isLoading} size="lg">
         {isLoading ? 'Loading checkout…' : 'Unlock full report (PDF)'}
       </Button>

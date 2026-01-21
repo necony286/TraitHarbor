@@ -127,7 +127,8 @@ export function CheckoutButton({ resultId }: CheckoutButtonProps) {
       const sessionId = providerSessionId ?? order.id;
 
       const redirectToCallback = (sid: string) => {
-        window.location.assign(`/checkout/callback?session_id=${sid}`);
+        const callbackUrl = `/checkout/callback?session_id=${sid}`;
+        window.location.assign(callbackUrl);
       };
 
       const isPlaywrightMode = process.env.NEXT_PUBLIC_PLAYWRIGHT === '1';
@@ -150,11 +151,7 @@ export function CheckoutButton({ resultId }: CheckoutButtonProps) {
       await loadPaddleScript();
 
       if (!window.Paddle) {
-        if (typeof window !== 'undefined') {
-          window.location.assign(`/checkout/callback?session_id=${sessionId}`);
-          return;
-        }
-        router.push(`/checkout/callback?session_id=${sessionId}`);
+        redirectToCallback(sessionId);
         return;
       }
 
@@ -186,11 +183,7 @@ export function CheckoutButton({ resultId }: CheckoutButtonProps) {
         },
         customData,
         successCallback: () => {
-          if (typeof window !== 'undefined') {
-            window.location.assign(`/checkout/callback?session_id=${sessionId}`);
-            return;
-          }
-          router.push(`/checkout/callback?session_id=${sessionId}`);
+          redirectToCallback(sessionId);
         }
       };
 

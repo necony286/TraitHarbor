@@ -1,6 +1,7 @@
+import { TRAIT_DATA, type TraitKey } from '../src/data/traits';
 import { QuizItem } from './ipip';
 
-type Trait = 'O' | 'C' | 'E' | 'A' | 'N';
+type Trait = TraitKey;
 
 export type AnswerMap = Record<string, number>;
 export type TraitScores = Record<Trait, number>;
@@ -11,7 +12,7 @@ export type ScoreResult = {
   counts: TraitScores;
 };
 
-const TRAITS: Trait[] = ['O', 'C', 'E', 'A', 'N'];
+const TRAITS: Trait[] = TRAIT_DATA.map((trait) => trait.key);
 
 const emptyTraitScores = (): TraitScores => ({
   O: 0,

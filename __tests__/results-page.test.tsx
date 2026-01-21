@@ -9,7 +9,7 @@ const pushMock = vi.fn();
 vi.mock('next/navigation', () => ({
   redirect: vi.fn(),
   useRouter: () => ({
-    push: (...args: unknown[]) => pushMock(...args)
+    push: pushMock
   })
 }));
 

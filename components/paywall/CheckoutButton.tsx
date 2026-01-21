@@ -132,8 +132,9 @@ export function CheckoutButton({ resultId }: CheckoutButtonProps) {
       };
 
       const isPlaywrightMode = process.env.NEXT_PUBLIC_PLAYWRIGHT === '1';
+      const isFixtureMode = process.env.NEXT_PUBLIC_QUIZ_FIXTURE_MODE === '1';
 
-      if (isPlaywrightMode) {
+      if (isPlaywrightMode || isFixtureMode) {
         // Keep E2E tests on the local callback flow without loading Paddle.
         redirectToCallback(sessionId);
         return;

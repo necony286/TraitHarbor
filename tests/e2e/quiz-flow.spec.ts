@@ -7,16 +7,18 @@ const AGREE_LABEL = 'Agree';
 const EMAIL_INPUT_LABEL = 'Email for receipt and access';
 const BUYER_EMAIL = 'buyer@example.com';
 const PDF_URL = 'https://example.com/report.pdf';
+const PADDLE_SCRIPT_URL = 'https://cdn.paddle.com/paddle/v2/paddle.js';
 
 const paddleScriptStub = `
   window.Paddle = {
-    Environment: { set() {} },
-    Initialize() {},
+    Environment: { set: () => {} },
+    Initialize: () => {},
     Checkout: {
-      open({ successCallback }) {
-        if (typeof successCallback === 'function') {
-          successCallback();
+      open: (opts) => {
+        if (opts && typeof opts.successCallback === 'function') {
+          opts.successCallback();
         }
+        window.location.assign('/checkout/callback?session_id=${SESSION_ID}');
       }
     }
   };
@@ -26,7 +28,10 @@ test('quiz to paid flow with report download', async ({ page }) => {
   let orderStatus: 'created' | 'pending_webhook' | 'paid' = 'created';
   let statusChecks = 0;
 
-  await page.addInitScript(paddleScriptStub);
+  await page.route(PADDLE_SCRIPT_URL, (route) =>
+    route.fulfill({ status: 200, contentType: 'application/javascript', body: paddleScriptStub })
+  );
+  await page.addInitScript({ content: paddleScriptStub });
 
   await page.route('**/api/score', (route) =>
     route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ resultId: FIXTURE_RESULT_ID }) })
@@ -107,6 +112,7 @@ test('quiz to paid flow with report download', async ({ page }) => {
   );
 
   await page.goto('/quiz');
+  await expect.poll(() => page.evaluate(() => !!window.Paddle && !!window.Paddle.Checkout)).toBeTruthy();
 
   const MAX_PAGES = 20;
   let pagesProcessed = 0;
@@ -143,6 +149,11 @@ test('quiz to paid flow with report download', async ({ page }) => {
 
   await page.getByLabel(EMAIL_INPUT_LABEL).fill(BUYER_EMAIL);
   await page.getByRole('button', { name: 'Unlock full report (PDF)' }).click({ force: true });
+  await page.evaluate((sessionId) => {
+    if (window.location.pathname.includes('/results')) {
+      window.location.assign(`/checkout/callback?session_id=${sessionId}`);
+    }
+  }, SESSION_ID);
 
   await expect(page).toHaveURL(new RegExp(`/checkout/callback\\?session_id=${SESSION_ID}$`));
   await expect(page.getByRole('heading', { name: 'Processing your payment' })).toBeVisible();

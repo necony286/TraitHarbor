@@ -7,6 +7,7 @@ import { Card } from '../../../components/ui/Card';
 import { Button } from '../../../components/ui/Button';
 import { FormField } from '../../../components/ui/FormField';
 import { Input } from '../../../components/ui/Input';
+import { EmptyState } from '../../../components/ui/States/EmptyState';
 
 type RequestStatus = 'idle' | 'loading' | 'sent';
 
@@ -67,9 +68,7 @@ export default function RetrieveReportPage() {
             </FormField>
 
             {status === 'sent' ? (
-              <div className="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
-                Check your email for a secure link to access your paid report.
-              </div>
+              <EmptyState message="Check your email for a secure link to access your paid report." tone="success" />
             ) : null}
 
             <Button type="submit" disabled={status === 'loading'} className="w-full">

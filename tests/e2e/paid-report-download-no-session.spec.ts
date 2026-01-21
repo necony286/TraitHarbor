@@ -8,7 +8,6 @@ const GUEST_SESSION_COOKIE_NAME = 'traitharbor_guest_report_access';
 const EMAIL_INPUT_LABEL = 'Email for receipt and access';
 const BUYER_EMAIL = 'buyer@example.com';
 const PDF_URL = 'https://example.com/report.pdf';
-const PADDLE_SCRIPT_URL = 'https://cdn.paddle.com/paddle/v2/paddle.js';
 
 const paddleScriptStub = `
   window.Paddle = {
@@ -30,9 +29,6 @@ test('paid report download works without session storage', async ({ page, browse
   let statusChecks = 0;
   let reportAccessUrl = '';
 
-  await page.route(PADDLE_SCRIPT_URL, (route) =>
-    route.fulfill({ status: 200, contentType: 'application/javascript', body: paddleScriptStub })
-  );
   await page.addInitScript({ content: paddleScriptStub });
 
   await page.route('**/api/score', (route) =>
@@ -156,14 +152,10 @@ test('paid report download works without session storage', async ({ page, browse
   await expect(page.getByRole('heading', { name: 'TraitHarbor personality snapshot' })).toBeVisible();
 
   await page.getByLabel(EMAIL_INPUT_LABEL).fill(BUYER_EMAIL);
-  await page.getByRole('button', { name: 'Unlock full report (PDF)' }).click({ force: true });
-  await page.evaluate((sessionId) => {
-    if (window.location.pathname.includes('/results')) {
-      window.location.assign(`/checkout/callback?session_id=${sessionId}`);
-    }
-  }, SESSION_ID);
-
-  await expect(page).toHaveURL(new RegExp(`/checkout/callback\\?session_id=${SESSION_ID}$`));
+  await Promise.all([
+    page.waitForURL(new RegExp(`/checkout/callback\\?session_id=${SESSION_ID}$`)),
+    page.getByRole('button', { name: 'Unlock full report (PDF)' }).click({ force: true })
+  ]);
   await expect(page.getByRole('heading', { name: 'Processing your payment' })).toBeVisible();
   await expect(page.getByText('Status: paid')).toBeVisible();
 
@@ -189,10 +181,9 @@ test('paid report download works without session storage', async ({ page, browse
   ]);
   await context2.route('**/report-access?token=*', (route) =>
     route.fulfill({
-      status: 302,
-      headers: {
-        location: '/my-reports'
-      }
+      status: 200,
+      contentType: 'text/html',
+      body: `<html><head><meta http-equiv="refresh" content="0;url=/my-reports" /></head><body></body></html>`
     })
   );
 

@@ -7,6 +7,7 @@ import { QuestionRow } from '@/components/figma/quiz/QuestionRow';
 import { QuizHeader } from '@/components/figma/quiz/QuizHeader';
 import { ScaleLegend } from '@/components/figma/quiz/ScaleLegend';
 import { StickyNavigation } from '@/components/figma/quiz/StickyNavigation';
+import { Container } from '../../../components/ui/Container';
 import { QuizEventName, trackQuizEvent } from '../../../lib/analytics';
 import { loadQuizItems, QuizItem } from '../../../lib/ipip';
 import { getOrCreateAnonymousUserId } from '../../../lib/anonymous-user';
@@ -170,7 +171,7 @@ export default function QuizPage() {
 
   return (
     <div className="min-h-screen bg-slate-50 pb-28">
-      <div className="container max-w-4xl mx-auto px-4 py-8 lg:py-12">
+      <Container className="py-8 lg:py-12">
         <QuizHeader
           title="Personality questionnaire"
           subtitle="IPIP-120"
@@ -196,7 +197,7 @@ export default function QuizPage() {
             />
           ))}
         </main>
-      </div>
+      </Container>
 
       <StickyNavigation
         currentPage={currentPage + 1}

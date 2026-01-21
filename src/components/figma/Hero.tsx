@@ -1,10 +1,11 @@
 import Link from 'next/link';
 import { ArrowRight, CheckCircle } from 'lucide-react';
+import { Container } from '../../../components/ui/Container';
 
 export function Hero() {
   return (
     <section className="relative overflow-hidden bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 pb-24 pt-20">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <Container>
         <div className="mx-auto max-w-4xl text-center">
           <div className="inline-flex items-center gap-2 rounded-full border border-purple-200 bg-white/80 px-4 py-2 shadow-sm backdrop-blur-sm">
             <CheckCircle className="h-4 w-4 text-purple-600" />
@@ -86,7 +87,7 @@ export function Hero() {
             </div>
           </div>
         </div>
-      </div>
+      </Container>
 
       <div className="pointer-events-none absolute top-0 left-0 h-96 w-96 rounded-full bg-purple-300/30 blur-3xl animate-blob" />
       <div className="pointer-events-none absolute top-0 right-0 h-96 w-96 rounded-full bg-indigo-300/30 blur-3xl animate-blob animation-delay-2000" />

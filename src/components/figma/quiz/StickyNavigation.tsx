@@ -1,5 +1,6 @@
 import React from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { Container } from '../../../../components/ui/Container';
 
 interface StickyNavigationProps {
   currentPage: number;
@@ -30,7 +31,7 @@ export function StickyNavigation({
           className="px-4 py-3 bg-destructive/10 border-b border-destructive/20 animate-in slide-in-from-bottom duration-300 pointer-events-auto"
           role="alert"
         >
-          <div className="container max-w-4xl mx-auto flex items-center justify-center gap-2">
+          <Container className="flex items-center justify-center gap-2">
             <svg className="w-4 h-4 text-destructive flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
               <path
                 fillRule="evenodd"
@@ -39,11 +40,11 @@ export function StickyNavigation({
               />
             </svg>
             <p className="text-sm text-destructive font-medium text-center">{errorMessage}</p>
-          </div>
+          </Container>
         </div>
       )}
 
-      <div className="container max-w-4xl mx-auto px-4 py-4 flex items-center justify-between gap-4 pointer-events-none">
+      <Container className="flex items-center justify-between gap-4 py-4 pointer-events-none">
         <button
           onClick={onPrevious}
           disabled={!canGoPrevious}
@@ -92,7 +93,7 @@ export function StickyNavigation({
             </svg>
           )}
         </button>
-      </div>
+      </Container>
     </nav>
   );
 }

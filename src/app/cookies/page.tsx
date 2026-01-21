@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { canonicalUrl, ogUrl } from '@/lib/siteUrl';
+import { Container } from '../../../components/ui/Container';
 
 export const metadata: Metadata = {
   title: 'Cookie Policy | TraitHarbor',
@@ -17,7 +18,7 @@ export const metadata: Metadata = {
 
 export default function CookiesPage() {
   return (
-    <section className="mx-auto flex max-w-3xl flex-col gap-6 px-4 py-12 sm:px-6">
+    <Container as="section" className="flex flex-col gap-6 py-12">
       <header className="space-y-3">
         <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">Cookie policy</p>
         <h1 className="text-3xl font-bold text-slate-900">Cookie Policy</h1>
@@ -30,6 +31,6 @@ export default function CookiesPage() {
         <li>Managing preferences</li>
         <li>Contact</li>
       </ol>
-    </section>
+    </Container>
   );
 }

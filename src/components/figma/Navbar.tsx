@@ -15,7 +15,7 @@ export function Navbar({ onStartQuiz }: NavbarProps) {
     <nav className="sticky top-0 z-50 border-b border-border/70 bg-background/80 backdrop-blur-md">
       <div className="container mx-auto flex h-16 max-w-6xl items-center justify-between px-4">
         <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#2563eb] text-white shadow-lg shadow-[#2563eb]/25">
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-lg shadow-primary/25">
             <span className="text-lg font-semibold">TH</span>
           </div>
           <span className="text-lg font-medium text-foreground">TraitHarbor</span>
@@ -45,7 +45,7 @@ export function Navbar({ onStartQuiz }: NavbarProps) {
         <div className="hidden md:flex">
           <Link
             href="/quiz"
-            className="rounded-xl bg-[#2563eb] px-5 py-2 text-sm font-medium text-white shadow-lg shadow-[#2563eb]/25 transition-all duration-200 hover:bg-[#1d4ed8] hover:shadow-xl hover:shadow-[#2563eb]/30 active:scale-[0.98] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#2563eb]"
+            className="rounded-xl bg-primary px-5 py-2 text-sm font-medium text-primary-foreground shadow-lg shadow-primary/25 transition-all duration-200 hover:bg-primary/90 hover:shadow-xl hover:shadow-primary/30 active:scale-[0.98] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
             onClick={onStartQuiz}
           >
             Start quiz
@@ -81,7 +81,7 @@ export function Navbar({ onStartQuiz }: NavbarProps) {
           <div className="mt-4">
             <Link
               href="/quiz"
-              className="block w-full rounded-xl bg-[#2563eb] px-5 py-2 text-center text-sm font-medium text-white shadow-lg shadow-[#2563eb]/25 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#2563eb]"
+              className="block w-full rounded-xl bg-primary px-5 py-2 text-center text-sm font-medium text-primary-foreground shadow-lg shadow-primary/25 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
               onClick={onStartQuiz}
             >
               Start quiz

@@ -48,7 +48,7 @@ export function ScaleLegend({ variant = 'default' }: ScaleLegendProps) {
         </div>
         <div className="flex-1 space-y-3">
           <div>
-            <h3 className="text-sm font-semibold text-foreground mb-1">Rate each statement</h3>
+            <h2 className="text-sm font-semibold text-foreground mb-1">Rate each statement</h2>
             <p className="text-xs text-muted-foreground leading-relaxed">
               For each statement, select how much you agree or disagree based on how you typically think, feel, or behave.
             </p>

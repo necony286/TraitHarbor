@@ -13,7 +13,7 @@ export function ReportPreviewCard() {
     <div className="bg-card border border-border rounded-2xl p-6 lg:p-8 shadow-lg">
       <div className="flex items-center gap-2 mb-6">
         <BarChart3 className="w-5 h-5 text-primary" />
-        <h3 className="font-medium text-foreground">Your Profile Preview</h3>
+        <h2 className="font-medium text-foreground">Your Profile Preview</h2>
       </div>
 
       <div className="space-y-4 mb-6">

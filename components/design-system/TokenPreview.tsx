@@ -4,26 +4,26 @@ import React from 'react';
 
 export function TokenPreview() {
   const [tokens, setTokens] = React.useState({
-    primary: '',
-    fontSize: '',
-    fontFamily: '',
-    radius: '',
-    gridColumns: '',
-    maxWidth: ''
+    primary: '#2563eb',
+    fontSize: '16px',
+    fontFamily: "'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
+    radius: '0.625rem',
+    gridColumns: '12',
+    maxWidth: '1440px'
   });
 
   React.useEffect(() => {
     const styles = getComputedStyle(document.documentElement);
     const readVar = (name: string) => styles.getPropertyValue(name).trim();
 
-    setTokens({
-      primary: readVar('--primary'),
-      fontSize: readVar('--font-size'),
-      fontFamily: readVar('--font-family'),
-      radius: readVar('--radius'),
-      gridColumns: readVar('--layout-grid-columns'),
-      maxWidth: readVar('--layout-max-width')
-    });
+    setTokens((current) => ({
+      primary: readVar('--primary') || current.primary,
+      fontSize: readVar('--font-size') || current.fontSize,
+      fontFamily: readVar('--font-family') || current.fontFamily,
+      radius: readVar('--radius') || current.radius,
+      gridColumns: readVar('--layout-grid-columns') || current.gridColumns,
+      maxWidth: readVar('--layout-max-width') || current.maxWidth
+    }));
   }, []);
 
   return (

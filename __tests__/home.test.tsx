@@ -7,8 +7,8 @@ describe('TokenPreview', () => {
     render(<TokenPreview />);
 
     expect(screen.getByText(/Design tokens/i)).toBeInTheDocument();
-    expect(screen.getByText('#5B7CFA')).toBeInTheDocument();
-    expect(screen.getByText(/Inter · 32px/i)).toBeInTheDocument();
+    expect(screen.getByText('#2563eb')).toBeInTheDocument();
+    expect(screen.getByText(/Inter.*16px/i)).toBeInTheDocument();
     expect(screen.getByText(/12 cols/i)).toBeInTheDocument();
   });
 });

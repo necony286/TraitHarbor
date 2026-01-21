@@ -5,6 +5,9 @@ import Link from 'next/link';
 import { Container } from '../../../components/ui/Container';
 import { Card } from '../../../components/ui/Card';
 import { Button } from '../../../components/ui/Button';
+import { EmptyState } from '../../../components/ui/States/EmptyState';
+import { ErrorBanner } from '../../../components/ui/States/ErrorBanner';
+import { LoadingState } from '../../../components/ui/States/LoadingState';
 
 type ReportOrder = {
   id: string;
@@ -88,26 +91,27 @@ export default function MyReportsPage() {
 
           <div className="mt-8 space-y-4">
             {isLoading ? (
-              <p className="text-sm text-slate-500">Loading your reports…</p>
+              <LoadingState message="Loading your reports…" />
             ) : null}
 
             {error ? (
-              <div className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
-                {error}{' '}
-                <Link href="/retrieve-report" className="font-semibold text-amber-900 underline underline-offset-2">
-                  Request a link
-                </Link>
-              </div>
+              <ErrorBanner
+                message={error}
+                tone="warning"
+                action={
+                  <Link href="/retrieve-report" className="font-semibold text-amber-900 underline underline-offset-2">
+                    Request a link
+                  </Link>
+                }
+              />
             ) : null}
 
             {downloadError ? (
-              <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">{downloadError}</div>
+              <ErrorBanner message={downloadError} />
             ) : null}
 
             {!isLoading && !error && orders.length === 0 ? (
-              <div className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-600">
-                We couldn&apos;t find any paid reports for this email yet.
-              </div>
+              <EmptyState message="We couldn&apos;t find any paid reports for this email yet." />
             ) : null}
 
             {!isLoading && !error && orders.length > 0 ? (

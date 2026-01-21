@@ -9,6 +9,9 @@ import { ANONYMOUS_USER_ID_HEADER } from '../../../../lib/constants';
 import { Button } from '../../../../components/ui/Button';
 import { Card } from '../../../../components/ui/Card';
 import { Container } from '../../../../components/ui/Container';
+import { ErrorBanner } from '../../../../components/ui/States/ErrorBanner';
+import { LoadingState } from '../../../../components/ui/States/LoadingState';
+import { EmptyState } from '../../../../components/ui/States/EmptyState';
 
 const MAX_POLL_TIME_MS = 60_000;
 const INITIAL_POLL_DELAY_MS = 1000;
@@ -43,7 +46,7 @@ export default function CheckoutCallbackClient() {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isGeneratingReport, setIsGeneratingReport] = useState(false);
   const [reportError, setReportError] = useState<string | null>(null);
-  const [linkStatus, setLinkStatus] = useState<string | null>(null);
+  const [linkStatus, setLinkStatus] = useState<{ message: string; tone: 'success' | 'error' } | null>(null);
   const trackedPurchaseRef = useRef(false);
   const pollStartRef = useRef<number | null>(null);
   const pollDelayRef = useRef(INITIAL_POLL_DELAY_MS);
@@ -169,7 +172,7 @@ export default function CheckoutCallbackClient() {
 
   const handleRequestLink = async () => {
     if (!order?.email) {
-      setLinkStatus('Please use the email you checked out with to request access.');
+      setLinkStatus({ message: 'Please use the email you checked out with to request access.', tone: 'error' });
       return;
     }
 
@@ -186,9 +189,12 @@ export default function CheckoutCallbackClient() {
         throw new Error('Unable to request access link.');
       }
 
-      setLinkStatus('We just emailed a secure access link. Check your inbox shortly.');
+      setLinkStatus({ message: 'We just emailed a secure access link. Check your inbox shortly.', tone: 'success' });
     } catch (error) {
-      setLinkStatus((error instanceof Error && error.message) || 'Unable to request access link.');
+      setLinkStatus({
+        message: (error instanceof Error && error.message) || 'Unable to request access link.',
+        tone: 'error'
+      });
     }
   };
 
@@ -201,9 +207,9 @@ export default function CheckoutCallbackClient() {
       </header>
 
       <Card className="mt-8 gap-6 border-slate-200/80 bg-white/90 p-6 shadow-lg shadow-indigo-100/40">
-        {errorMessage ? <p className="text-sm font-medium text-red-600">{errorMessage}</p> : null}
+        {errorMessage ? <ErrorBanner message={errorMessage} /> : null}
 
-        {isLoading ? <p className="text-sm text-slate-500">Checking payment status…</p> : null}
+        {isLoading ? <LoadingState message="Checking payment status…" /> : null}
 
         {!isLoading && order ? (
           <div className="space-y-1 text-sm">
@@ -220,12 +226,18 @@ export default function CheckoutCallbackClient() {
             <Button type="button" onClick={handleReportDownload} disabled={isGeneratingReport}>
               {isGeneratingReport ? 'Preparing report…' : 'Download report PDF'}
             </Button>
-            {reportError ? <p className="text-sm font-medium text-red-600">{reportError}</p> : null}
+            {reportError ? <ErrorBanner message={reportError} /> : null}
             <div className="space-y-2">
               <Button type="button" variant="ghost" onClick={handleRequestLink}>
                 Email me my access link
               </Button>
-              {linkStatus ? <p className="text-sm text-slate-600">{linkStatus}</p> : null}
+              {linkStatus ? (
+                linkStatus.tone === 'error' ? (
+                  <ErrorBanner message={linkStatus.message} />
+                ) : (
+                  <EmptyState message={linkStatus.message} tone="success" />
+                )
+              ) : null}
             </div>
           </div>
         ) : null}

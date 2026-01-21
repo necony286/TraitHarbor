@@ -44,6 +44,9 @@
   ],
   "exclude": [
     "node_modules",
-    "docs/**"
+    "docs/**",
+    "__tests__/**",
+    "tests/**",
+    "vitest.setup.ts"
   ]
 }

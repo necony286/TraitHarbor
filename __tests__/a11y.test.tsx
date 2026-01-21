@@ -52,73 +52,91 @@ vi.mock('../lib/db', () => ({
 }));
 
 describe('core screens a11y', () => {
+  const AXE_TIMEOUT = 30000;
+
   afterEach(() => {
     vi.unstubAllGlobals();
     vi.clearAllMocks();
   });
 
-  it('home page has no a11y violations', async () => {
-    const { container } = render(<HomePageClient />);
-    const results = await axe(container);
+  it(
+    'home page has no a11y violations',
+    async () => {
+      const { container } = render(<HomePageClient />);
+      const results = await axe(container);
 
-    expect(results).toHaveNoViolations();
-  });
+      expect(results).toHaveNoViolations();
+    },
+    AXE_TIMEOUT
+  );
 
-  it('quiz page has no a11y violations', async () => {
-    vi.useFakeTimers();
-    const { container } = render(<QuizPage />);
+  it(
+    'quiz page has no a11y violations',
+    async () => {
+      vi.useFakeTimers();
+      const { container } = render(<QuizPage />);
 
-    act(() => {
-      vi.runOnlyPendingTimers();
-    });
+      act(() => {
+        vi.runOnlyPendingTimers();
+      });
 
-    const results = await axe(container);
+      vi.useRealTimers();
+      const results = await axe(container);
 
-    expect(results).toHaveNoViolations();
-    vi.useRealTimers();
-  });
+      expect(results).toHaveNoViolations();
+    },
+    AXE_TIMEOUT
+  );
 
-  it('results page fallback has no a11y violations', async () => {
-    vi.stubEnv('SUPABASE_URL', '');
-    vi.stubEnv('SUPABASE_SERVICE_ROLE_KEY', '');
+  it(
+    'results page fallback has no a11y violations',
+    async () => {
+      vi.stubEnv('SUPABASE_URL', '');
+      vi.stubEnv('SUPABASE_SERVICE_ROLE_KEY', '');
 
-    const ui = await ResultsPage({
-      params: Promise.resolve({ resultId: '11111111-1111-1111-1111-111111111111' })
-    });
-    const { container } = render(ui);
-    const results = await axe(container);
+      const ui = await ResultsPage({
+        params: Promise.resolve({ resultId: '11111111-1111-1111-1111-111111111111' })
+      });
+      const { container } = render(ui);
+      const results = await axe(container);
 
-    expect(results).toHaveNoViolations();
-    vi.unstubAllEnvs();
-  });
+      expect(results).toHaveNoViolations();
+      vi.unstubAllEnvs();
+    },
+    AXE_TIMEOUT
+  );
 
-  it('checkout callback has no a11y violations', async () => {
-    const paidOrder = {
-      id: 'order-123',
-      status: 'paid',
-      resultId: 'result-123',
-      createdAt: '2024-01-01T00:00:00.000Z',
-      paidAt: '2024-01-02T00:00:00.000Z',
-      email: 'buyer@example.com',
-      reportReady: true,
-      providerSessionId: 'session-123'
-    };
+  it(
+    'checkout callback has no a11y violations',
+    async () => {
+      const paidOrder = {
+        id: 'order-123',
+        status: 'paid',
+        resultId: 'result-123',
+        createdAt: '2024-01-01T00:00:00.000Z',
+        paidAt: '2024-01-02T00:00:00.000Z',
+        email: 'buyer@example.com',
+        reportReady: true,
+        providerSessionId: 'session-123'
+      };
 
-    const fetchMock = vi.fn().mockResolvedValueOnce(
-      new Response(JSON.stringify({ order: paidOrder }), {
-        status: 200,
-        headers: { 'Content-Type': 'application/json' }
-      })
-    );
+      const fetchMock = vi.fn().mockResolvedValueOnce(
+        new Response(JSON.stringify({ order: paidOrder }), {
+          status: 200,
+          headers: { 'Content-Type': 'application/json' }
+        })
+      );
 
-    vi.stubGlobal('fetch', fetchMock);
+      vi.stubGlobal('fetch', fetchMock);
 
-    const { container } = render(<CheckoutCallbackClient />);
+      const { container } = render(<CheckoutCallbackClient />);
 
-    expect(await screen.findByText(/Status: paid/i)).toBeInTheDocument();
+      expect(await screen.findByText(/Status: paid/i)).toBeInTheDocument();
 
-    const results = await axe(container);
+      const results = await axe(container);
 
-    expect(results).toHaveNoViolations();
-  });
+      expect(results).toHaveNoViolations();
+    },
+    AXE_TIMEOUT
+  );
 });

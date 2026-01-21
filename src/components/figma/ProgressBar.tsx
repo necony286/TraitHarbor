@@ -3,9 +3,10 @@ import React from 'react';
 interface ProgressBarProps {
   current: number;
   total: number;
+  label?: string;
 }
 
-export function ProgressBar({ current, total }: ProgressBarProps) {
+export function ProgressBar({ current, total, label = 'Quiz progress' }: ProgressBarProps) {
   const safeTotal = Number.isFinite(total) && total > 0 ? total : 0;
   const finiteCurrent = Number.isFinite(current) ? current : 0;
   const clampedCurrent = Math.max(0, Math.min(finiteCurrent, safeTotal));
@@ -15,6 +16,7 @@ export function ProgressBar({ current, total }: ProgressBarProps) {
     <div
       className="w-full space-y-2"
       role="progressbar"
+      aria-label={label}
       aria-valuenow={clampedCurrent}
       aria-valuemin={0}
       aria-valuemax={safeTotal}

@@ -226,8 +226,7 @@ test('paid report download works without session storage', async ({ page, browse
   );
 
   const page2 = await context2.newPage();
-  await page2.goto(reportAccessUrl);
-  await page2.goto('/my-reports', { waitUntil: 'domcontentloaded' });
+  await page2.goto(reportAccessUrl, { waitUntil: 'domcontentloaded' });
 
   await expect(page2.getByRole('heading', { name: 'Your paid TraitHarbor reports' })).toBeVisible();
 

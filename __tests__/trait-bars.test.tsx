@@ -14,7 +14,8 @@ describe('TraitBars', () => {
       N: 10
     };
 
-    const traits = ['O', 'Z' as TraitKey];
+// @ts-expect-error Testing with an invalid trait key.
+    const traits: TraitKey[] = ['O', 'Z'];
 
     render(<TraitBars scores={scores} traits={traits} />);
 

@@ -3,8 +3,8 @@
 import { useEffect } from 'react';
 import { trackEvent } from '../../lib/analytics';
 import { CheckoutButton } from '../paywall/CheckoutButton';
-import { Badge } from '@/components/figma/ui/badge';
-import { Card, CardContent } from '@/components/figma/ui/card';
+import { Badge } from '../ui/Badge';
+import { Card, CardContent } from '../ui/Card';
 
 type PaywallCTAProps = {
   resultId: string;

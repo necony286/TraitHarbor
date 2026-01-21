@@ -1,5 +1,5 @@
 import React from 'react';
-import { cn } from '../../src/components/figma/ui/utils';
+import { cn } from './utils';
 
 type ContainerProps = React.HTMLAttributes<HTMLDivElement> & {
   as?: React.ElementType;

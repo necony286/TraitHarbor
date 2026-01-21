@@ -14,7 +14,7 @@ export function TraitBars({ scores, traits = TRAIT_ORDER }: TraitBarsProps) {
           return null;
         }
         const score = scores[trait] ?? 0;
-        const safeScore = Number.isFinite(score) ? score : 0;
+        const safeScore = Number.isFinite(scores[trait]) ? scores[trait] : 0;
         const width = Math.max(0, Math.min(100, safeScore));
 
         return (

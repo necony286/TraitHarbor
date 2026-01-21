@@ -51,7 +51,9 @@ vi.mock('../lib/db', () => ({
   getScoresByResultId: vi.fn(async () => ({ data: null, error: { message: 'Unavailable.' } }))
 }));
 
-describe('core screens a11y', { timeout: 30000 }, () => {
+const AXE_SUITE_TIMEOUT = 30000;
+
+describe('core screens a11y', { timeout: AXE_SUITE_TIMEOUT }, () => {
   afterEach(() => {
     vi.unstubAllGlobals();
     vi.clearAllMocks();

@@ -22,21 +22,21 @@ export function Navbar({ onStartQuiz }: NavbarProps) {
         </div>
 
         <div className="hidden items-center gap-8 md:flex">
-          <a
-            href="#how-it-works"
+          <Link
+            href="/#how-it-works"
             className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
           >
             How it works
-          </a>
-          <a
-            href="#what-you-get"
+          </Link>
+          <Link
+            href="/#what-you-get"
             className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
           >
             What you get
-          </a>
-          <a href="#faq" className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground">
+          </Link>
+          <Link href="/#faq" className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground">
             FAQ
-          </a>
+          </Link>
           <Link href="/quiz" className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground">
             Quiz
           </Link>
@@ -57,23 +57,25 @@ export function Navbar({ onStartQuiz }: NavbarProps) {
           onClick={() => setIsMenuOpen((open) => !open)}
           className="rounded-md p-2 text-muted-foreground transition-colors hover:text-foreground md:hidden"
           aria-label="Toggle menu"
+          aria-expanded={isMenuOpen}
+          aria-controls="mobile-menu"
         >
           {isMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
         </button>
       </div>
 
       {isMenuOpen ? (
-        <div className="border-t border-border/70 bg-background/95 px-4 py-4 md:hidden">
+        <div id="mobile-menu" className="border-t border-border/70 bg-background/95 px-4 py-4 md:hidden">
           <div className="space-y-3">
-            <a href="#how-it-works" className="block text-sm font-medium text-foreground">
+            <Link href="/#how-it-works" className="block text-sm font-medium text-foreground">
               How it works
-            </a>
-            <a href="#what-you-get" className="block text-sm font-medium text-foreground">
+            </Link>
+            <Link href="/#what-you-get" className="block text-sm font-medium text-foreground">
               What you get
-            </a>
-            <a href="#faq" className="block text-sm font-medium text-foreground">
+            </Link>
+            <Link href="/#faq" className="block text-sm font-medium text-foreground">
               FAQ
-            </a>
+            </Link>
             <Link href="/quiz" className="block text-sm font-medium text-foreground">
               Quiz
             </Link>

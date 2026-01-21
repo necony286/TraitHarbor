@@ -146,7 +146,7 @@ test('quiz to paid flow with report download', async ({ page }) => {
   await page.getByLabel(EMAIL_INPUT_LABEL).fill(BUYER_EMAIL);
   await Promise.all([
     page.waitForURL(new RegExp(`/checkout/callback\\?session_id=${SESSION_ID}$`)),
-    page.getByRole('button', { name: 'Unlock full report (PDF)' }).click({ force: true })
+    page.getByRole('button', { name: 'Unlock full report (PDF)' }).click()
   ]);
   await expect(page.getByRole('heading', { name: 'Processing your payment' })).toBeVisible();
 

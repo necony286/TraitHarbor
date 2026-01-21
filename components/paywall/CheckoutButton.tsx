@@ -1,7 +1,6 @@
 'use client';
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
 import { trackEvent } from '../../lib/analytics';
 import { getOrCreateAnonymousUserId } from '../../lib/anonymous-user';
 import { z } from 'zod';
@@ -88,7 +87,13 @@ export function CheckoutButton({ resultId }: CheckoutButtonProps) {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [email, setEmail] = useState('');
   const [emailError, setEmailError] = useState<string | null>(null);
-  const router = useRouter();
+  const [hydrated, setHydrated] = useState(false);
+
+  useEffect(() => {
+    setHydrated(true);
+  }, []);
+
+  const isInteractionDisabled = !hydrated || isLoading;
 
   const handleCheckout = async () => {
     setErrorMessage(null);
@@ -212,9 +217,10 @@ export function CheckoutButton({ resultId }: CheckoutButtonProps) {
           placeholder="you@example.com"
           value={email}
           onChange={(event) => setEmail(event.target.value)}
+          disabled={isInteractionDisabled}
         />
       </FormField>
-      <Button type="button" onClick={handleCheckout} disabled={isLoading} size="lg">
+      <Button type="button" onClick={handleCheckout} disabled={isInteractionDisabled} size="lg">
         {isLoading ? 'Loading checkout…' : 'Unlock full report (PDF)'}
       </Button>
       {errorMessage ? <p className="text-sm text-red-600">{errorMessage}</p> : null}

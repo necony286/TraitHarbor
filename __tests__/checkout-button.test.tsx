@@ -30,14 +30,16 @@ describe('CheckoutButton', () => {
     delete (window as { Paddle?: unknown }).Paddle;
   });
 
-  it('shows a validation error when email is invalid', () => {
+  it('shows a validation error when email is invalid', async () => {
     render(<CheckoutButton resultId="0d2a9f23-1f52-4f7d-9b75-b9b21c0ef35d" />);
 
-    fireEvent.click(screen.getByRole('button', { name: 'Unlock full report (PDF)' }));
+    const button = screen.getByRole('button', { name: 'Unlock full report (PDF)' });
 
-    expect(
-      screen.getByText('Please enter a valid email address to continue.')
-    ).toBeInTheDocument();
+    await waitFor(() => expect(button).toBeEnabled());
+
+    fireEvent.click(button);
+
+    expect(await screen.findByText('Please enter a valid email address to continue.')).toBeInTheDocument();
     expect(fetch).not.toHaveBeenCalled();
   });
 
@@ -76,10 +78,18 @@ describe('CheckoutButton', () => {
 
     render(<CheckoutButton resultId="0d2a9f23-1f52-4f7d-9b75-b9b21c0ef35d" />);
 
-    fireEvent.change(screen.getByLabelText('Email for receipt and access'), {
+    const emailInput = screen.getByLabelText('Email for receipt and access');
+    const button = screen.getByRole('button', { name: 'Unlock full report (PDF)' });
+
+    await waitFor(() => {
+      expect(emailInput).toBeEnabled();
+      expect(button).toBeEnabled();
+    });
+
+    fireEvent.change(emailInput, {
       target: { value: 'buyer@example.com' }
     });
-    fireEvent.click(screen.getByRole('button', { name: 'Unlock full report (PDF)' }));
+    fireEvent.click(button);
 
     const script = await waitFor(() => {
       const paddleScript = document.querySelector<HTMLScriptElement>('script[data-paddle]');

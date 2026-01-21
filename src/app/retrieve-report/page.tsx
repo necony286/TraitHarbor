@@ -5,6 +5,8 @@ import Link from 'next/link';
 import { Container } from '../../../components/ui/Container';
 import { Card } from '../../../components/ui/Card';
 import { Button } from '../../../components/ui/Button';
+import { FormField } from '../../../components/ui/FormField';
+import { Input } from '../../../components/ui/Input';
 
 type RequestStatus = 'idle' | 'loading' | 'sent';
 
@@ -52,22 +54,17 @@ export default function RetrieveReportPage() {
           </div>
 
           <form onSubmit={submitRequest} className="mt-8 space-y-4">
-            <label className="block text-sm font-medium text-slate-700" htmlFor="report-email">
-              Email address
-            </label>
-            <input
-              id="report-email"
-              name="email"
-              type="email"
-              required
-              autoComplete="email"
-              value={email}
-              onChange={(event) => setEmail(event.target.value)}
-              className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-base text-slate-900 shadow-sm focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-200"
-              placeholder="you@example.com"
-            />
-
-            {error ? <p className="text-sm text-rose-600">{error}</p> : null}
+            <FormField id="report-email" label="Email address" error={error}>
+              <Input
+                name="email"
+                type="email"
+                required
+                autoComplete="email"
+                value={email}
+                onChange={(event) => setEmail(event.target.value)}
+                placeholder="you@example.com"
+              />
+            </FormField>
 
             {status === 'sent' ? (
               <div className="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">

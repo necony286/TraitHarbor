@@ -112,7 +112,15 @@ export default function QuizPage() {
   const pageItems = items.slice(currentPage * PAGE_SIZE, currentPage * PAGE_SIZE + PAGE_SIZE);
 
   const updateAnswer = (questionId: string, value: number) => {
-    setAnswers((prev) => ({ ...prev, [questionId]: value }));
+    setAnswers((prev) => {
+      const nextAnswers = { ...prev, [questionId]: value };
+      latestSaveStateRef.current = {
+        answers: filterAnswers(nextAnswers, itemIds),
+        currentPage,
+        itemCount: items.length
+      };
+      return nextAnswers;
+    });
   };
 
   const goToNextPage = () => {
@@ -124,7 +132,15 @@ export default function QuizPage() {
   };
 
   const handleSubmit = async () => {
-    if (answeredCount !== items.length || isSubmitting) return;
+    const latestAnswers = filterAnswers(latestSaveStateRef.current.answers, itemIds);
+    const latestAnsweredCount = Object.keys(latestAnswers).length;
+
+    if (latestAnsweredCount !== items.length || isSubmitting) {
+      if (!isSubmitting) {
+        setSubmitError('Please answer all questions before submitting.');
+      }
+      return;
+    }
 
     setIsSubmitting(true);
     setSubmitError(null);
@@ -139,7 +155,7 @@ export default function QuizPage() {
       const response = await fetch('/api/score', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ answers: sanitizedAnswers, userId })
+        body: JSON.stringify({ answers: latestAnswers, userId })
       });
 
       const parsedPayload = scoreResponseSchema.safeParse(await response.json());
@@ -158,6 +174,10 @@ export default function QuizPage() {
       }
 
       clearQuizState();
+      if (typeof window !== 'undefined') {
+        window.location.assign(`/results/${payload.resultId}`);
+        return;
+      }
       router.push(`/results/${payload.resultId}`);
     } catch (error) {
       setSubmitError((error as Error).message || 'We could not score your quiz. Please try again.');

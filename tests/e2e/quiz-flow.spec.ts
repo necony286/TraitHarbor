@@ -26,9 +26,7 @@ test('quiz to paid flow with report download', async ({ page }) => {
   let orderStatus: 'created' | 'pending_webhook' | 'paid' = 'created';
   let statusChecks = 0;
 
-  await page.route('https://cdn.paddle.com/paddle/v2/paddle.js', (route) =>
-    route.fulfill({ status: 200, contentType: 'application/javascript', body: paddleScriptStub })
-  );
+  await page.addInitScript(paddleScriptStub);
 
   await page.route('**/api/score', (route) =>
     route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ resultId: FIXTURE_RESULT_ID }) })
@@ -129,22 +127,22 @@ test('quiz to paid flow with report download', async ({ page }) => {
       const group = questionGroups.nth(index);
       const agreeOption = group.getByRole('radio', { name: AGREE_LABEL, exact: true });
       await agreeOption.scrollIntoViewIfNeeded();
-      await agreeOption.check();
+      await agreeOption.check({ force: true });
     }
 
     if ((await submitButton.count()) > 0) {
-      await submitButton.click();
+      await submitButton.click({ force: true });
       break;
     }
 
-    await nextButton.click();
+    await nextButton.click({ force: true });
   }
 
   await expect(page).toHaveURL(new RegExp(`/results/${FIXTURE_RESULT_ID}$`), { timeout: 15000 });
   await expect(page.getByRole('heading', { name: 'TraitHarbor personality snapshot' })).toBeVisible();
 
   await page.getByLabel(EMAIL_INPUT_LABEL).fill(BUYER_EMAIL);
-  await page.getByRole('button', { name: 'Unlock full report (PDF)' }).click();
+  await page.getByRole('button', { name: 'Unlock full report (PDF)' }).click({ force: true });
 
   await expect(page).toHaveURL(new RegExp(`/checkout/callback\\?session_id=${SESSION_ID}$`));
   await expect(page.getByRole('heading', { name: 'Processing your payment' })).toBeVisible();

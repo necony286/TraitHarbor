@@ -12,13 +12,15 @@ export type TraitDetails = {
 
 export const TRAIT_ORDER: TraitKey[] = TRAIT_DATA.map((trait) => trait.key);
 
-export const TRAIT_DETAILS = Object.fromEntries(
-  TRAIT_DATA.map((trait) => [
-    trait.key,
-    {
+export const TRAIT_DETAILS = TRAIT_DATA.reduce<Record<TraitKey, TraitDetails>>(
+  (accumulator, trait) => {
+    accumulator[trait.key] = {
       label: trait.name,
       description: trait.description,
       guidance: trait.guidance
-    }
-  ])
-) as Record<TraitKey, TraitDetails>;
+    };
+
+    return accumulator;
+  },
+  {} as Record<TraitKey, TraitDetails>
+);

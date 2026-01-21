@@ -9,10 +9,10 @@ export default defineConfig({
     timeout: 5000
   },
   webServer: {
-    command: `pnpm dev --hostname 0.0.0.0 --port ${port}`,
+    command: `rm -rf .next && pnpm dev --hostname 0.0.0.0 --port ${port}`,
     url: `http://127.0.0.1:${port}`,
     timeout: 120 * 1000,
-    reuseExistingServer: !process.env.CI,
+    reuseExistingServer: false,
     env: {
       NEXT_PUBLIC_QUIZ_FIXTURE_MODE: '1',
       NEXT_PUBLIC_PLAUSIBLE_DOMAIN: 'analytics.traitharbor.example'

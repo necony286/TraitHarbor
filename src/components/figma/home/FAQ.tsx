@@ -42,10 +42,15 @@ export function FAQ() {
         <div className="space-y-4">
           {FAQ_ITEMS.map((item, index) => {
             const isOpen = openIndex === index;
+            const panelId = `faq-panel-${index}`;
+            const buttonId = `faq-toggle-${index}`;
             return (
               <div key={index} className="bg-card border border-border rounded-xl overflow-hidden shadow-sm">
                 <button
                   onClick={() => toggleItem(index)}
+                  id={buttonId}
+                  aria-expanded={isOpen}
+                  aria-controls={panelId}
                   className="w-full px-6 py-5 flex items-center justify-between gap-4 text-left hover:bg-muted/50 transition-colors duration-150 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
                 >
                   <span className="font-medium text-foreground">{item.question}</span>
@@ -56,7 +61,12 @@ export function FAQ() {
                   />
                 </button>
                 {isOpen && (
-                  <div className="px-6 pb-5 pt-1">
+                  <div
+                    id={panelId}
+                    role="region"
+                    aria-labelledby={buttonId}
+                    className="px-6 pb-5 pt-1"
+                  >
                     <p className="text-muted-foreground leading-relaxed">{item.answer}</p>
                   </div>
                 )}

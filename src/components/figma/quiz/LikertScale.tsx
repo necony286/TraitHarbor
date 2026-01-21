@@ -19,6 +19,8 @@ interface LikertScaleProps {
   value: number | null;
   onChange: (value: number) => void;
   questionId: string;
+  errorId?: string;
+  isInvalid?: boolean;
 }
 
 interface LikertOptionItemProps {
@@ -101,9 +103,15 @@ function LikertOptionItem({ option, isSelected, name, onChange }: LikertOptionIt
   );
 }
 
-export function LikertScale({ name, value, onChange, questionId }: LikertScaleProps) {
+export function LikertScale({ name, value, onChange, questionId, errorId, isInvalid }: LikertScaleProps) {
   return (
-    <div role="radiogroup" aria-labelledby={`question-${questionId}`} className="space-y-3">
+    <div
+      role="radiogroup"
+      aria-labelledby={`question-${questionId}`}
+      aria-describedby={isInvalid ? errorId : undefined}
+      aria-invalid={isInvalid ? true : undefined}
+      className="space-y-3"
+    >
       <div className="flex gap-2 md:grid md:grid-cols-5">
         {LIKERT_OPTIONS.map((option) => {
           const isSelected = value === option.value;

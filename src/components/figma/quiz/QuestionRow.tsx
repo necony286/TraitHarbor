@@ -18,6 +18,8 @@ export function QuestionRow({
   onChange,
   hasError = false
 }: QuestionRowProps) {
+  const errorId = `question-${questionId}-error`;
+
   return (
     <div
       className={`
@@ -42,7 +44,7 @@ export function QuestionRow({
                   clipRule="evenodd"
                 />
               </svg>
-              <p className="text-xs text-destructive font-medium" role="alert">
+              <p id={errorId} className="text-xs text-destructive font-medium" role="alert">
                 Please select an answer to continue
               </p>
             </div>
@@ -51,11 +53,12 @@ export function QuestionRow({
 
         <div className="pt-1">
           <LikertScale
-            key={`${questionId}-${value ?? 'unset'}`}
             name={`question-${questionId}`}
             value={value}
             onChange={onChange}
             questionId={questionId}
+            errorId={hasError ? errorId : undefined}
+            isInvalid={hasError}
           />
         </div>
       </div>

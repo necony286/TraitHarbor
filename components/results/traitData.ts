@@ -1,4 +1,4 @@
-export type TraitKey = 'O' | 'C' | 'E' | 'A' | 'N';
+import { TRAIT_DATA, type TraitKey } from '../../src/data/traits';
 
 export type TraitScores = Record<TraitKey, number>;
 
@@ -8,7 +8,7 @@ export type TraitDetails = {
   guidance: string[];
 };
 
-export const TRAIT_ORDER: TraitKey[] = ['O', 'C', 'E', 'A', 'N'];
+export const TRAIT_ORDER: TraitKey[] = TRAIT_DATA.map((trait) => trait.key);
 
 export const TRAIT_DETAILS: Record<TraitKey, TraitDetails> = {
   O: {

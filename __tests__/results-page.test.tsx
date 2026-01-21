@@ -48,13 +48,16 @@ describe('ResultsPage', () => {
     expect(screen.getByText('TraitHarbor personality snapshot')).toBeInTheDocument();
     expect(screen.queryByText(/your key traits/i)).toBeNull();
 
-    const traitHeadings = [
-      `${resultsFixture.O}% Openness`,
-      `${resultsFixture.C}% Conscientiousness`,
-      `${resultsFixture.E}% Extraversion`,
-      `${resultsFixture.A}% Agreeableness`,
-      `${resultsFixture.N}% Neuroticism`
+    const traitData: { key: keyof typeof resultsFixture; name: string }[] = [
+      { key: 'O', name: 'Openness' },
+      { key: 'C', name: 'Conscientiousness' },
+      { key: 'E', name: 'Extraversion' },
+      { key: 'A', name: 'Agreeableness' },
+      { key: 'N', name: 'Neuroticism' }
     ];
+    const traitHeadings = traitData.map(
+      (trait) => `${resultsFixture[trait.key]}% ${trait.name}`
+    );
 
     traitHeadings.forEach((heading) => {
       expect(screen.getAllByText(heading)).toHaveLength(1);

@@ -10,6 +10,9 @@ export function TraitBars({ scores, traits = TRAIT_ORDER }: TraitBarsProps) {
     <>
       {traits.map((trait) => {
         const details = TRAIT_DETAILS[trait];
+        if (!details) {
+          return null;
+        }
         const score = scores[trait] ?? 0;
 
         return (

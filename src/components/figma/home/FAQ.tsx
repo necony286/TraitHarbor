@@ -47,6 +47,7 @@ export function FAQ() {
             return (
               <div key={index} className="bg-card border border-border rounded-xl overflow-hidden shadow-sm">
                 <button
+                  type="button"
                   onClick={() => toggleItem(index)}
                   id={buttonId}
                   aria-expanded={isOpen}

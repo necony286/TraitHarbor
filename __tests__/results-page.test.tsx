@@ -3,6 +3,7 @@ import { render, screen } from '@testing-library/react';
 import { vi } from 'vitest';
 import { TraitChart } from '../components/results/TraitChart';
 import resultsFixture from '../src/data/results.fixture.json';
+import { TRAIT_DATA } from '../src/data/traits';
 
 const pushMock = vi.fn();
 
@@ -48,14 +49,7 @@ describe('ResultsPage', () => {
     expect(screen.getByText('TraitHarbor personality snapshot')).toBeInTheDocument();
     expect(screen.queryByText(/your key traits/i)).toBeNull();
 
-    const traitData: { key: keyof typeof resultsFixture; name: string }[] = [
-      { key: 'O', name: 'Openness' },
-      { key: 'C', name: 'Conscientiousness' },
-      { key: 'E', name: 'Extraversion' },
-      { key: 'A', name: 'Agreeableness' },
-      { key: 'N', name: 'Neuroticism' }
-    ];
-    const traitHeadings = traitData.map(
+    const traitHeadings = TRAIT_DATA.map(
       (trait) => `${resultsFixture[trait.key]}% ${trait.name}`
     );
 

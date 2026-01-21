@@ -127,12 +127,7 @@ export default function MyReportsPage() {
                         Report availability: {order.reportReady ? 'Ready to download' : 'Preparing'}
                       </p>
                     </div>
-                    <Button
-                      type="button"
-                      variant="primary"
-                      disabled={!order.reportReady || activeDownloadId === order.id}
-                      onClick={() => handleDownload(order.id)}
-                    >
+                    <Button type="button" disabled={!order.reportReady || activeDownloadId === order.id} onClick={() => handleDownload(order.id)}>
                       {activeDownloadId === order.id ? 'Preparing…' : 'Download report'}
                     </Button>
                   </div>

@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react';
-import { Badge } from '@/components/figma/ui/badge';
-import { Card, CardContent } from '@/components/figma/ui/card';
+import { Badge } from '../../../components/ui/Badge';
+import { Card, CardContent } from '../../../components/ui/Card';
 import { TRAIT_DETAILS, TRAIT_ORDER, type TraitScores } from '../../../components/results/traitData';
 
 interface ResultsDisplayProps {

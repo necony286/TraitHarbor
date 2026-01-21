@@ -1,9 +1,10 @@
 import Link from 'next/link';
+import { Container } from '../../../../components/ui/Container';
 
 export function Footer() {
   return (
     <footer className="border-t border-border bg-muted/30">
-      <div className="container max-w-6xl mx-auto px-4 py-12">
+      <Container className="py-12">
         <div className="flex flex-col md:flex-row items-center justify-between gap-6">
           <div className="text-center md:text-left">
             <h3 className="font-medium text-foreground mb-2">TraitHarbor</h3>
@@ -26,7 +27,7 @@ export function Footer() {
         <div className="mt-8 pt-6 border-t border-border text-center">
           <p className="text-xs text-muted-foreground">© 2026 TraitHarbor. All rights reserved.</p>
         </div>
-      </div>
+      </Container>
     </footer>
   );
 }

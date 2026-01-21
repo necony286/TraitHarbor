@@ -1,10 +1,11 @@
 import Link from 'next/link';
 import { ArrowRight, Sparkles } from 'lucide-react';
+import { Container } from '../../../components/ui/Container';
 
 export function CTA() {
   return (
     <section id="cta" className="bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 py-20">
-      <div className="mx-auto max-w-4xl px-4 text-center sm:px-6 lg:px-8">
+      <Container className="text-center">
         <div className="inline-flex items-center gap-2 rounded-full bg-white/20 px-4 py-2 text-white backdrop-blur-sm">
           <Sparkles className="h-4 w-4" />
           <span className="text-sm font-medium">Free forever • no signup required</span>
@@ -35,7 +36,7 @@ export function CTA() {
         </div>
 
         <p className="mt-6 text-sm text-white/80">Takes about 15 minutes • 120 thoughtful prompts • Instant results</p>
-      </div>
+      </Container>
     </section>
   );
 }

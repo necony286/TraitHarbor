@@ -1,4 +1,5 @@
 import { Briefcase, Heart, MessageSquare } from 'lucide-react';
+import { Container } from '../../../../components/ui/Container';
 
 const EXAMPLE_INSIGHTS = [
   {
@@ -33,7 +34,7 @@ const DETAILED_TRAITS = [
 export function WhatYouGet() {
   return (
     <section id="what-you-get" className="py-16 lg:py-24 bg-muted/30">
-      <div className="container max-w-6xl mx-auto px-4">
+      <Container>
         <div className="text-center mb-12">
           <h2 className="text-3xl lg:text-4xl font-medium text-foreground mb-4">What you get</h2>
         </div>
@@ -88,7 +89,7 @@ export function WhatYouGet() {
             })}
           </div>
         </div>
-      </div>
+      </Container>
     </section>
   );
 }

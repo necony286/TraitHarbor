@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { Menu, X } from 'lucide-react';
+import { Container } from '../../../components/ui/Container';
 
 interface NavbarProps {
   onStartQuiz?: () => void;
@@ -13,7 +14,7 @@ export function Navbar({ onStartQuiz }: NavbarProps) {
 
   return (
     <nav className="sticky top-0 z-50 border-b border-border/70 bg-background/80 backdrop-blur-md">
-      <div className="container mx-auto flex h-16 max-w-6xl items-center justify-between px-4">
+      <Container className="flex h-16 items-center justify-between">
         <div className="flex items-center gap-3">
           <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-lg shadow-primary/25">
             <span className="text-lg font-semibold">TH</span>
@@ -62,33 +63,35 @@ export function Navbar({ onStartQuiz }: NavbarProps) {
         >
           {isMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
         </button>
-      </div>
+      </Container>
 
       {isMenuOpen ? (
-        <div id="mobile-menu" className="border-t border-border/70 bg-background/95 px-4 py-4 md:hidden">
-          <div className="space-y-3">
-            <Link href="/#how-it-works" className="block text-sm font-medium text-foreground">
-              How it works
-            </Link>
-            <Link href="/#what-you-get" className="block text-sm font-medium text-foreground">
-              What you get
-            </Link>
-            <Link href="/#faq" className="block text-sm font-medium text-foreground">
-              FAQ
-            </Link>
-            <Link href="/quiz" className="block text-sm font-medium text-foreground">
-              Quiz
-            </Link>
-          </div>
-          <div className="mt-4">
-            <Link
-              href="/quiz"
-              className="block w-full rounded-xl bg-primary px-5 py-2 text-center text-sm font-medium text-primary-foreground shadow-lg shadow-primary/25 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
-              onClick={onStartQuiz}
-            >
-              Start quiz
-            </Link>
-          </div>
+        <div id="mobile-menu" className="border-t border-border/70 bg-background/95 md:hidden">
+          <Container className="py-4">
+            <div className="space-y-3">
+              <Link href="/#how-it-works" className="block text-sm font-medium text-foreground">
+                How it works
+              </Link>
+              <Link href="/#what-you-get" className="block text-sm font-medium text-foreground">
+                What you get
+              </Link>
+              <Link href="/#faq" className="block text-sm font-medium text-foreground">
+                FAQ
+              </Link>
+              <Link href="/quiz" className="block text-sm font-medium text-foreground">
+                Quiz
+              </Link>
+            </div>
+            <div className="mt-4">
+              <Link
+                href="/quiz"
+                className="block w-full rounded-xl bg-primary px-5 py-2 text-center text-sm font-medium text-primary-foreground shadow-lg shadow-primary/25 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+                onClick={onStartQuiz}
+              >
+                Start quiz
+              </Link>
+            </div>
+          </Container>
         </div>
       ) : null}
     </nav>

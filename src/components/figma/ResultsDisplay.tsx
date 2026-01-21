@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react';
 import { Badge } from '../../../components/ui/Badge';
 import { Card, CardContent } from '../../../components/ui/Card';
+import { Container } from '../../../components/ui/Container';
 import { TRAIT_DETAILS, TRAIT_ORDER, type TraitScores } from '../../../components/results/traitData';
 
 interface ResultsDisplayProps {
@@ -19,7 +20,7 @@ export function ResultsDisplay({ traits, children }: ResultsDisplayProps) {
     .slice(0, 4);
 
   return (
-    <section className="mx-auto flex w-full max-w-5xl flex-col gap-10">
+    <Container as="section" className="flex w-full flex-col gap-10">
       <Card className="shadow-sm">
         <CardContent className="pt-8">
           <div className="text-center space-y-4">
@@ -54,6 +55,6 @@ export function ResultsDisplay({ traits, children }: ResultsDisplayProps) {
       </Card>
 
       <div className="flex flex-col gap-6">{children}</div>
-    </section>
+    </Container>
   );
 }

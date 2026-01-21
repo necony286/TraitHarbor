@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { ChevronDown } from 'lucide-react';
+import { Container } from '../../../../components/ui/Container';
 
 const FAQ_ITEMS = [
   {
@@ -34,7 +35,7 @@ export function FAQ() {
 
   return (
     <section id="faq" className="py-16 lg:py-24">
-      <div className="container max-w-3xl mx-auto px-4">
+      <Container>
         <div className="text-center mb-12">
           <h2 className="text-3xl lg:text-4xl font-medium text-foreground mb-4">FAQ</h2>
         </div>
@@ -75,7 +76,7 @@ export function FAQ() {
             );
           })}
         </div>
-      </div>
+      </Container>
     </section>
   );
 }

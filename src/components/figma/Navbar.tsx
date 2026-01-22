@@ -9,7 +9,7 @@ interface NavbarProps {
   onStartQuiz?: () => void;
 }
 
-const navLinks = [
+const navLinks: ReadonlyArray<Readonly<{ href: string; label: string }>> = [
   { href: '/#how-it-works', label: 'How it works' },
   { href: '/#what-you-get', label: 'What you get' },
   { href: '/#faq', label: 'FAQ' },

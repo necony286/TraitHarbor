@@ -136,17 +136,17 @@ export default function QuizPage() {
     });
   };
 
-  const goToNextPage = () => {
+  const goToNextPage = useCallback(() => {
     setSubmitError(null);
     setShowPageValidation(false);
     setCurrentPage((prev) => Math.min(prev + 1, totalPages - 1));
-  };
+  }, [totalPages]);
 
-  const goToPrevPage = () => {
+  const goToPrevPage = useCallback(() => {
     setSubmitError(null);
     setShowPageValidation(false);
     setCurrentPage((prev) => Math.max(prev - 1, 0));
-  };
+  }, []);
 
   const handleNext = () => {
     if (isLastPage) {

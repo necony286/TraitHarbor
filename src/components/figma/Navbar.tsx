@@ -11,6 +11,13 @@ interface NavbarProps {
 
 export function Navbar({ onStartQuiz }: NavbarProps) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const navLinks = [
+    { href: '/#how-it-works', label: 'How it works' },
+    { href: '/#what-you-get', label: 'What you get' },
+    { href: '/#faq', label: 'FAQ' },
+    { href: '/my-reports', label: 'My reports' },
+    { href: '/quiz', label: 'Quiz' },
+  ];
 
   return (
     <nav className="sticky top-0 z-50 border-b border-border/70 bg-background/80 backdrop-blur-md">
@@ -23,30 +30,15 @@ export function Navbar({ onStartQuiz }: NavbarProps) {
         </Link>
 
         <div className="hidden items-center gap-8 md:flex">
-          <Link
-            href="/#how-it-works"
-            className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
-          >
-            How it works
-          </Link>
-          <Link
-            href="/#what-you-get"
-            className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
-          >
-            What you get
-          </Link>
-          <Link href="/#faq" className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground">
-            FAQ
-          </Link>
-          <Link
-            href="/my-reports"
-            className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
-          >
-            My reports
-          </Link>
-          <Link href="/quiz" className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground">
-            Quiz
-          </Link>
+          {navLinks.map((link) => (
+            <Link
+              key={link.href}
+              href={link.href}
+              className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
+            >
+              {link.label}
+            </Link>
+          ))}
         </div>
 
         <div className="hidden md:flex">
@@ -75,21 +67,11 @@ export function Navbar({ onStartQuiz }: NavbarProps) {
         <div id="mobile-menu" className="border-t border-border/70 bg-background/95 md:hidden">
           <Container className="py-4">
             <div className="space-y-3">
-              <Link href="/#how-it-works" className="block text-sm font-medium text-foreground">
-                How it works
-              </Link>
-              <Link href="/#what-you-get" className="block text-sm font-medium text-foreground">
-                What you get
-              </Link>
-              <Link href="/#faq" className="block text-sm font-medium text-foreground">
-                FAQ
-              </Link>
-              <Link href="/my-reports" className="block text-sm font-medium text-foreground">
-                My reports
-              </Link>
-              <Link href="/quiz" className="block text-sm font-medium text-foreground">
-                Quiz
-              </Link>
+              {navLinks.map((link) => (
+                <Link key={link.href} href={link.href} className="block text-sm font-medium text-foreground">
+                  {link.label}
+                </Link>
+              ))}
             </div>
             <div className="mt-4">
               <Link

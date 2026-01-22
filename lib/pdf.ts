@@ -224,7 +224,7 @@ export async function buildReportHtml(payload: ReportPayload) {
   ]);
 
   const clampedTraitPercentages = Object.fromEntries(
-    Object.entries(payload.traitPercentages ?? {}).map(([trait, value]) => [
+    Object.entries(payload.traitPercentages).map(([trait, value]) => [
       trait,
       Number.isFinite(value) ? clampScore(value) : 0
     ])

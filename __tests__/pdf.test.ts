@@ -17,11 +17,17 @@ describe('report template', () => {
 
     expect(html).toContain("Alex's Personality Profile");
     expect(html).not.toContain('{{trait_sections}}');
-    expect(html).toContain('Openness — {{trait_openness_band}} (85%)');
-    expect(html).toContain('Conscientiousness — {{trait_conscientiousness_band}} (70%)');
-    expect(html).toContain('Extraversion — {{trait_extraversion_band}} (60%)');
-    expect(html).toContain('Agreeableness — {{trait_agreeableness_band}} (55%)');
-    expect(html).toContain('Neuroticism — {{trait_neuroticism_band}} (45%)');
+    const expectedTraits = [
+      { name: 'Openness', token: 'openness', score: 85 },
+      { name: 'Conscientiousness', token: 'conscientiousness', score: 70 },
+      { name: 'Extraversion', token: 'extraversion', score: 60 },
+      { name: 'Agreeableness', token: 'agreeableness', score: 55 },
+      { name: 'Neuroticism', token: 'neuroticism', score: 45 }
+    ];
+
+    for (const trait of expectedTraits) {
+      expect(html).toContain(`${trait.name} — {{trait_${trait.token}_band}} (${trait.score}%)`);
+    }
     expect(html).toContain('85%');
     expect(html).toContain('70%');
     expect(html).toContain('60%');

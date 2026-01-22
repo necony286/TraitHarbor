@@ -97,14 +97,45 @@ describe('/api/report-access/request-link', () => {
     expect(createReportAccessLinkMock.mock.calls[0]?.[0]).not.toHaveProperty('token', 'raw-token');
 
     await expect(response.json()).resolves.toMatchObject({
-      accessUrl: 'http://localhost:3000/report-access?token=raw-token'
+      accessUrl: 'http://localhost/report-access?token=raw-token'
     });
 
     expect(sendReportAccessLinkEmailMock).toHaveBeenCalledWith(
       expect.objectContaining({
         email: 'guest@example.com',
-        accessUrl: 'http://localhost:3000/report-access?token=raw-token'
+        accessUrl: 'http://localhost/report-access?token=raw-token',
+        expiresInMinutes: 30
       })
     );
+  });
+
+  it('returns a server error when the email send fails', async () => {
+    getPaidOrdersByEmailMock.mockResolvedValue({
+      data: [
+        {
+          id: 'order-456',
+          status: 'paid',
+          created_at: new Date().toISOString(),
+          paid_at: new Date().toISOString()
+        }
+      ],
+      error: null
+    });
+
+    createReportAccessLinkMock.mockResolvedValue({ data: { id: 'link-2' }, error: null });
+    sendReportAccessLinkEmailMock.mockRejectedValue(new Error('Resend error'));
+
+    const response = await POST(
+      new Request('http://localhost/api/report-access/request-link', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: 'guest@example.com' })
+      })
+    );
+
+    expect(response.status).toBe(500);
+    await expect(response.json()).resolves.toMatchObject({
+      message: 'Unable to send report access email right now.'
+    });
   });
 });

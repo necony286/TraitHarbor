@@ -79,14 +79,26 @@ type ReportAccessLinkParams = {
   expiresAt: string;
 };
 
-const reportAccessLinkSchema = z.object({
+const normalizeTimestamp = (value: unknown) => {
+  if (typeof value !== 'string') {
+    return value;
+  }
+  return value.includes(' ') ? value.replace(' ', 'T') : value;
+};
+
+const reportAccessLinkTimestampSchema = z.preprocess(
+  normalizeTimestamp,
+  z.string().datetime({ offset: true })
+);
+
+export const reportAccessLinkSchema = z.object({
   id: z.string().uuid(),
   email: z.string().email(),
   order_id: z.string().uuid().nullable().optional(),
   token_hash: z.string(),
-  expires_at: z.string().datetime(),
-  used_at: z.string().datetime().nullable().optional(),
-  created_at: z.string().datetime()
+  expires_at: reportAccessLinkTimestampSchema,
+  used_at: reportAccessLinkTimestampSchema.nullable().optional(),
+  created_at: reportAccessLinkTimestampSchema
 });
 
 const PAID_ORDER_COLUMNS =

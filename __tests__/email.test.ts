@@ -86,4 +86,30 @@ describe('email config validation', () => {
     await expect(sendReportEmail(reportPayload)).resolves.toEqual({ ok: true });
     expect(sendMock).not.toHaveBeenCalled();
   });
+
+  it('sends a report access link email with the expected content', async () => {
+    process.env = { ...env, NODE_ENV: 'development', RESEND_API_KEY: 'test-key', EMAIL_FROM: 'sender@example.com' };
+    sendMock.mockResolvedValue({ data: { id: 'email_456' }, error: null });
+
+    const { sendReportAccessLinkEmail } = await import('../lib/email');
+
+    await expect(
+      sendReportAccessLinkEmail({
+        email: 'guest@example.com',
+        accessUrl: 'https://trait-harbor.com/r/raw-token',
+        requestUrl: 'https://trait-harbor.com/retrieve-report',
+        expiresInMinutes: 30
+      })
+    ).resolves.toEqual({ ok: true, id: 'email_456' });
+
+    expect(sendMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        from: 'sender@example.com',
+        to: 'guest@example.com',
+        subject: 'Your secure TraitHarbor access link',
+        html: expect.stringContaining('https://trait-harbor.com/r/raw-token'),
+        text: expect.stringContaining('https://trait-harbor.com/r/raw-token')
+      })
+    );
+  });
 });

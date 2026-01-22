@@ -1,38 +1,35 @@
 import { describe, expect, it } from 'vitest';
-import { buildReportHtml } from '../lib/pdf';
+import { buildReportHtml, traitSectionOrder } from '../lib/pdf';
 
 describe('report template', () => {
   it('hydrates report html with trait scores', async () => {
+    const traits = {
+      O: 85,
+      C: 70,
+      E: 60,
+      A: 55,
+      N: 45
+    };
     const html = await buildReportHtml({
       name: 'Alex',
       date: new Date(Date.UTC(2024, 0, 2, 12, 0, 0)),
-      traits: {
-        O: 85,
-        C: 70,
-        E: 60,
-        A: 55,
-        N: 45
-      }
+      traits
     });
 
     expect(html).toContain("Alex's Personality Profile");
     expect(html).not.toContain('{{trait_sections}}');
-    const expectedTraits = [
-      { name: 'Openness', token: 'openness', score: 85 },
-      { name: 'Conscientiousness', token: 'conscientiousness', score: 70 },
-      { name: 'Extraversion', token: 'extraversion', score: 60 },
-      { name: 'Agreeableness', token: 'agreeableness', score: 55 },
-      { name: 'Neuroticism', token: 'neuroticism', score: 45 }
-    ];
+    const expectedTraits = traitSectionOrder.map(({ name, token, scoreKey }) => ({
+      name,
+      token,
+      score: traits[scoreKey]
+    }));
 
     for (const trait of expectedTraits) {
       expect(html).toContain(`${trait.name} — {{trait_${trait.token}_band}} (${trait.score}%)`);
     }
-    expect(html).toContain('85%');
-    expect(html).toContain('70%');
-    expect(html).toContain('60%');
-    expect(html).toContain('55%');
-    expect(html).toContain('45%');
+    for (const score of Object.values(traits)) {
+      expect(html).toContain(`${score}%`);
+    }
   });
 
   it('escapes user-provided strings in the report template', async () => {

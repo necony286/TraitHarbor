@@ -94,11 +94,11 @@ const traitSectionOrder = [
   { name: 'Neuroticism', token: 'neuroticism', scoreKey: 'N' }
 ];
 
-const buildTraitSections = () =>
+const buildTraitSections = (scores: Record<typeof traitSectionOrder[number]['scoreKey'], number>) =>
   traitSectionOrder
     .map(
       ({ name, token, scoreKey }) => `      <section class="report__trait">
-        <h2>${name} — {{trait_${token}_band}} ({{score_${scoreKey}}}%)</h2>
+        <h2>${name} — {{trait_${token}_band}} (${scores[scoreKey]}%)</h2>
         <h3>How this trait shows up for you</h3>
         <p>{{trait_${token}_manifestation}}</p>
         <h3>Strengths to leverage</h3>

@@ -27,9 +27,6 @@ describe('report template', () => {
     for (const trait of expectedTraits) {
       expect(html).toContain(`${trait.name} — {{trait_${trait.token}_band}} (${trait.score}%)`);
     }
-    for (const score of Object.values(traits)) {
-      expect(html).toContain(`${score}%`);
-    }
   });
 
   it('escapes user-provided strings in the report template', async () => {

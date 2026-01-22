@@ -86,7 +86,7 @@ const clampScore = (value: number) => Math.max(0, Math.min(100, Math.round(value
 const formatDate = (date: Date) =>
   new Intl.DateTimeFormat('en-US', { month: 'long', day: 'numeric', year: 'numeric' }).format(date);
 
-const traitSectionOrder = [
+export const traitSectionOrder = [
   { name: 'Openness', token: 'openness', scoreKey: 'O' },
   { name: 'Conscientiousness', token: 'conscientiousness', scoreKey: 'C' },
   { name: 'Extraversion', token: 'extraversion', scoreKey: 'E' },

@@ -25,7 +25,7 @@ export function TraitBars({ scores, traits = TRAIT_ORDER }: TraitBarsProps) {
             </div>
             <div className="h-3 w-full overflow-hidden rounded-full bg-muted/60">
               <div
-                className="h-full rounded-full bg-gradient-to-r from-brand to-brand-strong"
+                className="h-full rounded-full bg-gradient-to-r from-primary to-primary"
                 style={{ width: `${width}%` }}
               />
             </div>

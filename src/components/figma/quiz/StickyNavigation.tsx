@@ -1,5 +1,5 @@
 import React from 'react';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Loader2 } from 'lucide-react';
 import { Container } from '../../../../components/ui/Container';
 
 interface StickyNavigationProps {
@@ -10,6 +10,7 @@ interface StickyNavigationProps {
   canGoPrevious: boolean;
   isLastPage: boolean;
   errorMessage?: string;
+  statusMessage?: string;
 }
 
 export function StickyNavigation({
@@ -19,7 +20,8 @@ export function StickyNavigation({
   onNext,
   canGoPrevious,
   isLastPage,
-  errorMessage
+  errorMessage,
+  statusMessage
 }: StickyNavigationProps) {
   return (
     <nav
@@ -40,6 +42,18 @@ export function StickyNavigation({
               />
             </svg>
             <p className="text-sm text-destructive font-medium text-center">{errorMessage}</p>
+          </Container>
+        </div>
+      )}
+      {!errorMessage && statusMessage && (
+        <div
+          className="px-4 py-3 bg-primary/10 border-b border-primary/20 animate-in slide-in-from-bottom duration-300 pointer-events-auto"
+          role="status"
+          aria-live="polite"
+        >
+          <Container className="flex items-center justify-center gap-2">
+            <Loader2 className="w-4 h-4 text-primary animate-spin" aria-hidden="true" />
+            <p className="text-sm text-primary font-medium text-center">{statusMessage}</p>
           </Container>
         </div>
       )}

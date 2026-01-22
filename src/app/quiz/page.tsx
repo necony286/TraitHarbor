@@ -32,6 +32,7 @@ export default function QuizPage() {
   const [currentPage, setCurrentPage] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
+  const [showPageValidation, setShowPageValidation] = useState(false);
   const totalPages = Math.max(1, Math.ceil(items.length / PAGE_SIZE));
   const router = useRouter();
 
@@ -110,6 +111,18 @@ export default function QuizPage() {
   }, []);
 
   const pageItems = items.slice(currentPage * PAGE_SIZE, currentPage * PAGE_SIZE + PAGE_SIZE);
+  const missingPageItems = useMemo(
+    () => pageItems.filter((item) => sanitizedAnswers[item.id] == null),
+    [pageItems, sanitizedAnswers]
+  );
+  const isCurrentPageComplete = missingPageItems.length === 0;
+
+  useEffect(() => {
+    if (showPageValidation && isCurrentPageComplete) {
+      setSubmitError(null);
+      setShowPageValidation(false);
+    }
+  }, [isCurrentPageComplete, showPageValidation]);
 
   const updateAnswer = (questionId: string, value: number) => {
     setAnswers((prev) => {
@@ -124,11 +137,35 @@ export default function QuizPage() {
   };
 
   const goToNextPage = () => {
+    setSubmitError(null);
+    setShowPageValidation(false);
     setCurrentPage((prev) => Math.min(prev + 1, totalPages - 1));
   };
 
   const goToPrevPage = () => {
+    setSubmitError(null);
+    setShowPageValidation(false);
     setCurrentPage((prev) => Math.max(prev - 1, 0));
+  };
+
+  const handleNext = () => {
+    if (isLastPage) {
+      handleSubmit();
+      return;
+    }
+
+    if (!isCurrentPageComplete) {
+      setShowPageValidation(true);
+      setSubmitError('Please answer all questions on this page to continue.');
+      if (missingPageItems.length > 0) {
+        document
+          .getElementById(`question-${missingPageItems[0].id}`)
+          ?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+      return;
+    }
+
+    goToNextPage();
   };
 
   const handleSubmit = async () => {
@@ -214,6 +251,7 @@ export default function QuizPage() {
               questionText={item.prompt}
               value={sanitizedAnswers[item.id] ?? null}
               onChange={(value) => updateAnswer(item.id, value)}
+              hasError={showPageValidation && sanitizedAnswers[item.id] == null}
             />
           ))}
         </main>
@@ -223,10 +261,11 @@ export default function QuizPage() {
         currentPage={currentPage + 1}
         totalPages={totalPages}
         onPrevious={goToPrevPage}
-        onNext={isLastPage ? handleSubmit : goToNextPage}
+        onNext={handleNext}
         canGoPrevious={currentPage > 0}
         isLastPage={isLastPage}
-        errorMessage={submitError ?? (isSubmitting ? 'Scoring your answers...' : undefined)}
+        errorMessage={submitError ?? undefined}
+        statusMessage={isSubmitting ? 'Calculating your answers...' : undefined}
       />
     </div>
   );

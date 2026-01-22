@@ -20,4 +20,24 @@ describe('reportAccessLinkSchema', () => {
     const parsed = reportAccessLinkSchema.safeParse({ ...baseLink, expires_at: expiresAt });
     expect(parsed.success).toBe(true);
   });
+
+  it('accepts space-separated timestamps for other date fields', () => {
+    const linkWithSpaces = {
+      ...baseLink,
+      created_at: '2025-01-22 10:11:12+00:00',
+      used_at: '2025-01-22 10:11:12+00:00',
+      expires_at: '2025-01-22 10:11:12+00:00'
+    };
+    const parsed = reportAccessLinkSchema.safeParse(linkWithSpaces);
+    expect(parsed.success).toBe(true);
+  });
+
+  it('accepts a missing used_at field', () => {
+    const { used_at, ...linkData } = baseLink;
+    const parsed = reportAccessLinkSchema.safeParse({
+      ...linkData,
+      expires_at: '2025-01-22T10:11:12+00:00'
+    });
+    expect(parsed.success).toBe(true);
+  });
 });

@@ -5,7 +5,17 @@ import { sendReportAccessLinkEmail } from '../../../../../lib/email';
 import { logError, logWarn } from '../../../../../lib/logger';
 import { enforceRateLimit, getClientIdentifier } from '../../../../../lib/rate-limit';
 import { generateReportAccessToken, hashReportAccessToken } from '../../../../../lib/report-access';
-import { absoluteUrl } from '@/lib/siteUrl';
+const resolveSiteOrigin = (request: Request) => {
+  const envUrl = process.env.NEXT_PUBLIC_SITE_URL?.trim() ?? process.env.SITE_URL?.trim();
+  if (envUrl) {
+    return new URL(envUrl).origin;
+  }
+  const originHeader = request.headers.get('origin');
+  if (originHeader) {
+    return originHeader;
+  }
+  return new URL(request.url).origin;
+};
 
 const requestSchema = z
   .object({
@@ -95,17 +105,20 @@ export async function POST(request: Request) {
     return NextResponse.json(GENERIC_RESPONSE);
   }
 
-  const accessUrl = absoluteUrl(`/report-access?token=${encodeURIComponent(token)}`);
-  const requestUrl = absoluteUrl('/retrieve-report');
+  const siteOrigin = resolveSiteOrigin(request);
+  const accessUrl = new URL(`/report-access?token=${encodeURIComponent(token)}`, siteOrigin).toString();
+  const requestUrl = new URL('/retrieve-report', siteOrigin).toString();
 
   try {
     await sendReportAccessLinkEmail({
       email: normalizedEmail,
       accessUrl,
-      requestUrl
+      requestUrl,
+      expiresInMinutes: TOKEN_TTL_MINUTES
     });
   } catch (error) {
-    logWarn('Failed to send report access email.', { email: normalizedEmail, error });
+    logError('Failed to send report access email.', { email: normalizedEmail, error });
+    return NextResponse.json({ message: 'Unable to send report access email right now.' }, { status: 500 });
   }
 
   if (process.env.NODE_ENV === 'test' || process.env.PLAYWRIGHT === '1') {

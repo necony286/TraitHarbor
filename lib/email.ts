@@ -132,14 +132,22 @@ export type ReportAccessLinkEmailPayload = {
   email: string;
   accessUrl: string;
   requestUrl: string;
+  expiresInMinutes: number;
 };
 
 export async function sendReportAccessLinkEmail(payload: ReportAccessLinkEmailPayload) {
   const subject = 'Your secure TraitHarbor access link';
-  const text = `Use this secure link to access your reports:\n${payload.accessUrl}\n\nIf this link has expired, request another here: ${payload.requestUrl}`;
+  const text = [
+    'Use this secure link to access your reports:',
+    payload.accessUrl,
+    '',
+    `This link expires in ${payload.expiresInMinutes} minutes.`,
+    `If this link has expired, request another here: ${payload.requestUrl}`
+  ].join('\n');
   const html = [
     '<p>Use this secure link to access your reports:</p>',
     `<p><a href="${payload.accessUrl}">Access your report</a></p>`,
+    `<p>This link expires in ${payload.expiresInMinutes} minutes.</p>`,
     `<p>If this link has expired, request another here: <a href="${payload.requestUrl}">${payload.requestUrl}</a></p>`
   ].join('');
 

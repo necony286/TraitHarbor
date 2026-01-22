@@ -16,83 +16,79 @@
         <p class="muted">Generated on {{date}}</p>
       </section>
 
-      <section class="report__overview">
-        <h2>Overview</h2>
-        <p>
-          Your TraitHarbor assessment highlights how you recharge, collaborate, and adapt. Scores range from 0–100 and
-          reflect your responses to the IPIP-120 inventory.
-        </p>
+      <section class="report__summary">
+        <h2>Personality Profile Summary</h2>
+        <p>{{profile_summary}}</p>
       </section>
 
-      <section class="report__chart">
-        <h2>Score snapshot</h2>
-        <div class="chart">
-          <div class="chart__row">
-            <span>Openness</span>
-            <div class="chart__bar"><span style="width: {{score_O}}%"></span></div>
-            <strong>{{score_O}}%</strong>
-          </div>
-          <div class="chart__row">
-            <span>Conscientiousness</span>
-            <div class="chart__bar"><span style="width: {{score_C}}%"></span></div>
-            <strong>{{score_C}}%</strong>
-          </div>
-          <div class="chart__row">
-            <span>Extraversion</span>
-            <div class="chart__bar"><span style="width: {{score_E}}%"></span></div>
-            <strong>{{score_E}}%</strong>
-          </div>
-          <div class="chart__row">
-            <span>Agreeableness</span>
-            <div class="chart__bar"><span style="width: {{score_A}}%"></span></div>
-            <strong>{{score_A}}%</strong>
-          </div>
-          <div class="chart__row">
-            <span>Neuroticism</span>
-            <div class="chart__bar"><span style="width: {{score_N}}%"></span></div>
-            <strong>{{score_N}}%</strong>
-          </div>
-        </div>
+      <section class="report__trait">
+        <h2>Openness — {{trait_openness_band}} ({{score_O}}%)</h2>
+        <h3>How this trait shows up for you</h3>
+        <p>{{trait_openness_manifestation}}</p>
+        <h3>Strengths to leverage</h3>
+        <p>{{trait_openness_strengths}}</p>
+        <h3>Growth &amp; balance tips</h3>
+        <p>{{trait_openness_growth}}</p>
       </section>
 
-      <section class="report__traits">
-        <h2>Trait highlights</h2>
-        <div class="trait-grid">
-          <article>
-            <h3>Openness — {{score_O}}%</h3>
-            <p>You balance curiosity with practicality, seeking fresh perspectives while valuing grounded insights.</p>
-          </article>
-          <article>
-            <h3>Conscientiousness — {{score_C}}%</h3>
-            <p>You bring structure to your goals, pairing reliability with an adaptable approach to planning.</p>
-          </article>
-          <article>
-            <h3>Extraversion — {{score_E}}%</h3>
-            <p>Your social energy flexes with the moment, helping you connect with others while preserving focus.</p>
-          </article>
-          <article>
-            <h3>Agreeableness — {{score_A}}%</h3>
-            <p>You value cooperation and empathy, balancing candor with a supportive communication style.</p>
-          </article>
-          <article>
-            <h3>Neuroticism — {{score_N}}%</h3>
-            <p>You notice emotional signals and can channel them into thoughtful reflection and resilience.</p>
-          </article>
-        </div>
+      <section class="report__trait">
+        <h2>Conscientiousness — {{trait_conscientiousness_band}} ({{score_C}}%)</h2>
+        <h3>How this trait shows up for you</h3>
+        <p>{{trait_conscientiousness_manifestation}}</p>
+        <h3>Strengths to leverage</h3>
+        <p>{{trait_conscientiousness_strengths}}</p>
+        <h3>Growth &amp; balance tips</h3>
+        <p>{{trait_conscientiousness_growth}}</p>
       </section>
 
-      <section class="report__tips">
-        <h2>Personalized tips</h2>
-        <ul>
-          <li>Use your top two traits when setting weekly intentions.</li>
-          <li>Choose environments that reinforce your natural energy rhythm.</li>
-          <li>Revisit this report before major decisions to stay aligned with your strengths.</li>
-        </ul>
+      <section class="report__trait">
+        <h2>Extraversion — {{trait_extraversion_band}} ({{score_E}}%)</h2>
+        <h3>How this trait shows up for you</h3>
+        <p>{{trait_extraversion_manifestation}}</p>
+        <h3>Strengths to leverage</h3>
+        <p>{{trait_extraversion_strengths}}</p>
+        <h3>Growth &amp; balance tips</h3>
+        <p>{{trait_extraversion_growth}}</p>
       </section>
 
-      <section class="report__resources">
-        <h2>Resources</h2>
-        <p>Explore guided exercises, reflection prompts, and coaching content inside your TraitHarbor dashboard.</p>
+      <section class="report__trait">
+        <h2>Agreeableness — {{trait_agreeableness_band}} ({{score_A}}%)</h2>
+        <h3>How this trait shows up for you</h3>
+        <p>{{trait_agreeableness_manifestation}}</p>
+        <h3>Strengths to leverage</h3>
+        <p>{{trait_agreeableness_strengths}}</p>
+        <h3>Growth &amp; balance tips</h3>
+        <p>{{trait_agreeableness_growth}}</p>
+      </section>
+
+      <section class="report__trait">
+        <h2>Neuroticism — {{trait_neuroticism_band}} ({{score_N}}%)</h2>
+        <h3>How this trait shows up for you</h3>
+        <p>{{trait_neuroticism_manifestation}}</p>
+        <h3>Strengths to leverage</h3>
+        <p>{{trait_neuroticism_strengths}}</p>
+        <h3>Growth &amp; balance tips</h3>
+        <p>{{trait_neuroticism_growth}}</p>
+      </section>
+
+      <section class="report__comparison">
+        <h2>How You Compare to Others</h2>
+        <p>{{comparison_text}}</p>
+      </section>
+
+      <section class="report__work">
+        <h2>Career &amp; Work Style Insights</h2>
+        <p>{{work_style}}</p>
+      </section>
+
+      <section class="report__relationships">
+        <h2>Relationships &amp; Communication Style</h2>
+        <p>{{relationship_insights}}</p>
+      </section>
+
+      <section class="report__roadmap">
+        <h2>Personal Development Roadmap</h2>
+        <div class="roadmap">{{roadmap_blocks}}</div>
       </section>
     </main>
   </body>

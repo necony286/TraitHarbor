@@ -21,16 +21,17 @@ describe('reportAccessLinkSchema', () => {
     expect(parsed.success).toBe(true);
   });
 
-  it('accepts space-separated timestamps for other date fields', () => {
-    const linkWithSpaces = {
-      ...baseLink,
-      created_at: '2025-01-22 10:11:12+00:00',
-      used_at: '2025-01-22 10:11:12+00:00',
-      expires_at: '2025-01-22 10:11:12+00:00'
-    };
-    const parsed = reportAccessLinkSchema.safeParse(linkWithSpaces);
-    expect(parsed.success).toBe(true);
-  });
+  it.each(['created_at', 'used_at'] as const)(
+    'accepts space-separated timestamps for %s',
+    (field) => {
+      const parsed = reportAccessLinkSchema.safeParse({
+        ...baseLink,
+        expires_at: '2025-01-22T10:11:12+00:00',
+        [field]: '2025-01-22 10:11:12+00:00'
+      });
+      expect(parsed.success).toBe(true);
+    }
+  );
 
   it('accepts a missing used_at field', () => {
     const { used_at, ...linkData } = baseLink;

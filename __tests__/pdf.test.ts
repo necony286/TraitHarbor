@@ -16,6 +16,12 @@ describe('report template', () => {
     });
 
     expect(html).toContain("Alex's Personality Profile");
+    expect(html).not.toContain('{{trait_sections}}');
+    expect(html).toContain('Openness — {{trait_openness_band}} (85%)');
+    expect(html).toContain('Conscientiousness — {{trait_conscientiousness_band}} (70%)');
+    expect(html).toContain('Extraversion — {{trait_extraversion_band}} (60%)');
+    expect(html).toContain('Agreeableness — {{trait_agreeableness_band}} (55%)');
+    expect(html).toContain('Neuroticism — {{trait_neuroticism_band}} (45%)');
     expect(html).toContain('85%');
     expect(html).toContain('70%');
     expect(html).toContain('60%');

@@ -15,12 +15,12 @@ export function Navbar({ onStartQuiz }: NavbarProps) {
   return (
     <nav className="sticky top-0 z-50 border-b border-border/70 bg-background/80 backdrop-blur-md">
       <Container className="flex h-16 items-center justify-between">
-        <div className="flex items-center gap-3">
+        <Link href="/" className="flex items-center gap-3" aria-label="TraitHarbor home">
           <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-lg shadow-primary/25">
             <span className="text-lg font-semibold">TH</span>
           </div>
           <span className="text-lg font-medium text-foreground">TraitHarbor</span>
-        </div>
+        </Link>
 
         <div className="hidden items-center gap-8 md:flex">
           <Link
@@ -37,6 +37,12 @@ export function Navbar({ onStartQuiz }: NavbarProps) {
           </Link>
           <Link href="/#faq" className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground">
             FAQ
+          </Link>
+          <Link
+            href="/my-reports"
+            className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
+          >
+            My reports
           </Link>
           <Link href="/quiz" className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground">
             Quiz
@@ -77,6 +83,9 @@ export function Navbar({ onStartQuiz }: NavbarProps) {
               </Link>
               <Link href="/#faq" className="block text-sm font-medium text-foreground">
                 FAQ
+              </Link>
+              <Link href="/my-reports" className="block text-sm font-medium text-foreground">
+                My reports
               </Link>
               <Link href="/quiz" className="block text-sm font-medium text-foreground">
                 Quiz

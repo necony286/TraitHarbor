@@ -24,9 +24,11 @@ describe('reportAccessLinkSchema', () => {
   it.each(['created_at', 'used_at'] as const)(
     'accepts space-separated timestamps for %s',
     (field) => {
+      const { created_at, used_at, ...rest } = baseLink;
       const parsed = reportAccessLinkSchema.safeParse({
-        ...baseLink,
+        ...rest,
         expires_at: '2025-01-22T10:11:12+00:00',
+        created_at: '2025-01-22T10:11:12+00:00',
         [field]: '2025-01-22 10:11:12+00:00'
       });
       expect(parsed.success).toBe(true);

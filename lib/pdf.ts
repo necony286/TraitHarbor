@@ -92,7 +92,7 @@ const traitSectionOrder = [
   { name: 'Extraversion', token: 'extraversion', scoreKey: 'E' },
   { name: 'Agreeableness', token: 'agreeableness', scoreKey: 'A' },
   { name: 'Neuroticism', token: 'neuroticism', scoreKey: 'N' }
-];
+] as const;
 
 const buildTraitSections = (scores: Record<typeof traitSectionOrder[number]['scoreKey'], number>) =>
   traitSectionOrder

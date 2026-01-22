@@ -3,7 +3,7 @@ import { buildReportHtml, traitSectionOrder } from '../lib/pdf';
 
 describe('report template', () => {
   it('hydrates report html with trait scores', async () => {
-    const traits = {
+    const traits: ReportTraits = {
       O: 85,
       C: 70,
       E: 60,

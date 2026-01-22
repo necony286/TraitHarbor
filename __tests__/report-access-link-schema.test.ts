@@ -28,7 +28,9 @@ describe('reportAccessLinkSchema', () => {
       const parsed = reportAccessLinkSchema.safeParse({
         ...rest,
         expires_at: '2025-01-22T10:11:12+00:00',
-        created_at: '2025-01-22T10:11:12+00:00',
+        ...(field !== 'created_at' && {
+          created_at: '2025-01-22T10:11:12+00:00'
+        }),
         [field]: '2025-01-22 10:11:12+00:00'
       });
       expect(parsed.success).toBe(true);

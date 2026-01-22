@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { PdfRenderConcurrencyError, generateReportPdf } from './pdf';
+import { PdfRenderConcurrencyError, generateReportPdf, traitSectionOrder } from './pdf';
 import { getReportAsset, getScoresByResultId, storeReportAsset, updateOrderReportFileKey } from './db';
 import { getReportPath, getReportSignedUrl, getReportSignedUrlForPath, uploadReport } from './storage';
 
@@ -24,6 +24,35 @@ const resultSchema = z.object({
   id: z.string().uuid(),
   traits: traitsSchema
 });
+
+const buildReportTraitData = (traits: z.infer<typeof traitsSchema>) => {
+  const traitScores = traitSectionOrder.map(({ name, scoreKey }, index) => ({
+    name,
+    score: traits[scoreKey],
+    index
+  }));
+
+  const traitRankOrder = traitScores
+    .slice()
+    .sort((a, b) => {
+      if (b.score !== a.score) {
+        return b.score - a.score;
+      }
+      return a.index - b.index;
+    })
+    .map((trait) => trait.name);
+
+  const traitPercentages = Object.fromEntries(
+    traitScores.map(({ name, score }) => [name, score])
+  );
+
+  return {
+    traitPercentages,
+    traitRankOrder,
+    highestTrait: traitRankOrder[0] ?? '',
+    lowestTrait: traitRankOrder[traitRankOrder.length - 1] ?? ''
+  };
+};
 
 type OrderDetail = {
   id: string;
@@ -89,10 +118,18 @@ export const getOrCreateReportDownloadUrl = async ({
     throw new ReportGenerationError('RESULT_INVALID', 'Invalid result payload.');
   }
 
+  const { traitPercentages, traitRankOrder, highestTrait, lowestTrait } = buildReportTraitData(
+    parsedResult.data.traits
+  );
+
   const pdfBuffer = await generateReportPdf({
     name,
     date: new Date(order.created_at),
-    traits: parsedResult.data.traits
+    traits: parsedResult.data.traits,
+    traitPercentages,
+    traitRankOrder,
+    highestTrait,
+    lowestTrait
   });
 
   await uploadReport(order.id, pdfBuffer);

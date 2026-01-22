@@ -295,8 +295,7 @@ export async function buildReportHtml(payload: ReportPayload) {
     .replaceAll('{{comparison_text}}', escapeHtml(comparisonText))
     .replaceAll('{{work_style}}', escapeHtml(workStyle))
     .replaceAll('{{relationship_insights}}', escapeHtml(relationshipInsights))
-    .replaceAll('{{roadmap_blocks}}', roadmapBlocks)
-    .replaceAll('{{facet_score_blocks}}', roadmapBlocks);
+    .replaceAll('{{roadmap_blocks}}', roadmapBlocks);
 }
 
 export async function generateReportPdf(payload: ReportPayload) {

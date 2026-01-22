@@ -59,6 +59,12 @@ export type ReportPayload = {
   name: string;
   date: Date;
   traits: ReportTraits;
+  traitPercentages: Record<string, number>;
+  highestTrait: string;
+  lowestTrait: string;
+  traitRankOrder: string[];
+  facetScores?: Record<string, Record<string, number>>;
+  userName?: string;
 };
 
 const MAX_PDF_BYTES = 700 * 1024;
@@ -108,6 +114,38 @@ const buildTraitSections = (scores: Record<typeof traitSectionOrder[number]['sco
       </section>`
     )
     .join('\n\n');
+
+const buildListItems = (items: string[]) =>
+  items.length ? items.map((item) => `        <li>${escapeHtml(item)}</li>`).join('\n') : '';
+
+const buildFacetScoreBlocks = (facetScores?: Record<string, Record<string, number>>) => {
+  if (!facetScores) {
+    return '';
+  }
+
+  return Object.entries(facetScores)
+    .map(([groupName, scores]) => {
+      const scoreItems = Object.entries(scores ?? {})
+        .map(([facetName, score]) => {
+          const clampedScore = Number.isFinite(score) ? clampScore(score) : 0;
+          return `          <li>${escapeHtml(facetName)} — ${clampedScore}%</li>`;
+        })
+        .join('\n');
+
+      if (!scoreItems) {
+        return '';
+      }
+
+      return `      <div class="roadmap__block">
+        <h3>${escapeHtml(groupName)}</h3>
+        <ul>
+${scoreItems}
+        </ul>
+      </div>`;
+    })
+    .filter(Boolean)
+    .join('\n');
+};
 
 let chromiumPromise: Promise<Chromium> | undefined;
 let activePdfRenders = 0;
@@ -185,6 +223,13 @@ export async function buildReportHtml(payload: ReportPayload) {
     readFile(templatePath('report.css'), 'utf8')
   ]);
 
+  const clampedTraitPercentages = Object.fromEntries(
+    Object.entries(payload.traitPercentages ?? {}).map(([trait, value]) => [
+      trait,
+      Number.isFinite(value) ? clampScore(value) : 0
+    ])
+  );
+
   const scores = {
     O: clampScore(payload.traits.O),
     C: clampScore(payload.traits.C),
@@ -193,16 +238,65 @@ export async function buildReportHtml(payload: ReportPayload) {
     N: clampScore(payload.traits.N)
   };
 
+  const normalizedUserName = payload.userName?.trim();
+  const narrativeName = normalizedUserName || payload.name || 'You';
+  const highestTrait = payload.highestTrait?.trim() || '';
+  const lowestTrait = payload.lowestTrait?.trim() || '';
+  const traitRankOrder = payload.traitRankOrder?.filter(Boolean) ?? [];
+
+  const formatTraitPercentage = (trait: string) => {
+    if (!trait || !(trait in clampedTraitPercentages)) {
+      return '';
+    }
+    return ` (${clampedTraitPercentages[trait]}%)`;
+  };
+
+  const profileSummaryParts: string[] = [];
+  if (highestTrait) {
+    profileSummaryParts.push(
+      `${narrativeName} scored highest in ${highestTrait}${formatTraitPercentage(highestTrait)}.`
+    );
+  }
+  if (lowestTrait) {
+    profileSummaryParts.push(
+      `${narrativeName} scored lowest in ${lowestTrait}${formatTraitPercentage(lowestTrait)}.`
+    );
+  }
+
+  const profileSummary = profileSummaryParts.join(' ');
+  const comparisonText = traitRankOrder.length
+    ? `Your trait rank order is ${traitRankOrder.join(', ')}.`
+    : '';
+  const workStyle = highestTrait
+    ? `${narrativeName} may feel most energized in ${highestTrait}-driven environments.`
+    : '';
+  const relationshipInsights = lowestTrait
+    ? `Being mindful of ${lowestTrait} can help ${narrativeName} stay balanced in relationships.`
+    : '';
+  const roadmapBlocks = buildFacetScoreBlocks(payload.facetScores);
+  const traitRankList = buildListItems(traitRankOrder);
+
   return template
     .replace('{{styles}}', styles)
     .replace('{{trait_sections}}', buildTraitSections(scores))
     .replaceAll('{{name}}', escapeHtml(payload.name))
+    .replaceAll('{{user_name}}', escapeHtml(normalizedUserName || payload.name))
     .replaceAll('{{date}}', escapeHtml(formatDate(payload.date)))
     .replaceAll('{{score_O}}', scores.O.toString())
     .replaceAll('{{score_C}}', scores.C.toString())
     .replaceAll('{{score_E}}', scores.E.toString())
     .replaceAll('{{score_A}}', scores.A.toString())
-    .replaceAll('{{score_N}}', scores.N.toString());
+    .replaceAll('{{score_N}}', scores.N.toString())
+    .replaceAll('{{highest_trait}}', escapeHtml(highestTrait))
+    .replaceAll('{{lowest_trait}}', escapeHtml(lowestTrait))
+    .replaceAll('{{trait_rank_order}}', escapeHtml(traitRankOrder.join(', ')))
+    .replaceAll('{{trait_rank_list}}', traitRankList)
+    .replaceAll('{{profile_summary}}', escapeHtml(profileSummary))
+    .replaceAll('{{comparison_text}}', escapeHtml(comparisonText))
+    .replaceAll('{{work_style}}', escapeHtml(workStyle))
+    .replaceAll('{{relationship_insights}}', escapeHtml(relationshipInsights))
+    .replaceAll('{{roadmap_blocks}}', roadmapBlocks)
+    .replaceAll('{{facet_score_blocks}}', roadmapBlocks);
 }
 
 export async function generateReportPdf(payload: ReportPayload) {

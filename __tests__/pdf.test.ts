@@ -13,7 +13,17 @@ describe('report template', () => {
     const html = await buildReportHtml({
       name: 'Alex',
       date: new Date(Date.UTC(2024, 0, 2, 12, 0, 0)),
-      traits
+      traits,
+      traitPercentages: {
+        Openness: traits.O,
+        Conscientiousness: traits.C,
+        Extraversion: traits.E,
+        Agreeableness: traits.A,
+        Neuroticism: traits.N
+      },
+      highestTrait: 'Openness',
+      lowestTrait: 'Neuroticism',
+      traitRankOrder: ['Openness', 'Conscientiousness', 'Extraversion', 'Agreeableness', 'Neuroticism']
     });
 
     expect(html).toContain("Alex's Personality Profile");
@@ -39,7 +49,18 @@ describe('report template', () => {
         E: 60,
         A: 55,
         N: 45
-      }
+      },
+      traitPercentages: {
+        Openness: 85,
+        Conscientiousness: 70,
+        Extraversion: 60,
+        Agreeableness: 55,
+        Neuroticism: 45
+      },
+      highestTrait: 'Openness',
+      lowestTrait: 'Neuroticism',
+      traitRankOrder: ['Openness', 'Conscientiousness', 'Extraversion', 'Agreeableness', 'Neuroticism'],
+      userName: '<script>alert("x")</script>'
     });
 
     expect(html).toContain('&lt;script&gt;alert(&quot;x&quot;)&lt;/script&gt;');

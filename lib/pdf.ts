@@ -86,6 +86,29 @@ const clampScore = (value: number) => Math.max(0, Math.min(100, Math.round(value
 const formatDate = (date: Date) =>
   new Intl.DateTimeFormat('en-US', { month: 'long', day: 'numeric', year: 'numeric' }).format(date);
 
+const traitSectionOrder = [
+  { name: 'Openness', token: 'openness', scoreKey: 'O' },
+  { name: 'Conscientiousness', token: 'conscientiousness', scoreKey: 'C' },
+  { name: 'Extraversion', token: 'extraversion', scoreKey: 'E' },
+  { name: 'Agreeableness', token: 'agreeableness', scoreKey: 'A' },
+  { name: 'Neuroticism', token: 'neuroticism', scoreKey: 'N' }
+];
+
+const buildTraitSections = () =>
+  traitSectionOrder
+    .map(
+      ({ name, token, scoreKey }) => `      <section class="report__trait">
+        <h2>${name} — {{trait_${token}_band}} ({{score_${scoreKey}}}%)</h2>
+        <h3>How this trait shows up for you</h3>
+        <p>{{trait_${token}_manifestation}}</p>
+        <h3>Strengths to leverage</h3>
+        <p>{{trait_${token}_strengths}}</p>
+        <h3>Growth &amp; balance tips</h3>
+        <p>{{trait_${token}_growth}}</p>
+      </section>`
+    )
+    .join('\n\n');
+
 let chromiumPromise: Promise<Chromium> | undefined;
 let activePdfRenders = 0;
 
@@ -172,6 +195,7 @@ export async function buildReportHtml(payload: ReportPayload) {
 
   return template
     .replace('{{styles}}', styles)
+    .replace('{{trait_sections}}', buildTraitSections())
     .replaceAll('{{name}}', escapeHtml(payload.name))
     .replaceAll('{{date}}', escapeHtml(formatDate(payload.date)))
     .replaceAll('{{score_O}}', scores.O.toString())

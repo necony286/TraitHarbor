@@ -240,9 +240,9 @@ export async function buildReportHtml(payload: ReportPayload) {
 
   const normalizedUserName = payload.userName?.trim();
   const narrativeName = normalizedUserName || payload.name || 'You';
-  const highestTrait = payload.highestTrait?.trim() || '';
-  const lowestTrait = payload.lowestTrait?.trim() || '';
-  const traitRankOrder = payload.traitRankOrder?.filter(Boolean) ?? [];
+  const highestTrait = payload.highestTrait.trim() || '';
+  const lowestTrait = payload.lowestTrait.trim() || '';
+  const traitRankOrder = payload.traitRankOrder.filter(Boolean);
 
   const formatTraitPercentage = (trait: string) => {
     if (!trait || !(trait in clampedTraitPercentages)) {

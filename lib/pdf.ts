@@ -195,7 +195,7 @@ export async function buildReportHtml(payload: ReportPayload) {
 
   return template
     .replace('{{styles}}', styles)
-    .replace('{{trait_sections}}', buildTraitSections())
+    .replace('{{trait_sections}}', buildTraitSections(scores))
     .replaceAll('{{name}}', escapeHtml(payload.name))
     .replaceAll('{{date}}', escapeHtml(formatDate(payload.date)))
     .replaceAll('{{score_O}}', scores.O.toString())

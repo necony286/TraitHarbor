@@ -125,7 +125,7 @@ const buildFacetScoreBlocks = (facetScores?: Record<string, Record<string, numbe
 
   return Object.entries(facetScores)
     .map(([groupName, scores]) => {
-      const scoreItems = Object.entries(scores ?? {})
+      const scoreItems = Object.entries(scores)
         .map(([facetName, score]) => {
           const clampedScore = Number.isFinite(score) ? clampScore(score) : 0;
           return `          <li>${escapeHtml(facetName)} — ${clampedScore}%</li>`;

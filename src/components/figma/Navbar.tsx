@@ -9,15 +9,16 @@ interface NavbarProps {
   onStartQuiz?: () => void;
 }
 
+const navLinks: ReadonlyArray<Readonly<{ href: string; label: string }>> = [
+  { href: '/#how-it-works', label: 'How it works' },
+  { href: '/#what-you-get', label: 'What you get' },
+  { href: '/#faq', label: 'FAQ' },
+  { href: '/my-reports', label: 'My reports' },
+  { href: '/quiz', label: 'Quiz' },
+];
+
 export function Navbar({ onStartQuiz }: NavbarProps) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const navLinks = [
-    { href: '/#how-it-works', label: 'How it works' },
-    { href: '/#what-you-get', label: 'What you get' },
-    { href: '/#faq', label: 'FAQ' },
-    { href: '/my-reports', label: 'My reports' },
-    { href: '/quiz', label: 'Quiz' },
-  ];
 
   return (
     <nav className="sticky top-0 z-50 border-b border-border/70 bg-background/80 backdrop-blur-md">

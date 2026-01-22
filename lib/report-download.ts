@@ -25,7 +25,7 @@ const resultSchema = z.object({
   traits: traitsSchema
 });
 
-const buildReportTraitData = (traits: z.infer<typeof traitsSchema>) => {
+export const buildReportTraitData = (traits: z.infer<typeof traitsSchema>) => {
   const traitScores = traitSectionOrder.map(({ name, scoreKey }, index) => ({
     name,
     score: traits[scoreKey],

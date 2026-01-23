@@ -1,23 +1,9 @@
 import { readFile } from 'fs/promises';
 import path from 'path';
-type Page = {
-  setDefaultTimeout(timeout: number): void;
-  setDefaultNavigationTimeout(timeout: number): void;
-  setContent(html: string, options: { waitUntil: 'networkidle0'; timeout: number }): Promise<void>;
-  emulateMedia(options: { media: 'screen' }): Promise<void>;
-  pdf(options: PdfOptions): Promise<Uint8Array>;
-  close(): Promise<void>;
-};
+import type { PdfOptions } from 'puppeteer-core';
+import type puppeteer from 'puppeteer-core';
 
-type Browser = {
-  newPage(): Promise<Page>;
-  close(): Promise<void>;
-};
-
-type PuppeteerModule = {
-  connect(options: { browserWSEndpoint: string }): Promise<Browser>;
-  launch(options: { executablePath?: string; args: string[]; headless: boolean }): Promise<Browser>;
-};
+type PuppeteerModule = typeof puppeteer;
 
 const loadPuppeteer = async (): Promise<PuppeteerModule> => {
   const puppeteerModule = (await import(
@@ -39,18 +25,6 @@ import {
   getWorkStyleInsights
 } from './report-content';
 
-type PdfMargin = {
-  top: string;
-  bottom: string;
-  left: string;
-  right: string;
-};
-
-type PdfOptions = {
-  format: 'A4';
-  printBackground: boolean;
-  margin: PdfMargin;
-};
 
 export type ReportTraits = {
   O: number;

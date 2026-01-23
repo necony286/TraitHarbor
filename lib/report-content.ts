@@ -71,8 +71,8 @@ const applyNarrativeVoice = (text: string, voice: NarrativeVoice) => {
     .replace(/\bYour\b/g, voice.possessiveAdjective)
     .replace(/\byour\b/g, voice.possessiveDeterminer)
     .replace(/\bYou\b/g, 'They')
-    .replace(/\byou\b/g, voice.objectPronoun)
-    .replace(/\bwhen them\b/g, 'when they');
+    .replace(/\bwhen you\b/g, 'when they')
+    .replace(/\byou\b/g, voice.objectPronoun);
 };
 
 const traitContent: Record<

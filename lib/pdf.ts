@@ -117,7 +117,7 @@ const buildTraitSections = (
 ) =>
   traitSectionOrder
     .map(
-      ({ name, token, scoreKey }) => {
+      ({ name, scoreKey }) => {
         const score = scores[scoreKey];
         const strengths = getStrengths(name, score).map(escapeHtml).join(' ');
         const growth = getGrowthTips(name, score).map(escapeHtml).join(' ');

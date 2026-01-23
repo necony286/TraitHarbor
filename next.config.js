@@ -8,7 +8,7 @@ const securityHeaders = [
 
 const nextConfig = {
   reactStrictMode: true,
-  serverExternalPackages: ['playwright', 'playwright-core'],
+  serverExternalPackages: ['playwright', 'playwright-core', 'puppeteer-core'],
   allowedDevOrigins: ['127.0.0.1', 'localhost'],
   async headers() {
     return [

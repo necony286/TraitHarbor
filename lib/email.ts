@@ -143,7 +143,7 @@ export async function sendReportEmail(payload: ReportEmailPayload) {
     payload.attachmentFilename ?? `TraitHarbor-Report-${payload.orderId.slice(0, 8)}.pdf`;
   let attachments: ResendAttachment[] | undefined;
 
-  if (hasAttachment && !skipEmail) {
+  if (payload.attachmentUrl && !skipEmail) {
     getResendConfig();
 
     try {

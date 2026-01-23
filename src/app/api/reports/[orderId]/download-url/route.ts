@@ -88,7 +88,7 @@ export async function POST(
     }
 
     if (error instanceof BrowserlessConfigError) {
-      logError('Browserless configuration missing for report download.', {
+      logError('Browserless configuration error for report download.', {
         orderId: order.id,
         message: error.message
       });

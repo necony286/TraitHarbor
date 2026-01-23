@@ -7,7 +7,7 @@ import { verifyPaddleSignature } from '../../../../../lib/signature';
 import { orderStatusSchema } from '../../../../../lib/orders';
 import { enforceRateLimit, getClientIdentifier } from '../../../../../lib/rate-limit';
 import { generateReportAccessToken, hashReportAccessToken } from '../../../../../lib/report-access';
-import { getOrCreateReportDownloadUrl } from '../../../../../lib/report-download';
+import { BrowserlessConfigError, getOrCreateReportDownloadUrl } from '../../../../../lib/report-download';
 import { absoluteUrl } from '@/lib/siteUrl';
 
 export const runtime = 'nodejs';
@@ -220,10 +220,17 @@ export async function POST(request: Request) {
         attachmentUrl = url;
         attachmentFilename = `TraitHarbor-Report-${updatedOrder.id.slice(0, 8)}.pdf`;
       } catch (error) {
-        logWarn('Failed to generate signed PDF URL for paid order email.', {
-          orderId: order.id,
-          error
-        });
+        if (error instanceof BrowserlessConfigError) {
+          logWarn('Browserless configuration missing for report email attachment.', {
+            orderId: order.id,
+            message: error.message
+          });
+        } else {
+          logWarn('Failed to generate signed PDF URL for paid order email.', {
+            orderId: order.id,
+            error
+          });
+        }
       }
 
       try {

@@ -4,7 +4,12 @@ import { logError, logInfo, logWarn } from '../../../../lib/logger';
 import { enforceRateLimit } from '../../../../lib/rate-limit';
 import { getOrderById } from '../../../../lib/db';
 import { isAuthorizedForOrder } from '../../../../lib/report-authorization';
-import { getOrCreateReportDownloadUrl, PdfRenderConcurrencyError, ReportGenerationError } from '../../../../lib/report-download';
+import {
+  BrowserlessConfigError,
+  getOrCreateReportDownloadUrl,
+  PdfRenderConcurrencyError,
+  ReportGenerationError
+} from '../../../../lib/report-download';
 import { REPORT_UNAVAILABLE_ERROR } from '../../../../lib/constants';
 
 const requestSchema = z
@@ -84,6 +89,14 @@ export async function POST(request: Request) {
 
     if (error instanceof ReportGenerationError && error.code === 'RESULT_NOT_FOUND') {
       return NextResponse.json({ error: 'Result not found.' }, { status: 404 });
+    }
+
+    if (error instanceof BrowserlessConfigError) {
+      logError('Browserless configuration missing for report generation.', {
+        orderId: order.id,
+        message: error.message
+      });
+      return NextResponse.json({ error: REPORT_UNAVAILABLE_ERROR }, { status: 503 });
     }
 
     logError('Report generation failed.', { orderId: order.id, error });

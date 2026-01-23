@@ -3,7 +3,12 @@ import { z } from 'zod';
 import { getOrderById } from '../../../../lib/db';
 import { logError, logInfo, logWarn } from '../../../../lib/logger';
 import { verifyReportAccessToken } from '../../../../lib/report-access';
-import { getOrCreateReportDownloadUrl, PdfRenderConcurrencyError, ReportGenerationError } from '../../../../lib/report-download';
+import {
+  BrowserlessConfigError,
+  getOrCreateReportDownloadUrl,
+  PdfRenderConcurrencyError,
+  ReportGenerationError
+} from '../../../../lib/report-download';
 import { REPORT_UNAVAILABLE_ERROR } from '../../../../lib/constants';
 
 const orderIdSchema = z.string().uuid();
@@ -98,6 +103,14 @@ export async function GET(
 
     if (error instanceof ReportGenerationError && error.code === 'RESULT_NOT_FOUND') {
       return NextResponse.json({ error: 'Result not found.' }, { status: 404 });
+    }
+
+    if (error instanceof BrowserlessConfigError) {
+      logError('Browserless configuration missing for report redirect.', {
+        orderId,
+        message: error.message
+      });
+      return respondReportUnavailable();
     }
 
     logError('Report generation failed for redirect.', { orderId, error });

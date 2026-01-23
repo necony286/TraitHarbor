@@ -165,6 +165,25 @@ const withPdfConcurrencyGuard = async <T>(task: () => Promise<T>) => {
 const isVercelRuntime = () => Boolean(process.env.VERCEL);
 const isLocalFallbackEnabled = () => process.env.PDF_LOCAL_FALLBACK === '1';
 
+const preflightBrowserlessConfig = () => {
+  if (!isVercelRuntime() || isLocalFallbackEnabled()) {
+    return;
+  }
+
+  const wsEndpoint = process.env.BROWSERLESS_WS_ENDPOINT?.trim();
+  const token = process.env.BROWSERLESS_TOKEN?.trim();
+
+  if (wsEndpoint || token) {
+    return;
+  }
+
+  const missingEnv = ['BROWSERLESS_WS_ENDPOINT', 'BROWSERLESS_TOKEN'];
+  console.warn('Browserless configuration missing in Vercel runtime.', { missingEnv });
+  throw new BrowserlessConfigError(
+    `Browserless is not configured. Missing env: ${missingEnv.join(', ')}.`
+  );
+};
+
 const resolveBrowserlessWsUrl = () => {
   const wsEndpoint = process.env.BROWSERLESS_WS_ENDPOINT?.trim();
   if (wsEndpoint) {
@@ -227,6 +246,7 @@ const launchLocalBrowser = async () => {
 
 const getBrowser = async () => {
   logBrowserFactoryState();
+  preflightBrowserlessConfig();
   const wsUrl = resolveBrowserlessWsUrl();
   const localFallbackEnabled = isLocalFallbackEnabled();
 

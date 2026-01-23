@@ -25,7 +25,16 @@ const resultSchema = z.object({
   traits: traitsSchema
 });
 
-export const buildReportTraitData = (traits: z.infer<typeof traitsSchema>) => {
+type TraitName = (typeof traitSectionOrder)[number]['name'];
+type TraitPercentages = Record<TraitName, number>;
+type TraitData = {
+  traitPercentages: TraitPercentages;
+  traitRankOrder: TraitName[];
+  highestTrait: TraitName | '';
+  lowestTrait: TraitName | '';
+};
+
+export const buildReportTraitData = (traits: z.infer<typeof traitsSchema>): TraitData => {
   const traitScores = traitSectionOrder.map(({ name, scoreKey }, index) => ({
     name,
     score: traits[scoreKey],
@@ -42,9 +51,10 @@ export const buildReportTraitData = (traits: z.infer<typeof traitsSchema>) => {
     })
     .map((trait) => trait.name);
 
-  const traitPercentages = Object.fromEntries(
-    traitScores.map(({ name, score }) => [name, score])
-  );
+  const traitPercentages = traitScores.reduce<TraitPercentages>((acc, { name, score }) => {
+    acc[name] = score;
+    return acc;
+  }, {} as TraitPercentages);
 
   return {
     traitPercentages,

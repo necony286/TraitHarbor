@@ -25,17 +25,20 @@ export async function GET(
       new URL('/retrieve-report?error=report_generation_unavailable', request.url)
     );
   const reportUnavailableJson = () =>
-    NextResponse.json(
-      { error: REPORT_UNAVAILABLE_ERROR },
-      { status: 503 }
-    );
-  const respondReportUnavailable = () => {
-    const accept = request.headers.get('accept')?.toLowerCase() ?? '';
-    if (accept.includes('text/html')) {
-      return reportUnavailableRedirect();
+    NextResponse.json({ error: REPORT_UNAVAILABLE_ERROR }, { status: 503 });
+  const isNavigationRequest = () => {
+    const fetchDest = request.headers.get('sec-fetch-dest');
+    const fetchMode = request.headers.get('sec-fetch-mode');
+    if (fetchDest === 'document' || fetchMode === 'navigate') {
+      return true;
     }
-    return reportUnavailableJson();
+    const accept = request.headers.get('accept')?.toLowerCase() ?? '';
+    return accept.includes('text/html');
   };
+  const respondReportUnavailable = () =>
+    (isNavigationRequest() ? reportUnavailableRedirect() : reportUnavailableJson());
+  const respondReportError = (payload: { error: string }, status: number) =>
+    (isNavigationRequest() ? reportUnavailableRedirect() : NextResponse.json(payload, { status }));
   let orderId: string;
   try {
     ({ orderId } = await params);
@@ -98,11 +101,11 @@ export async function GET(
     return NextResponse.redirect(url);
   } catch (error) {
     if (error instanceof PdfRenderConcurrencyError) {
-      return NextResponse.json({ error: 'Report generation busy. Try again shortly.' }, { status: 429 });
+      return respondReportError({ error: 'Report generation busy. Try again shortly.' }, 429);
     }
 
     if (error instanceof ReportGenerationError && error.code === 'RESULT_NOT_FOUND') {
-      return NextResponse.json({ error: 'Result not found.' }, { status: 404 });
+      return respondReportError({ error: 'Result not found.' }, 404);
     }
 
     if (error instanceof BrowserlessConfigError) {

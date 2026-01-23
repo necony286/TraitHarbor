@@ -87,7 +87,16 @@ const normalizeTimestamp = (value: unknown) => {
   if (typeof value !== 'string') {
     return value;
   }
-  return value.includes(' ') ? value.replace(' ', 'T') : value;
+
+  let normalized = value.includes(' ') ? value.replace(' ', 'T') : value;
+
+  if (normalized.endsWith('Z')) {
+    return normalized;
+  }
+
+  normalized = normalized.replace(/([+-]\d{2})$/, '$1:00');
+
+  return normalized;
 };
 
 const reportAccessLinkTimestampSchema = z.preprocess(

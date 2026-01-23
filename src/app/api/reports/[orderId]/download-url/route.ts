@@ -92,7 +92,7 @@ export async function POST(
         orderId: order.id,
         message: error.message
       });
-      return NextResponse.json({ error: REPORT_UNAVAILABLE_ERROR }, { status: 503 });
+      return NextResponse.json({ error: error.message }, { status: 503 });
     }
 
     logError('Report download URL generation failed.', { orderId: order.id, error });

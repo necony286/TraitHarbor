@@ -28,14 +28,14 @@ describe('report template', () => {
 
     expect(html).toContain("Alex's Personality Profile");
     expect(html).not.toContain('{{trait_sections}}');
-    const expectedTraits = traitSectionOrder.map(({ name, token, scoreKey }) => ({
+    const expectedTraits = traitSectionOrder.map(({ name, scoreKey }) => ({
       name,
-      token,
       score: traits[scoreKey]
     }));
 
     for (const trait of expectedTraits) {
-      expect(html).toContain(`${trait.name} — {{trait_${trait.token}_band}} (${trait.score}%)`);
+      const band = getScoreBandLabel(trait.score);
+      expect(html).toContain(`${trait.name} — ${band} (${trait.score}%)`);
     }
   });
 

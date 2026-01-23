@@ -1,5 +1,15 @@
 import { readFile } from 'fs/promises';
 import path from 'path';
+import {
+  getFacetInsights,
+  getGrowthTips,
+  getPersonalDevelopmentRoadmap,
+  getProfileSummary,
+  getRelationshipInsights,
+  getScoreBandLabel,
+  getStrengths,
+  getWorkStyleInsights
+} from './report-content';
 
 type SetContentOptions = {
   waitUntil: 'networkidle';
@@ -100,36 +110,44 @@ export const traitSectionOrder = [
   { name: 'Neuroticism', token: 'neuroticism', scoreKey: 'N' }
 ] as const;
 
-const buildTraitSections = (scores: Record<typeof traitSectionOrder[number]['scoreKey'], number>) =>
+const buildTraitSections = (
+  scores: Record<typeof traitSectionOrder[number]['scoreKey'], number>,
+  traitPercentages: Record<string, number>,
+  facetScores?: Record<string, Record<string, number>>
+) =>
   traitSectionOrder
     .map(
-      ({ name, token, scoreKey }) => `      <section class="report__trait">
-        <h2>${name} — {{trait_${token}_band}} (${scores[scoreKey]}%)</h2>
+      ({ name, scoreKey }) => {
+        const score = scores[scoreKey];
+        const strengths = getStrengths(name, score).map(escapeHtml).join(' ');
+        const growth = getGrowthTips(name, score).map(escapeHtml).join(' ');
+        const facets = getFacetInsights(name, facetScores).map(escapeHtml).join(' ');
+        const band = getScoreBandLabel(score);
+        const scoreValue = traitPercentages[name] ?? score;
+
+        return `      <section class="report__trait">
+        <h2>${name} — ${band} (${scoreValue}%)</h2>
         <h3>How this trait shows up for you</h3>
-        <p>{{trait_${token}_manifestation}}</p>
+        <p>${facets || 'Facet insights will appear here when available.'}</p>
         <h3>Strengths to leverage</h3>
-        <p>{{trait_${token}_strengths}}</p>
+        <p>${strengths || 'Identify the strengths that support your goals.'}</p>
         <h3>Growth &amp; balance tips</h3>
-        <p>{{trait_${token}_growth}}</p>
-      </section>`
+        <p>${growth || 'Focus on one growth habit that keeps you balanced.'}</p>
+      </section>`;
+      }
     )
     .join('\n\n');
 
 const buildListItems = (items: string[]) =>
   items.length ? items.map((item) => `        <li>${escapeHtml(item)}</li>`).join('\n') : '';
 
-const buildFacetScoreBlocks = (facetScores?: Record<string, Record<string, number>>) => {
-  if (!facetScores) {
-    return '';
-  }
-
-  return Object.entries(facetScores)
-    .map(([groupName, scores]) => {
-      const scoreItems = Object.entries(scores)
-        .map(([facetName, score]) => {
-          const clampedScore = Number.isFinite(score) ? clampScore(score) : 0;
-          return `          <li>${escapeHtml(facetName)} — ${clampedScore}%</li>`;
-        })
+const buildRoadmapBlocks = (
+  roadmap: Array<{ recommendationType: string; items: string[] }>
+) =>
+  roadmap
+    .map(({ recommendationType, items }) => {
+      const scoreItems = items
+        .map((item) => `          <li>${escapeHtml(item)}</li>`)
         .join('\n');
 
       if (!scoreItems) {
@@ -137,7 +155,7 @@ const buildFacetScoreBlocks = (facetScores?: Record<string, Record<string, numbe
       }
 
       return `      <div class="roadmap__block">
-        <h3>${escapeHtml(groupName)}</h3>
+        <h3>${escapeHtml(recommendationType)}</h3>
         <ul>
 ${scoreItems}
         </ul>
@@ -145,7 +163,6 @@ ${scoreItems}
     })
     .filter(Boolean)
     .join('\n');
-};
 
 let chromiumPromise: Promise<Chromium> | undefined;
 let activePdfRenders = 0;
@@ -244,41 +261,26 @@ export async function buildReportHtml(payload: ReportPayload) {
   const lowestTrait = payload.lowestTrait.trim() || '';
   const traitRankOrder = payload.traitRankOrder.filter(Boolean);
 
-  const formatTraitPercentage = (trait: string) => {
-    if (!trait || !(trait in clampedTraitPercentages)) {
-      return '';
-    }
-    return ` (${clampedTraitPercentages[trait]}%)`;
-  };
-
-  const profileSummaryParts: string[] = [];
-  if (highestTrait) {
-    profileSummaryParts.push(
-      `${narrativeName} scored highest in ${highestTrait}${formatTraitPercentage(highestTrait)}.`
-    );
-  }
-  if (lowestTrait) {
-    profileSummaryParts.push(
-      `${narrativeName} scored lowest in ${lowestTrait}${formatTraitPercentage(lowestTrait)}.`
-    );
-  }
-
-  const profileSummary = profileSummaryParts.join(' ');
+  const profileSummary = getProfileSummary(clampedTraitPercentages, traitRankOrder)
+    .replace('Your', narrativeName)
+    .replace('your', narrativeName.toLowerCase());
   const comparisonText = traitRankOrder.length
     ? `Your trait rank order is ${traitRankOrder.join(', ')}.`
     : '';
-  const workStyle = highestTrait
-    ? `${narrativeName} may feel most energized in ${highestTrait}-driven environments.`
-    : '';
-  const relationshipInsights = lowestTrait
-    ? `Being mindful of ${lowestTrait} can help ${narrativeName} stay balanced in relationships.`
-    : '';
-  const roadmapBlocks = buildFacetScoreBlocks(payload.facetScores);
+  const workStyle = getWorkStyleInsights(clampedTraitPercentages, traitRankOrder)
+    .replace('Your', narrativeName)
+    .replace('your', narrativeName.toLowerCase());
+  const relationshipInsights = getRelationshipInsights(clampedTraitPercentages, traitRankOrder)
+    .replace('you', narrativeName.toLowerCase())
+    .replace('You', narrativeName);
+  const roadmapBlocks = buildRoadmapBlocks(
+    getPersonalDevelopmentRoadmap(clampedTraitPercentages, traitRankOrder)
+  );
   const traitRankList = buildListItems(traitRankOrder);
 
   return template
     .replace('{{styles}}', styles)
-    .replace('{{trait_sections}}', buildTraitSections(scores))
+    .replace('{{trait_sections}}', buildTraitSections(scores, clampedTraitPercentages, payload.facetScores))
     .replaceAll('{{name}}', escapeHtml(payload.name))
     .replaceAll('{{user_name}}', escapeHtml(normalizedUserName || payload.name))
     .replaceAll('{{date}}', escapeHtml(formatDate(payload.date)))

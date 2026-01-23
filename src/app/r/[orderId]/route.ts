@@ -14,6 +14,25 @@ export async function GET(
   { params }: { params: Promise<{ orderId: string }> }
 ) {
   const redirectToRetrieve = () => NextResponse.redirect(new URL('/retrieve-report', request.url));
+  const reportUnavailableRedirect = () =>
+    NextResponse.redirect(
+      new URL('/retrieve-report?error=report_generation_unavailable', request.url)
+    );
+  const reportUnavailableJson = () =>
+    NextResponse.json(
+      { error: 'Report generation is temporarily unavailable. Please try again later.' },
+      { status: 503 }
+    );
+  const respondReportUnavailable = () => {
+    const accept = request.headers.get('accept')?.toLowerCase() ?? '';
+    if (accept.includes('text/html')) {
+      return reportUnavailableRedirect();
+    }
+    if (accept.includes('application/json')) {
+      return reportUnavailableJson();
+    }
+    return reportUnavailableJson();
+  };
   let orderId: string;
   try {
     ({ orderId } = await params);
@@ -84,6 +103,6 @@ export async function GET(
     }
 
     logError('Report generation failed for redirect.', { orderId, error });
-    return NextResponse.json({ error: 'Unable to generate report.' }, { status: 500 });
+    return respondReportUnavailable();
   }
 }

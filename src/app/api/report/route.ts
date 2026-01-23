@@ -86,6 +86,9 @@ export async function POST(request: Request) {
     }
 
     logError('Report generation failed.', { orderId: order.id, error });
-    return NextResponse.json({ error: 'Unable to generate report.' }, { status: 500 });
+    return NextResponse.json(
+      { error: 'Report generation is temporarily unavailable. Please try again later.' },
+      { status: 503 }
+    );
   }
 }

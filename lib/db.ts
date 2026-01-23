@@ -18,6 +18,8 @@ const scoreRowSchema = z.object({
   traits: traitSchema
 });
 
+const facetScoresSchema = z.record(z.record(z.number()));
+
 const orderIdSchema = z.string().uuid();
 
 type DbError = {
@@ -29,6 +31,8 @@ type DbResult<T> = {
   data: T | null;
   error: DbError | null;
 };
+
+type FacetScores = Record<string, Record<string, number>>;
 
 type OrderLookup = {
   orderId?: string;
@@ -184,6 +188,36 @@ export const getScoresByResultId = async (resultId: string): Promise<DbResult<Tr
   }
 
   return { data: parsed.data.traits, error: null };
+};
+
+export const getFacetScoresByResultId = async (
+  resultId: string
+): Promise<DbResult<FacetScores>> => {
+  const supabase = getSupabaseAdminClient();
+  const { data, error } = await supabase
+    .from('scores')
+    .select('response_id, facet_scores')
+    .eq('response_id', resultId)
+    .maybeSingle();
+
+  if (error) {
+    // PostgreSQL error code for "undefined column"
+    if (error.code === '42703' && error.message.includes('facet_scores')) {
+      return { data: null, error: null };
+    }
+    return { data: null, error: mapDbError(error, 'Failed to fetch facet scores.') };
+  }
+
+  if (!data || !('facet_scores' in data) || data.facet_scores === null) {
+    return { data: null, error: null };
+  }
+
+  const parsed = facetScoresSchema.safeParse(data.facet_scores);
+  if (!parsed.success) {
+    return { data: null, error: { message: parsed.error.message } };
+  }
+
+  return { data: parsed.data, error: null };
 };
 
 export const createProvisionalOrder = async ({

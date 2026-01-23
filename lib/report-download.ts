@@ -1,6 +1,13 @@
 import { z } from 'zod';
 import { PdfRenderConcurrencyError, generateReportPdf, traitSectionOrder } from './pdf';
-import { getReportAsset, getScoresByResultId, storeReportAsset, updateOrderReportFileKey } from './db';
+import {
+  getFacetScoresByResultId,
+  getReportAsset,
+  getScoresByResultId,
+  storeReportAsset,
+  updateOrderReportFileKey
+} from './db';
+import { logWarn } from './logger';
 import { getReportPath, getReportSignedUrl, getReportSignedUrlForPath, uploadReport } from './storage';
 
 export class ReportGenerationError extends Error {
@@ -130,6 +137,13 @@ export const getOrCreateReportDownloadUrl = async ({
   const { traitPercentages, traitRankOrder, highestTrait, lowestTrait } = buildReportTraitData(
     parsedResult.data.traits
   );
+  const { data: facetScores, error: facetError } = await getFacetScoresByResultId(order.response_id);
+  if (facetError) {
+    logWarn('Unable to fetch facet scores.', {
+      resultId: order.response_id,
+      message: facetError.message
+    });
+  }
 
   const pdfBuffer = await generateReportPdf({
     name,
@@ -138,7 +152,8 @@ export const getOrCreateReportDownloadUrl = async ({
     traitPercentages,
     traitRankOrder,
     highestTrait,
-    lowestTrait
+    lowestTrait,
+    facetScores: facetScores ?? undefined
   });
 
   await uploadReport(order.id, pdfBuffer);

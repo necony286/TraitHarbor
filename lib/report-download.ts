@@ -1,5 +1,10 @@
 import { z } from 'zod';
-import { PdfRenderConcurrencyError, generateReportPdf, traitSectionOrder } from './pdf';
+import {
+  BrowserlessConfigError,
+  PdfRenderConcurrencyError,
+  generateReportPdf,
+  traitSectionOrder
+} from './pdf';
 import {
   getFacetScoresByResultId,
   getReportAsset,
@@ -177,4 +182,4 @@ export const getOrCreateReportDownloadUrl = async ({
   return { url: signedUrl, cached: false, reportFileKey: reportPath };
 };
 
-export { PdfRenderConcurrencyError };
+export { BrowserlessConfigError, PdfRenderConcurrencyError };

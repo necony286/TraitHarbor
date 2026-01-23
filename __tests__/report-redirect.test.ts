@@ -14,6 +14,7 @@ vi.mock('../lib/db', () => ({
 
 vi.mock('../lib/report-download', () => ({
   getOrCreateReportDownloadUrl: (...args: unknown[]) => getOrCreateReportDownloadUrlMock(...args),
+  BrowserlessConfigError: class BrowserlessConfigError extends Error {},
   PdfRenderConcurrencyError: class PdfRenderConcurrencyError extends Error {},
   ReportGenerationError: class ReportGenerationError extends Error {}
 }));

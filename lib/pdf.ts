@@ -1,5 +1,7 @@
 import { readFile } from 'fs/promises';
 import path from 'path';
+import type { Page } from 'puppeteer-core';
+import puppeteer from 'puppeteer-core';
 import {
   getComparisonText,
   getFacetInsights,
@@ -12,15 +14,6 @@ import {
   getWorkStyleInsights
 } from './report-content';
 
-type SetContentOptions = {
-  waitUntil: 'networkidle';
-  timeout?: number;
-};
-
-type EmulateMediaOptions = {
-  media: 'screen';
-};
-
 type PdfMargin = {
   top: string;
   bottom: string;
@@ -32,30 +25,6 @@ type PdfOptions = {
   format: 'A4';
   printBackground: boolean;
   margin: PdfMargin;
-};
-
-type ChromiumPage = {
-  setContent: (html: string, options: SetContentOptions) => Promise<void>;
-  emulateMedia: (options: EmulateMediaOptions) => Promise<void>;
-  pdf: (options: PdfOptions) => Promise<Uint8Array>;
-  setDefaultTimeout: (timeout: number) => void;
-  setDefaultNavigationTimeout: (timeout: number) => void;
-  close: () => Promise<void>;
-};
-
-type ChromiumBrowser = {
-  newContext: () => Promise<ChromiumContext>;
-  close: () => Promise<void>;
-};
-
-type ChromiumContext = {
-  newPage: () => Promise<ChromiumPage>;
-  close: () => Promise<void>;
-};
-
-type Chromium = {
-  connectOverCDP: (wsEndpoint: string) => Promise<ChromiumBrowser>;
-  launch: () => Promise<ChromiumBrowser>;
 };
 
 export type ReportTraits = {
@@ -85,6 +54,20 @@ const PDF_TIMEOUT_MS = 30_000;
 export class PdfRenderConcurrencyError extends Error {
   constructor() {
     super('PDF generation is busy.');
+  }
+}
+
+export class BrowserlessConfigError extends Error {
+  constructor(message = 'Browserless is not configured.') {
+    super(message);
+    this.name = 'BrowserlessConfigError';
+  }
+}
+
+export class BrowserlessConnectError extends Error {
+  constructor(message = 'Failed to connect to Browserless.') {
+    super(message);
+    this.name = 'BrowserlessConnectError';
   }
 }
 
@@ -165,7 +148,6 @@ ${scoreItems}
     .filter(Boolean)
     .join('\n');
 
-let chromiumPromise: Promise<Chromium> | undefined;
 let activePdfRenders = 0;
 
 const withPdfConcurrencyGuard = async <T>(task: () => Promise<T>) => {
@@ -181,19 +163,8 @@ const withPdfConcurrencyGuard = async <T>(task: () => Promise<T>) => {
   }
 };
 
-const getChromium = () => {
-  if (!chromiumPromise) {
-    chromiumPromise = import(/* webpackIgnore: true */ 'playwright-core').then(
-      (playwright) => playwright.chromium
-    );
-  }
-  return chromiumPromise;
-};
-
-const shouldSkipBrowserless = () =>
-  process.env.NODE_ENV === 'test' || process.env.PLAYWRIGHT === '1';
-
 const isVercelRuntime = () => Boolean(process.env.VERCEL);
+const isLocalFallbackEnabled = () => process.env.PDF_LOCAL_FALLBACK === '1';
 
 const resolveBrowserlessWsUrl = () => {
   const wsEndpoint = process.env.BROWSERLESS_WS_ENDPOINT?.trim();
@@ -204,7 +175,7 @@ const resolveBrowserlessWsUrl = () => {
         throw new Error('Protocol must be ws: or wss:');
       }
     } catch {
-      throw new Error(
+      throw new BrowserlessConfigError(
         'BROWSERLESS_WS_ENDPOINT must be a full ws/wss URL. Provide wss://.../?token=... or use BROWSERLESS_TOKEN.'
       );
     }
@@ -220,19 +191,61 @@ const resolveBrowserlessWsUrl = () => {
   return null;
 };
 
+const logBrowserFactoryState = () => {
+  const hasBrowserlessWsEndpoint = Boolean(process.env.BROWSERLESS_WS_ENDPOINT?.trim());
+  const hasBrowserlessToken = Boolean(process.env.BROWSERLESS_TOKEN?.trim());
+  const localFallbackEnabled = isLocalFallbackEnabled();
+  const hasChromeExecutablePath = Boolean(process.env.CHROME_EXECUTABLE_PATH?.trim());
+
+  console.info({
+    isVercel: isVercelRuntime(),
+    hasBrowserlessWsEndpoint,
+    hasBrowserlessToken,
+    localFallbackEnabled,
+    hasChromeExecutablePath
+  });
+};
+
+const connectBrowserless = async (wsUrl: string) => {
+  try {
+    return await puppeteer.connect({ browserWSEndpoint: wsUrl });
+  } catch (error) {
+    throw new BrowserlessConnectError(
+      error instanceof Error ? error.message : 'Failed to connect to Browserless.'
+    );
+  }
+};
+
+const launchLocalBrowser = () =>
+  puppeteer.launch({
+    executablePath: process.env.CHROME_EXECUTABLE_PATH ?? '/usr/bin/google-chrome',
+    args: ['--no-sandbox', '--disable-setuid-sandbox'],
+    headless: 'new'
+  });
+
 const getBrowser = async () => {
-  const chromium = await getChromium();
-  const wsUrl = shouldSkipBrowserless() ? null : resolveBrowserlessWsUrl();
+  logBrowserFactoryState();
+  const wsUrl = resolveBrowserlessWsUrl();
+  const localFallbackEnabled = isLocalFallbackEnabled();
 
   if (wsUrl) {
-    return chromium.connectOverCDP(wsUrl);
+    try {
+      return await connectBrowserless(wsUrl);
+    } catch (error) {
+      if (localFallbackEnabled) {
+        return launchLocalBrowser();
+      }
+      throw error;
+    }
   }
 
-  if (isVercelRuntime()) {
-    throw new Error('Browserless is required on Vercel. Set BROWSERLESS_WS_ENDPOINT or BROWSERLESS_TOKEN.');
+  if (!localFallbackEnabled) {
+    throw new BrowserlessConfigError(
+      'Browserless is not configured. Set BROWSERLESS_WS_ENDPOINT or BROWSERLESS_TOKEN.'
+    );
   }
 
-  return chromium.launch();
+  return launchLocalBrowser();
 };
 
 export async function buildReportHtml(payload: ReportPayload) {
@@ -297,12 +310,10 @@ export async function generateReportPdf(payload: ReportPayload) {
   return withPdfConcurrencyGuard(async () => {
     const html = await buildReportHtml(payload);
     const browser = await getBrowser();
-    let context: ChromiumContext | null = null;
-    let page: ChromiumPage | null = null;
+    let page: Page | null = null;
 
     try {
-      context = await browser.newContext();
-      page = await context.newPage();
+      page = await browser.newPage();
       page.setDefaultTimeout(PDF_TIMEOUT_MS);
       page.setDefaultNavigationTimeout(PDF_TIMEOUT_MS);
       await page.setContent(html, { waitUntil: 'networkidle', timeout: PDF_TIMEOUT_MS });
@@ -322,9 +333,6 @@ export async function generateReportPdf(payload: ReportPayload) {
     } finally {
       if (page) {
         await page.close();
-      }
-      if (context) {
-        await context.close();
       }
       await browser.close();
     }

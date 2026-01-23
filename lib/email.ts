@@ -107,17 +107,18 @@ const fetchPdfAsBase64 = async (url: string, maxBytes = MAX_PDF_BYTES) => {
     throw new Error(`Failed to fetch PDF (status ${response.status}).`);
   }
 
+  const pdfTooLargeMessage = `PDF exceeds ${maxBytes} bytes.`;
   const contentLength = response.headers.get('content-length');
   if (contentLength) {
     const size = Number(contentLength);
     if (Number.isFinite(size) && size > maxBytes) {
-      throw new Error(`PDF exceeds ${maxBytes} bytes.`);
+      throw new Error(pdfTooLargeMessage);
     }
   }
 
   const buffer = await response.arrayBuffer();
   if (buffer.byteLength > maxBytes) {
-    throw new Error(`PDF exceeds ${maxBytes} bytes.`);
+    throw new Error(pdfTooLargeMessage);
   }
 
   return { base64: Buffer.from(buffer).toString('base64'), size: buffer.byteLength };

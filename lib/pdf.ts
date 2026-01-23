@@ -171,9 +171,23 @@ const preflightBrowserlessConfig = () => {
   }
 
   const wsEndpoint = process.env.BROWSERLESS_WS_ENDPOINT?.trim();
-  const token = process.env.BROWSERLESS_TOKEN?.trim();
+  if (wsEndpoint) {
+    try {
+      const url = new URL(wsEndpoint);
+      if (url.protocol !== 'ws:' && url.protocol !== 'wss:') {
+        throw new Error('Protocol must be ws: or wss:');
+      }
+      return;
+    } catch {
+      const message =
+        'BROWSERLESS_WS_ENDPOINT must be a full ws/wss URL. Provide wss://.../?token=... or use BROWSERLESS_TOKEN.';
+      console.warn('Invalid Browserless configuration in Vercel runtime.', { message });
+      throw new BrowserlessConfigError(message);
+    }
+  }
 
-  if (wsEndpoint || token) {
+  const token = process.env.BROWSERLESS_TOKEN?.trim();
+  if (token) {
     return;
   }
 

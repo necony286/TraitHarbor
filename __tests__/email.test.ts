@@ -137,8 +137,8 @@ describe('email config validation', () => {
 
   it('logs a warning and sends email without attachment when content-length exceeds max bytes', async () => {
     process.env = { ...env, NODE_ENV: 'development', RESEND_API_KEY: 'test-key', EMAIL_FROM: 'sender@example.com' };
-    const { MAX_PDF_BYTES } = await import('../lib/email');
-    const oversizedLength = MAX_PDF_BYTES + 1;
+    const { MAX_EMAIL_ATTACHMENT_BYTES } = await import('../lib/email');
+    const oversizedLength = MAX_EMAIL_ATTACHMENT_BYTES + 1;
     const arrayBufferMock = vi.fn();
     fetchMock.mockResolvedValue({
       ok: true,
@@ -158,7 +158,7 @@ describe('email config validation', () => {
       'Failed to fetch PDF for email attachment; sending link-only.',
       expect.objectContaining({
         orderId: reportPayload.orderId,
-        error: `PDF exceeds ${MAX_PDF_BYTES} bytes.`
+        error: `PDF exceeds ${MAX_EMAIL_ATTACHMENT_BYTES} bytes.`
       })
     );
     expect(sendMock).toHaveBeenCalledWith(
@@ -171,8 +171,8 @@ describe('email config validation', () => {
 
   it('logs a warning and sends email without attachment when downloaded PDF exceeds max bytes', async () => {
     process.env = { ...env, NODE_ENV: 'development', RESEND_API_KEY: 'test-key', EMAIL_FROM: 'sender@example.com' };
-    const { MAX_PDF_BYTES } = await import('../lib/email');
-    const maxBytes = MAX_PDF_BYTES;
+    const { MAX_EMAIL_ATTACHMENT_BYTES } = await import('../lib/email');
+    const maxBytes = MAX_EMAIL_ATTACHMENT_BYTES;
     const pdfBytes = new Uint8Array(maxBytes + 1);
     fetchMock.mockResolvedValue({
       ok: true,
@@ -191,7 +191,7 @@ describe('email config validation', () => {
       'Failed to fetch PDF for email attachment; sending link-only.',
       expect.objectContaining({
         orderId: reportPayload.orderId,
-        error: `PDF exceeds ${MAX_PDF_BYTES} bytes.`
+        error: `PDF exceeds ${MAX_EMAIL_ATTACHMENT_BYTES} bytes.`
       })
     );
     expect(sendMock).toHaveBeenCalledWith(

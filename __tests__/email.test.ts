@@ -137,7 +137,8 @@ describe('email config validation', () => {
 
   it('logs a warning and sends email without attachment when content-length exceeds max bytes', async () => {
     process.env = { ...env, NODE_ENV: 'development', RESEND_API_KEY: 'test-key', EMAIL_FROM: 'sender@example.com' };
-    const oversizedLength = 15 * 1024 * 1024 + 1;
+    const { MAX_PDF_BYTES } = await import('../lib/email');
+    const oversizedLength = MAX_PDF_BYTES + 1;
     const arrayBufferMock = vi.fn();
     fetchMock.mockResolvedValue({
       ok: true,

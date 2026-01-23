@@ -123,8 +123,7 @@ const buildTraitSections = (
         const growth = getGrowthTips(name, score).map(escapeHtml).join(' ');
         const facets = getFacetInsights(name, facetScores).map(escapeHtml).join(' ');
         const band = getScoreBandLabel(score);
-        const scoreDisplay = traitPercentages[name] ?? score;
-        const scoreValue = Number.isFinite(scoreDisplay) ? clampScore(scoreDisplay) : score;
+        const scoreValue = traitPercentages[name] ?? score;
 
         return `      <section class="report__trait">
         <h2>${name} — ${band} (${scoreValue}%)</h2>

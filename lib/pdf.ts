@@ -218,7 +218,7 @@ const connectBrowserless = async (wsUrl: string) => {
 
 const launchLocalBrowser = () =>
   puppeteer.launch({
-    executablePath: process.env.CHROME_EXECUTABLE_PATH ?? '/usr/bin/google-chrome',
+    executablePath: process.env.CHROME_EXECUTABLE_PATH,
     args: ['--no-sandbox', '--disable-setuid-sandbox'],
     headless: 'new'
   });

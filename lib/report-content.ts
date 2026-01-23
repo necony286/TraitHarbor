@@ -1,5 +1,15 @@
 type ScoreBand = 'High' | 'Medium' | 'Low';
 
+type NarrativeVoice = {
+  isSecondPerson: boolean;
+  subject: string;
+  subjectPronoun: 'you' | 'they';
+  objectPronoun: 'you' | 'them';
+  possessiveDeterminer: 'your' | 'their';
+  possessiveAdjective: 'Your' | 'Their';
+  possessiveName: string;
+};
+
 const getScoreBand = (score: number): ScoreBand => {
   if (score >= 70) {
     return 'High';
@@ -23,6 +33,46 @@ const traitKeyMap: Record<string, string> = {
 const resolveTraitName = (trait: string) => {
   const normalized = normalizeTrait(trait);
   return traitKeyMap[normalized] ?? trait.trim();
+};
+
+const formatPossessiveName = (name: string) => (name.endsWith('s') || name.endsWith('S') ? `${name}'` : `${name}'s`);
+
+const getNarrativeVoice = (narrativeName?: string): NarrativeVoice => {
+  const trimmedName = narrativeName?.trim();
+  if (!trimmedName || trimmedName === 'You') {
+    return {
+      isSecondPerson: true,
+      subject: 'You',
+      subjectPronoun: 'you',
+      objectPronoun: 'you',
+      possessiveDeterminer: 'your',
+      possessiveAdjective: 'Your',
+      possessiveName: 'Your'
+    };
+  }
+
+  return {
+    isSecondPerson: false,
+    subject: trimmedName,
+    subjectPronoun: 'they',
+    objectPronoun: 'them',
+    possessiveDeterminer: 'their',
+    possessiveAdjective: 'Their',
+    possessiveName: formatPossessiveName(trimmedName)
+  };
+};
+
+const applyNarrativeVoice = (text: string, voice: NarrativeVoice) => {
+  if (voice.isSecondPerson) {
+    return text;
+  }
+
+  return text
+    .replace(/\bYour\b/g, voice.possessiveAdjective)
+    .replace(/\byour\b/g, voice.possessiveDeterminer)
+    .replace(/\bYou\b/g, 'They')
+    .replace(/\byou\b/g, voice.objectPronoun)
+    .replace(/\bwhen them\b/g, 'when they');
 };
 
 const traitContent: Record<
@@ -329,10 +379,12 @@ export const getGrowthTips = (trait: string, score: number): string[] =>
 
 export const getProfileSummary = (
   traitPercentages: Record<string, number>,
-  traitRankOrder: string[]
+  traitRankOrder: string[],
+  narrativeName?: string
 ): string => {
+  const voice = getNarrativeVoice(narrativeName);
   if (!traitRankOrder.length) {
-    return 'Your profile reflects a balanced mix of personality traits.';
+    return `${voice.possessiveName} profile reflects a balanced mix of personality traits.`;
   }
 
   const highestTrait = traitRankOrder[0];
@@ -342,9 +394,9 @@ export const getProfileSummary = (
     return Number.isFinite(value) ? ` (${Math.round(value)}%)` : '';
   };
 
-  const statements = [`Your highest trait is ${highestTrait}${formatPercent(highestTrait)}.`];
+  const statements = [`${voice.possessiveName} highest trait is ${highestTrait}${formatPercent(highestTrait)}.`];
   if (lowestTrait && lowestTrait !== highestTrait) {
-    statements.push(`Your lowest trait is ${lowestTrait}${formatPercent(lowestTrait)}.`);
+    statements.push(`${voice.possessiveName} lowest trait is ${lowestTrait}${formatPercent(lowestTrait)}.`);
   }
 
   return statements.join(' ');
@@ -392,38 +444,53 @@ export const getFacetInsights = (
 
 export const getWorkStyleInsights = (
   traitPercentages: Record<string, number>,
-  traitRankOrder: string[]
+  traitRankOrder: string[],
+  narrativeName?: string
 ): string => {
+  const voice = getNarrativeVoice(narrativeName);
   if (!traitRankOrder.length) {
-    return 'Your work style reflects a blend of focus, collaboration, and adaptability.';
+    return `${voice.possessiveName} work style reflects a blend of focus, collaboration, and adaptability.`;
   }
 
   const [primaryTrait, secondaryTrait] = traitRankOrder;
   const primaryScore = traitPercentages[primaryTrait] ?? 0;
   const primaryContent = getTraitContent(primaryTrait, primaryScore);
-  const primaryLines = primaryContent?.workStyle ?? [];
+  const primaryLines = (primaryContent?.workStyle ?? []).map((line) => applyNarrativeVoice(line, voice));
 
   if (secondaryTrait) {
-    return `Your strongest drivers at work are ${primaryTrait} and ${secondaryTrait}. ${primaryLines.join(' ')}`.trim();
+    return `${voice.possessiveName} strongest drivers at work are ${primaryTrait} and ${secondaryTrait}. ${primaryLines.join(' ')}`.trim();
   }
 
-  return `Your strongest driver at work is ${primaryTrait}. ${primaryLines.join(' ')}`.trim();
+  return `${voice.possessiveName} strongest driver at work is ${primaryTrait}. ${primaryLines.join(' ')}`.trim();
 };
 
 export const getRelationshipInsights = (
   traitPercentages: Record<string, number>,
-  traitRankOrder: string[]
+  traitRankOrder: string[],
+  narrativeName?: string
 ): string => {
+  const voice = getNarrativeVoice(narrativeName);
   if (!traitRankOrder.length) {
-    return 'Your relationships benefit from steady communication and mutual understanding.';
+    return `${voice.possessiveName} relationships benefit from steady communication and mutual understanding.`;
   }
 
   const lowestTrait = traitRankOrder[traitRankOrder.length - 1];
   const lowestScore = traitPercentages[lowestTrait] ?? 0;
   const lowestContent = getTraitContent(lowestTrait, lowestScore);
-  const relationshipLines = lowestContent?.relationships ?? [];
+  const relationshipLines = (lowestContent?.relationships ?? []).map((line) => applyNarrativeVoice(line, voice));
 
-  return `Relationships may feel smoother when you stay mindful of ${lowestTrait}. ${relationshipLines.join(' ')}`.trim();
+  return `Relationships may feel smoother when ${voice.subjectPronoun} stay mindful of ${lowestTrait}. ${relationshipLines.join(
+    ' '
+  )}`.trim();
+};
+
+export const getComparisonText = (traitRankOrder: string[], narrativeName?: string): string => {
+  if (!traitRankOrder.length) {
+    return '';
+  }
+
+  const voice = getNarrativeVoice(narrativeName);
+  return `${voice.possessiveName} trait rank order is ${traitRankOrder.join(', ')}.`;
 };
 
 export const getPersonalDevelopmentRoadmap = (

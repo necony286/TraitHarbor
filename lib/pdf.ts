@@ -8,11 +8,12 @@ type PuppeteerModule = typeof puppeteer;
 const loadPuppeteer = async (): Promise<PuppeteerModule> => {
   // Use a standard dynamic import so Next/Vercel traces puppeteer-core in the server bundle.
   // Browserless provides Chromium remotely, avoiding local Playwright dependencies in production.
-  const puppeteerModule = (await import('puppeteer-core')) as {
-    default?: PuppeteerModule;
-  } & PuppeteerModule;
+  const puppeteerModule = await import('puppeteer-core');
+  const resolvedModule =
+    (puppeteerModule as { default?: PuppeteerModule }).default ??
+    (puppeteerModule as unknown as PuppeteerModule);
 
-  return puppeteerModule.default ?? puppeteerModule;
+  return resolvedModule;
 };
 import {
   getComparisonText,
@@ -377,7 +378,7 @@ export async function generateReportPdf(payload: ReportPayload) {
       page.setDefaultTimeout(PDF_TIMEOUT_MS);
       page.setDefaultNavigationTimeout(PDF_TIMEOUT_MS);
       await page.setContent(html, { waitUntil: 'networkidle0', timeout: PDF_TIMEOUT_MS });
-      await page.emulateMedia({ media: 'screen' });
+      await page.emulateMediaType('screen');
 
       const pdf = await page.pdf({
         format: 'A4',

@@ -51,9 +51,10 @@ export const buildReportTraitData = (traits: z.infer<typeof traitsSchema>): Trai
     })
     .map((trait) => trait.name);
 
-  const traitPercentages = Object.fromEntries(
-    traitScores.map(({ name, score }) => [name, score])
-  );
+  const traitPercentages = traitScores.reduce<TraitPercentages>((acc, { name, score }) => {
+    acc[name] = score;
+    return acc;
+  }, {} as TraitPercentages);
 
   return {
     traitPercentages,

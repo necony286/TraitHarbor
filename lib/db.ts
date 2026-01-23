@@ -192,7 +192,7 @@ export const getScoresByResultId = async (resultId: string): Promise<DbResult<Tr
 
 export const getFacetScoresByResultId = async (
   resultId: string
-): Promise<DbResult<FacetScores | undefined>> => {
+): Promise<DbResult<FacetScores>> => {
   const supabase = getSupabaseAdminClient();
   const { data, error } = await supabase
     .from('scores')

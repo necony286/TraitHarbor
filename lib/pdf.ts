@@ -220,7 +220,7 @@ const launchLocalBrowser = () =>
   puppeteer.launch({
     executablePath: process.env.CHROME_EXECUTABLE_PATH,
     args: ['--no-sandbox', '--disable-setuid-sandbox'],
-    headless: 'new'
+    headless: true
   });
 
 const getBrowser = async () => {

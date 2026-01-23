@@ -9,8 +9,9 @@ export type ReportEmailPayload = {
 };
 
 type ResendAttachment = {
-  filename?: string;
-  path: string;
+  filename: string;
+  content: string;
+  contentType?: string;
 };
 
 type ResendEmailPayload = {
@@ -98,9 +99,34 @@ const sendResendEmail = async ({ to, subject, html, text, attachments }: ResendE
   return { ok: true as const, id: data?.id };
 };
 
+const MAX_PDF_BYTES = 15 * 1024 * 1024;
+
+const fetchPdfAsBase64 = async (url: string, maxBytes = MAX_PDF_BYTES) => {
+  const response = await fetch(url);
+  if (!response.ok) {
+    throw new Error(`Failed to fetch PDF (status ${response.status}).`);
+  }
+
+  const contentLength = response.headers.get('content-length');
+  if (contentLength) {
+    const size = Number(contentLength);
+    if (Number.isFinite(size) && size > maxBytes) {
+      throw new Error(`PDF exceeds ${maxBytes} bytes.`);
+    }
+  }
+
+  const buffer = await response.arrayBuffer();
+  if (buffer.byteLength > maxBytes) {
+    throw new Error(`PDF exceeds ${maxBytes} bytes.`);
+  }
+
+  return { base64: Buffer.from(buffer).toString('base64'), size: buffer.byteLength };
+};
+
 export async function sendReportEmail(payload: ReportEmailPayload) {
   const subject = 'Your TraitHarbor report is ready';
   const hasAttachment = Boolean(payload.attachmentUrl);
+  const skipEmail = shouldSkipEmail();
   const text = [
     'Your report is ready.',
     '',
@@ -115,9 +141,28 @@ export async function sendReportEmail(payload: ReportEmailPayload) {
   ].join('');
   const filename =
     payload.attachmentFilename ?? `TraitHarbor-Report-${payload.orderId.slice(0, 8)}.pdf`;
-  const attachments = hasAttachment
-    ? [{ filename, path: payload.attachmentUrl as string }]
-    : undefined;
+  let attachments: ResendAttachment[] | undefined;
+
+  if (payload.attachmentUrl && !skipEmail) {
+    getResendConfig();
+
+    try {
+      const { base64 } = await fetchPdfAsBase64(payload.attachmentUrl as string);
+      attachments = [
+        {
+          filename,
+          content: base64,
+          contentType: 'application/pdf'
+        }
+      ];
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      console.warn('Failed to fetch PDF for email attachment; sending link-only.', {
+        orderId: payload.orderId,
+        error: message
+      });
+    }
+  }
 
   return sendResendEmail({
     to: payload.email,

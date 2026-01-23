@@ -34,8 +34,7 @@ describe('report template', () => {
     }));
 
     for (const trait of expectedTraits) {
-      const band =
-        trait.score >= 70 ? 'High' : trait.score >= 40 ? 'Medium' : 'Low';
+      const band = getScoreBandLabel(trait.score);
       expect(html).toContain(`${trait.name} — ${band} (${trait.score}%)`);
     }
   });

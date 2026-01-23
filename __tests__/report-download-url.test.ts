@@ -1,5 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { createGuestSessionCookie, GUEST_SESSION_COOKIE_NAME } from '../lib/guest-session';
+import { REPORT_UNAVAILABLE_ERROR } from '../lib/constants';
+import { ReportGenerationError } from '../lib/report-download';
 import { POST } from '../src/app/api/reports/[orderId]/download-url/route';
 
 const ORDER_ID = '22222222-2222-2222-2222-222222222222';
@@ -119,5 +121,34 @@ describe('/api/reports/:orderId/download-url', () => {
     });
 
     expect(response.status).toBe(401);
+  });
+
+  it('returns a 503 when report generation is unavailable', async () => {
+    getOrderByIdMock.mockResolvedValue({
+      data: {
+        id: ORDER_ID,
+        status: 'paid',
+        created_at: new Date().toISOString(),
+        response_id: null,
+        email: 'guest@example.com',
+        user_id: USER_ID
+      },
+      error: null
+    });
+
+    const generationError = new ReportGenerationError('Report failed');
+    generationError.code = 'RESULT_INVALID';
+    getOrCreateReportDownloadUrlMock.mockRejectedValue(generationError);
+
+    const response = await POST(
+      new Request(`http://localhost/api/reports/${ORDER_ID}/download-url`, {
+        method: 'POST',
+        headers: { 'x-user-id': USER_ID }
+      }),
+      { params: Promise.resolve({ orderId: ORDER_ID }) }
+    );
+
+    expect(response.status).toBe(503);
+    await expect(response.json()).resolves.toEqual({ error: REPORT_UNAVAILABLE_ERROR });
   });
 });

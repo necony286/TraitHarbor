@@ -5,6 +5,7 @@ import { enforceRateLimit } from '../../../../lib/rate-limit';
 import { getOrderById } from '../../../../lib/db';
 import { isAuthorizedForOrder } from '../../../../lib/report-authorization';
 import { getOrCreateReportDownloadUrl, PdfRenderConcurrencyError, ReportGenerationError } from '../../../../lib/report-download';
+import { REPORT_UNAVAILABLE_ERROR } from '../../../../lib/constants';
 
 const requestSchema = z
   .object({
@@ -86,9 +87,6 @@ export async function POST(request: Request) {
     }
 
     logError('Report generation failed.', { orderId: order.id, error });
-    return NextResponse.json(
-      { error: 'Report generation is temporarily unavailable. Please try again later.' },
-      { status: 503 }
-    );
+    return NextResponse.json({ error: REPORT_UNAVAILABLE_ERROR }, { status: 503 });
   }
 }

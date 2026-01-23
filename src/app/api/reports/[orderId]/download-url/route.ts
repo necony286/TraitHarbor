@@ -5,6 +5,7 @@ import { logError, logInfo, logWarn } from '../../../../../../lib/logger';
 import { enforceRateLimit } from '../../../../../../lib/rate-limit';
 import { isAuthorizedForOrder } from '../../../../../../lib/report-authorization';
 import { getOrCreateReportDownloadUrl, PdfRenderConcurrencyError, ReportGenerationError } from '../../../../../../lib/report-download';
+import { REPORT_UNAVAILABLE_ERROR } from '../../../../../../lib/constants';
 
 const orderIdSchema = z.string().uuid();
 
@@ -77,17 +78,11 @@ export async function POST(
       }
 
       if (error.code === 'RESULT_INVALID') {
-        return NextResponse.json(
-          { error: 'Report generation is temporarily unavailable. Please try again later.' },
-          { status: 503 }
-        );
+        return NextResponse.json({ error: REPORT_UNAVAILABLE_ERROR }, { status: 503 });
       }
     }
 
     logError('Report download URL generation failed.', { orderId: order.id, error });
-    return NextResponse.json(
-      { error: 'Report generation is temporarily unavailable. Please try again later.' },
-      { status: 503 }
-    );
+    return NextResponse.json({ error: REPORT_UNAVAILABLE_ERROR }, { status: 503 });
   }
 }

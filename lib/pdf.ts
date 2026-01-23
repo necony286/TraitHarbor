@@ -1,6 +1,6 @@
 import { readFile } from 'fs/promises';
 import path from 'path';
-import type { PdfOptions } from 'puppeteer-core';
+import type { Page, PdfOptions } from 'puppeteer-core';
 import type puppeteer from 'puppeteer-core';
 
 type PuppeteerModule = typeof puppeteer;

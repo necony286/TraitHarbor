@@ -1,7 +1,8 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import Link from 'next/link';
+import { useSearchParams } from 'next/navigation';
 import { Container } from '../../../components/ui/Container';
 import { Card } from '../../../components/ui/Card';
 import { Button } from '../../../components/ui/Button';
@@ -15,6 +16,14 @@ export default function RetrieveReportPage() {
   const [email, setEmail] = useState('');
   const [status, setStatus] = useState<RequestStatus>('idle');
   const [error, setError] = useState<string | null>(null);
+  const searchParams = useSearchParams();
+  const reportErrorMessage = useMemo(() => {
+    const errorParam = searchParams.get('error');
+    if (errorParam === 'report_generation_unavailable') {
+      return 'We’re having trouble generating your report right now. Please try again in a few minutes.';
+    }
+    return null;
+  }, [searchParams]);
 
   const submitRequest = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -55,6 +64,11 @@ export default function RetrieveReportPage() {
           </div>
 
           <form onSubmit={submitRequest} className="mt-8 space-y-4">
+            {reportErrorMessage ? (
+              <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-700">
+                {reportErrorMessage}
+              </div>
+            ) : null}
             <FormField id="report-email" label="Email address" error={error}>
               <Input
                 name="email"

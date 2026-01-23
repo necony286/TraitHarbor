@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { Suspense, useState } from 'react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { Container } from '../../../components/ui/Container';
@@ -18,7 +18,7 @@ const REPORT_ERROR_MESSAGE =
 const EMAIL_SENT_MESSAGE = 'Check your email for a secure link to access your paid report.';
 const EMAIL_SEND_ERROR_MESSAGE = 'We could not send the email right now. Please try again shortly.';
 
-export default function RetrieveReportPage() {
+function RetrieveReportForm() {
   const [email, setEmail] = useState('');
   const [status, setStatus] = useState<RequestStatus>('idle');
   const [error, setError] = useState<string | null>(null);
@@ -100,5 +100,13 @@ export default function RetrieveReportPage() {
         </Card>
       </Container>
     </div>
+  );
+}
+
+export default function RetrieveReportPage() {
+  return (
+    <Suspense fallback={<div className="bg-background py-16" />}>
+      <RetrieveReportForm />
+    </Suspense>
   );
 }

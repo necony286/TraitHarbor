@@ -1,7 +1,32 @@
 import { readFile } from 'fs/promises';
 import path from 'path';
-import type { Page } from 'puppeteer-core';
-import puppeteer from 'puppeteer-core';
+type Page = {
+  setDefaultTimeout(timeout: number): void;
+  setDefaultNavigationTimeout(timeout: number): void;
+  setContent(html: string, options: { waitUntil: 'networkidle0'; timeout: number }): Promise<void>;
+  emulateMedia(options: { media: 'screen' }): Promise<void>;
+  pdf(options: PdfOptions): Promise<Uint8Array>;
+  close(): Promise<void>;
+};
+
+type Browser = {
+  newPage(): Promise<Page>;
+  close(): Promise<void>;
+};
+
+type PuppeteerModule = {
+  connect(options: { browserWSEndpoint: string }): Promise<Browser>;
+  launch(options: { executablePath?: string; args: string[]; headless: boolean }): Promise<Browser>;
+};
+
+const loadPuppeteer = async (): Promise<PuppeteerModule> => {
+  const puppeteerModule = (await import(
+    /* webpackIgnore: true */
+    'puppeteer-core'
+  )) as { default?: PuppeteerModule } & PuppeteerModule;
+
+  return puppeteerModule.default ?? puppeteerModule;
+};
 import {
   getComparisonText,
   getFacetInsights,
@@ -207,6 +232,7 @@ const logBrowserFactoryState = () => {
 };
 
 const connectBrowserless = async (wsUrl: string) => {
+  const puppeteer = await loadPuppeteer();
   try {
     return await puppeteer.connect({ browserWSEndpoint: wsUrl });
   } catch (error) {
@@ -216,12 +242,14 @@ const connectBrowserless = async (wsUrl: string) => {
   }
 };
 
-const launchLocalBrowser = () =>
-  puppeteer.launch({
+const launchLocalBrowser = async () => {
+  const puppeteer = await loadPuppeteer();
+  return puppeteer.launch({
     executablePath: process.env.CHROME_EXECUTABLE_PATH,
     args: ['--no-sandbox', '--disable-setuid-sandbox'],
     headless: true
   });
+};
 
 const getBrowser = async () => {
   logBrowserFactoryState();
@@ -233,7 +261,7 @@ const getBrowser = async () => {
       return await connectBrowserless(wsUrl);
     } catch (error) {
       if (localFallbackEnabled) {
-        return launchLocalBrowser();
+        return await launchLocalBrowser();
       }
       throw error;
     }
@@ -245,7 +273,7 @@ const getBrowser = async () => {
     );
   }
 
-  return launchLocalBrowser();
+  return await launchLocalBrowser();
 };
 
 export async function buildReportHtml(payload: ReportPayload) {

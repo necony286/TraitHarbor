@@ -244,9 +244,9 @@ const connectBrowserless = async (wsUrl: string) => {
     return {
       browser,
       cleanup: async () => {
-        const disconnect = (browser as Browser & { disconnect?: () => Promise<void> }).disconnect;
-        if (disconnect) {
-          await disconnect.call(browser);
+        const browserWithDisconnect = browser as Browser & { disconnect?: () => Promise<void> };
+        if (browserWithDisconnect.disconnect) {
+          await browserWithDisconnect.disconnect();
         } else {
           await browser.close();
         }

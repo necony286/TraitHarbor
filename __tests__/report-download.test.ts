@@ -36,5 +36,14 @@ describe('buildReportTraitData', () => {
       'Agreeableness',
       'Neuroticism'
     ]);
+    expect(result.highestTrait).toBe('Openness');
+    expect(result.lowestTrait).toBe('Neuroticism');
+    expect(result.traitPercentages).toEqual({
+      Openness: 50,
+      Conscientiousness: 50,
+      Extraversion: 50,
+      Agreeableness: 50,
+      Neuroticism: 50
+    });
   });
 });

@@ -17,13 +17,13 @@ export default function RetrieveReportPage() {
   const [status, setStatus] = useState<RequestStatus>('idle');
   const [error, setError] = useState<string | null>(null);
   const searchParams = useSearchParams();
+  const errorParam = searchParams.get('error');
   const reportErrorMessage = useMemo(() => {
-    const errorParam = searchParams.get('error');
     if (errorParam === 'report_generation_unavailable') {
       return 'We’re having trouble generating your report right now. Please try again in a few minutes.';
     }
     return null;
-  }, [searchParams]);
+  }, [errorParam]);
 
   const submitRequest = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();

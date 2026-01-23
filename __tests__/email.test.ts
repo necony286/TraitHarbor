@@ -26,15 +26,19 @@ const reportPayload = {
 
 describe('email config validation', () => {
   const env = process.env;
+  let fetchMock: ReturnType<typeof vi.fn>;
 
   beforeEach(() => {
     vi.clearAllMocks();
     vi.resetModules();
     process.env = { ...env, NODE_ENV: 'development' };
+    fetchMock = vi.fn();
+    vi.stubGlobal('fetch', fetchMock);
   });
 
   afterEach(() => {
     process.env = env;
+    vi.unstubAllGlobals();
   });
 
   it.each([
@@ -62,6 +66,13 @@ describe('email config validation', () => {
 
   it('caches resend configuration after first load', async () => {
     process.env = { ...env, NODE_ENV: 'development', RESEND_API_KEY: 'test-key', EMAIL_FROM: 'sender@example.com' };
+    const pdfBytes = Uint8Array.from([0x25, 0x50, 0x44, 0x46]);
+    fetchMock.mockResolvedValue({
+      ok: true,
+      status: 200,
+      headers: new Headers({ 'content-length': String(pdfBytes.length) }),
+      arrayBuffer: async () => pdfBytes.buffer
+    });
     sendMock.mockResolvedValue({ data: { id: 'email_123' }, error: null });
 
     const { sendReportEmail } = await import('../lib/email');
@@ -75,6 +86,16 @@ describe('email config validation', () => {
 
     expect(sendMock).toHaveBeenCalledTimes(2);
     expect(resendConstructorMock).toHaveBeenCalledWith('test-key');
+    expect(sendMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        attachments: [
+          expect.objectContaining({
+            filename: expect.stringMatching(/\.pdf$/),
+            content: Buffer.from(pdfBytes).toString('base64')
+          })
+        ]
+      })
+    );
   });
 
   it('skips sending in test mode', async () => {
@@ -85,6 +106,7 @@ describe('email config validation', () => {
 
     await expect(sendReportEmail(reportPayload)).resolves.toEqual({ ok: true });
     expect(sendMock).not.toHaveBeenCalled();
+    expect(fetchMock).not.toHaveBeenCalled();
   });
 
   it('sends a report access link email with the expected content', async () => {

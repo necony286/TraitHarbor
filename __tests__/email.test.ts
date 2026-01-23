@@ -171,7 +171,8 @@ describe('email config validation', () => {
 
   it('logs a warning and sends email without attachment when downloaded PDF exceeds max bytes', async () => {
     process.env = { ...env, NODE_ENV: 'development', RESEND_API_KEY: 'test-key', EMAIL_FROM: 'sender@example.com' };
-    const maxBytes = 15 * 1024 * 1024;
+    const { MAX_PDF_BYTES } = await import('../lib/email');
+    const maxBytes = MAX_PDF_BYTES;
     const pdfBytes = new Uint8Array(maxBytes + 1);
     fetchMock.mockResolvedValue({
       ok: true,

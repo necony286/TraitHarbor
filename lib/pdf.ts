@@ -71,6 +71,13 @@ export class BrowserlessConnectError extends Error {
   }
 }
 
+export class LocalBrowserLaunchError extends Error {
+  constructor(message = 'Failed to launch local browser.') {
+    super(message);
+    this.name = 'LocalBrowserLaunchError';
+  }
+}
+
 const templatePath = (filename: string) => path.join(process.cwd(), 'templates', filename);
 
 const escapeHtml = (value: string) =>
@@ -249,17 +256,22 @@ const connectBrowserless = async (wsUrl: string) => {
 
 const launchLocalBrowser = async () => {
   const puppeteer = await loadPuppeteer();
-  const browser = await puppeteer.launch({
-    executablePath: process.env.CHROME_EXECUTABLE_PATH,
-    args: ['--no-sandbox', '--disable-setuid-sandbox'],
-    headless: true
-  });
-  return {
-    browser,
-    cleanup: async () => {
-      await browser.close();
-    }
-  };
+  try {
+    const browser = await puppeteer.launch({
+      executablePath: process.env.CHROME_EXECUTABLE_PATH,
+      args: ['--no-sandbox', '--disable-setuid-sandbox'],
+      headless: true
+    });
+    return {
+      browser,
+      cleanup: async () => {
+        await browser.close();
+      }
+    };
+  } catch (error) {
+    const message = error instanceof Error ? error.message : 'Failed to launch local browser.';
+    throw new LocalBrowserLaunchError(`Failed to launch local browser: ${message}`);
+  }
 };
 
 type BrowserHandle = {
@@ -267,7 +279,7 @@ type BrowserHandle = {
   cleanup: () => Promise<void>;
 };
 
-const getBrowser = async (): Promise<BrowserHandle> => {
+export const getBrowser = async (): Promise<BrowserHandle> => {
   logBrowserFactoryState();
   const localFallbackAvailable = await canUseLocalFallback();
   let wsUrl: string;

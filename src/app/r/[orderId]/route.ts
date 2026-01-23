@@ -4,6 +4,7 @@ import { getOrderById } from '../../../../lib/db';
 import { logError, logInfo, logWarn } from '../../../../lib/logger';
 import { verifyReportAccessToken } from '../../../../lib/report-access';
 import { getOrCreateReportDownloadUrl, PdfRenderConcurrencyError, ReportGenerationError } from '../../../../lib/report-download';
+import { REPORT_UNAVAILABLE_ERROR } from '../../../../lib/constants';
 
 const orderIdSchema = z.string().uuid();
 
@@ -20,16 +21,13 @@ export async function GET(
     );
   const reportUnavailableJson = () =>
     NextResponse.json(
-      { error: 'Report generation is temporarily unavailable. Please try again later.' },
+      { error: REPORT_UNAVAILABLE_ERROR },
       { status: 503 }
     );
   const respondReportUnavailable = () => {
     const accept = request.headers.get('accept')?.toLowerCase() ?? '';
     if (accept.includes('text/html')) {
       return reportUnavailableRedirect();
-    }
-    if (accept.includes('application/json')) {
-      return reportUnavailableJson();
     }
     return reportUnavailableJson();
   };

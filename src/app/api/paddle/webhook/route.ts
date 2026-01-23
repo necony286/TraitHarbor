@@ -221,7 +221,7 @@ export async function POST(request: Request) {
         attachmentFilename = `TraitHarbor-Report-${updatedOrder.id.slice(0, 8)}.pdf`;
       } catch (error) {
         if (error instanceof BrowserlessConfigError) {
-          logWarn('Browserless configuration missing for report email attachment.', {
+          logWarn('Browserless configuration error for report email attachment.', {
             orderId: order.id,
             message: error.message
           });

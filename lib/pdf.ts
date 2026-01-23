@@ -1,15 +1,16 @@
-import { readFile } from 'fs/promises';
+import { access, readFile } from 'fs/promises';
 import path from 'path';
-import type { Page, PdfOptions } from 'puppeteer-core';
+import type { Page } from 'puppeteer-core';
 import type puppeteer from 'puppeteer-core';
 
 type PuppeteerModule = typeof puppeteer;
 
 const loadPuppeteer = async (): Promise<PuppeteerModule> => {
-  const puppeteerModule = (await import(
-    /* webpackIgnore: true */
-    'puppeteer-core'
-  )) as { default?: PuppeteerModule } & PuppeteerModule;
+  // Use a standard dynamic import so Next/Vercel traces puppeteer-core in the server bundle.
+  // Browserless provides Chromium remotely, avoiding local Playwright dependencies in production.
+  const puppeteerModule = (await import('puppeteer-core')) as {
+    default?: PuppeteerModule;
+  } & PuppeteerModule;
 
   return puppeteerModule.default ?? puppeteerModule;
 };
@@ -163,69 +164,37 @@ const withPdfConcurrencyGuard = async <T>(task: () => Promise<T>) => {
 };
 
 const isVercelRuntime = () => Boolean(process.env.VERCEL);
-const isLocalFallbackEnabled = () => process.env.PDF_LOCAL_FALLBACK === '1';
-
-const preflightBrowserlessConfig = () => {
-  if (!isVercelRuntime() || isLocalFallbackEnabled()) {
-    return;
-  }
-
-  const wsEndpoint = process.env.BROWSERLESS_WS_ENDPOINT?.trim();
-  if (wsEndpoint) {
-    let url: URL;
-    try {
-      url = new URL(wsEndpoint);
-    } catch {
-      const message =
-        'BROWSERLESS_WS_ENDPOINT must be a full ws/wss URL. Provide wss://.../?token=... or use BROWSERLESS_TOKEN.';
-      console.warn('Invalid Browserless configuration in Vercel runtime.', { message });
-      throw new BrowserlessConfigError(message);
-    }
-
-    if (url.protocol !== 'ws:' && url.protocol !== 'wss:') {
-      const message = `The protocol for BROWSERLESS_WS_ENDPOINT must be ws: or wss:, but got "${url.protocol}".`;
-      console.warn('Invalid Browserless configuration in Vercel runtime.', { message });
-      throw new BrowserlessConfigError(message);
-    }
-
-    return;
-  }
-
-  const token = process.env.BROWSERLESS_TOKEN?.trim();
-  if (token) {
-    return;
-  }
-
-  const missingEnv = ['BROWSERLESS_WS_ENDPOINT', 'BROWSERLESS_TOKEN'];
-  console.warn('Browserless configuration missing in Vercel runtime.', { missingEnv });
-  throw new BrowserlessConfigError(
-    `Browserless is not configured. Missing env: ${missingEnv.join(', ')}.`
-  );
-};
+const isLocalFallbackEnabled = () => process.env.REPORT_LOCAL_FALLBACK === '1';
 
 const resolveBrowserlessWsUrl = () => {
   const wsEndpoint = process.env.BROWSERLESS_WS_ENDPOINT?.trim();
-  if (wsEndpoint) {
-    try {
-      const url = new URL(wsEndpoint);
-      if (url.protocol !== 'ws:' && url.protocol !== 'wss:') {
-        throw new Error('Protocol must be ws: or wss:');
-      }
-    } catch {
-      throw new BrowserlessConfigError(
-        'BROWSERLESS_WS_ENDPOINT must be a full ws/wss URL. Provide wss://.../?token=... or use BROWSERLESS_TOKEN.'
-      );
-    }
-    return wsEndpoint;
+  if (!wsEndpoint) {
+    throw new BrowserlessConfigError(
+      'BROWSERLESS_WS_ENDPOINT is required to generate reports in production.'
+    );
+  }
+
+  let url: URL;
+  try {
+    url = new URL(wsEndpoint);
+  } catch {
+    throw new BrowserlessConfigError(
+      'BROWSERLESS_WS_ENDPOINT must be a full ws/wss URL. Provide wss://.../?token=... or use BROWSERLESS_TOKEN.'
+    );
+  }
+
+  if (url.protocol !== 'ws:' && url.protocol !== 'wss:') {
+    throw new BrowserlessConfigError(
+      `The protocol for BROWSERLESS_WS_ENDPOINT must be ws: or wss:, but got "${url.protocol}".`
+    );
   }
 
   const token = process.env.BROWSERLESS_TOKEN?.trim();
-  if (token) {
-    const host = process.env.BROWSERLESS_HOST?.trim() || 'production-sfo.browserless.io';
-    return `wss://${host}/?token=${token}`;
+  if (token && !url.searchParams.has('token')) {
+    url.searchParams.set('token', token);
   }
 
-  return null;
+  return url.toString();
 };
 
 const logBrowserFactoryState = () => {
@@ -241,6 +210,24 @@ const logBrowserFactoryState = () => {
     localFallbackEnabled,
     hasChromeExecutablePath
   });
+};
+
+const canUseLocalFallback = async () => {
+  if (!isLocalFallbackEnabled() || isVercelRuntime()) {
+    return false;
+  }
+
+  const executablePath = process.env.CHROME_EXECUTABLE_PATH?.trim();
+  if (!executablePath) {
+    return false;
+  }
+
+  try {
+    await access(executablePath);
+    return true;
+  } catch {
+    return false;
+  }
 };
 
 const connectBrowserless = async (wsUrl: string) => {
@@ -265,28 +252,25 @@ const launchLocalBrowser = async () => {
 
 const getBrowser = async () => {
   logBrowserFactoryState();
-  preflightBrowserlessConfig();
-  const wsUrl = resolveBrowserlessWsUrl();
-  const localFallbackEnabled = isLocalFallbackEnabled();
+  let wsUrl: string;
 
-  if (wsUrl) {
-    try {
-      return await connectBrowserless(wsUrl);
-    } catch (error) {
-      if (localFallbackEnabled) {
-        return await launchLocalBrowser();
-      }
-      throw error;
+  try {
+    wsUrl = resolveBrowserlessWsUrl();
+  } catch (error) {
+    if (error instanceof BrowserlessConfigError && (await canUseLocalFallback())) {
+      return await launchLocalBrowser();
     }
+    throw error;
   }
 
-  if (!localFallbackEnabled) {
-    throw new BrowserlessConfigError(
-      'Browserless is not configured. Set BROWSERLESS_WS_ENDPOINT or BROWSERLESS_TOKEN.'
-    );
+  try {
+    return await connectBrowserless(wsUrl);
+  } catch (error) {
+    if (await canUseLocalFallback()) {
+      return await launchLocalBrowser();
+    }
+    throw error;
   }
-
-  return await launchLocalBrowser();
 };
 
 export async function buildReportHtml(payload: ReportPayload) {

@@ -106,7 +106,7 @@ export async function GET(
     }
 
     if (error instanceof BrowserlessConfigError) {
-      logError('Browserless configuration missing for report redirect.', {
+      logError('Browserless configuration error for report redirect.', {
         orderId,
         message: error.message
       });

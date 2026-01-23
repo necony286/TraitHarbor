@@ -1,6 +1,7 @@
 import { readFile } from 'fs/promises';
 import path from 'path';
 import {
+  getComparisonText,
   getFacetInsights,
   getGrowthTips,
   getPersonalDevelopmentRoadmap,
@@ -261,18 +262,10 @@ export async function buildReportHtml(payload: ReportPayload) {
   const lowestTrait = payload.lowestTrait.trim() || '';
   const traitRankOrder = payload.traitRankOrder.filter(Boolean);
 
-  const profileSummary = getProfileSummary(clampedTraitPercentages, traitRankOrder)
-    .replace('Your', narrativeName)
-    .replace('your', narrativeName.toLowerCase());
-  const comparisonText = traitRankOrder.length
-    ? `Your trait rank order is ${traitRankOrder.join(', ')}.`
-    : '';
-  const workStyle = getWorkStyleInsights(clampedTraitPercentages, traitRankOrder)
-    .replace('Your', narrativeName)
-    .replace('your', narrativeName.toLowerCase());
-  const relationshipInsights = getRelationshipInsights(clampedTraitPercentages, traitRankOrder)
-    .replace('you', narrativeName.toLowerCase())
-    .replace('You', narrativeName);
+  const profileSummary = getProfileSummary(clampedTraitPercentages, traitRankOrder, narrativeName);
+  const comparisonText = getComparisonText(traitRankOrder, narrativeName);
+  const workStyle = getWorkStyleInsights(clampedTraitPercentages, traitRankOrder, narrativeName);
+  const relationshipInsights = getRelationshipInsights(clampedTraitPercentages, traitRankOrder, narrativeName);
   const roadmapBlocks = buildRoadmapBlocks(
     getPersonalDevelopmentRoadmap(clampedTraitPercentages, traitRankOrder)
   );

@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { buildReportHtml, traitSectionOrder } from '../lib/pdf';
+import { getScoreBandLabel } from '../lib/report-content';
+import { buildReportHtml, traitSectionOrder, type ReportTraits } from '../lib/pdf';
 
 describe('report template', () => {
   it('hydrates report html with trait scores', async () => {

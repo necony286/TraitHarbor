@@ -38,7 +38,7 @@ describe('/api/report-access/request-link', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-    process.env = { ...env, NODE_ENV: 'test' };
+    process.env = { ...env, NODE_ENV: 'test', NEXT_PUBLIC_SITE_URL: 'http://localhost' };
   });
 
   afterEach(() => {

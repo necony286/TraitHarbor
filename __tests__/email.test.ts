@@ -134,4 +134,71 @@ describe('email config validation', () => {
       })
     );
   });
+
+  it('logs a warning and sends email without attachment when content-length exceeds max bytes', async () => {
+    process.env = { ...env, NODE_ENV: 'development', RESEND_API_KEY: 'test-key', EMAIL_FROM: 'sender@example.com' };
+    const { MAX_PDF_BYTES } = await import('../lib/email');
+    const oversizedLength = MAX_PDF_BYTES + 1;
+    const arrayBufferMock = vi.fn();
+    fetchMock.mockResolvedValue({
+      ok: true,
+      status: 200,
+      headers: new Headers({ 'content-length': String(oversizedLength) }),
+      arrayBuffer: arrayBufferMock
+    });
+    sendMock.mockResolvedValue({ data: { id: 'email_789' }, error: null });
+    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+
+    const { sendReportEmail } = await import('../lib/email');
+
+    await expect(sendReportEmail(reportPayload)).resolves.toEqual({ ok: true, id: 'email_789' });
+
+    expect(arrayBufferMock).not.toHaveBeenCalled();
+    expect(warnSpy).toHaveBeenCalledWith(
+      'Failed to fetch PDF for email attachment; sending link-only.',
+      expect.objectContaining({
+        orderId: reportPayload.orderId,
+        error: `PDF exceeds ${MAX_PDF_BYTES} bytes.`
+      })
+    );
+    expect(sendMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        attachments: undefined
+      })
+    );
+    warnSpy.mockRestore();
+  });
+
+  it('logs a warning and sends email without attachment when downloaded PDF exceeds max bytes', async () => {
+    process.env = { ...env, NODE_ENV: 'development', RESEND_API_KEY: 'test-key', EMAIL_FROM: 'sender@example.com' };
+    const { MAX_PDF_BYTES } = await import('../lib/email');
+    const maxBytes = MAX_PDF_BYTES;
+    const pdfBytes = new Uint8Array(maxBytes + 1);
+    fetchMock.mockResolvedValue({
+      ok: true,
+      status: 200,
+      headers: new Headers({ 'content-length': String(maxBytes) }),
+      arrayBuffer: async () => pdfBytes.buffer
+    });
+    sendMock.mockResolvedValue({ data: { id: 'email_101' }, error: null });
+    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+
+    const { sendReportEmail } = await import('../lib/email');
+
+    await expect(sendReportEmail(reportPayload)).resolves.toEqual({ ok: true, id: 'email_101' });
+
+    expect(warnSpy).toHaveBeenCalledWith(
+      'Failed to fetch PDF for email attachment; sending link-only.',
+      expect.objectContaining({
+        orderId: reportPayload.orderId,
+        error: `PDF exceeds ${MAX_PDF_BYTES} bytes.`
+      })
+    );
+    expect(sendMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        attachments: undefined
+      })
+    );
+    warnSpy.mockRestore();
+  });
 });

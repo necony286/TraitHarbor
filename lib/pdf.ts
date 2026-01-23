@@ -316,7 +316,7 @@ export async function generateReportPdf(payload: ReportPayload) {
       page = await browser.newPage();
       page.setDefaultTimeout(PDF_TIMEOUT_MS);
       page.setDefaultNavigationTimeout(PDF_TIMEOUT_MS);
-      await page.setContent(html, { waitUntil: 'networkidle', timeout: PDF_TIMEOUT_MS });
+      await page.setContent(html, { waitUntil: 'networkidle0', timeout: PDF_TIMEOUT_MS });
       await page.emulateMedia({ media: 'screen' });
 
       const pdf = await page.pdf({

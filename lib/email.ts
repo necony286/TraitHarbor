@@ -99,7 +99,7 @@ const sendResendEmail = async ({ to, subject, html, text, attachments }: ResendE
   return { ok: true as const, id: data?.id };
 };
 
-const MAX_PDF_BYTES = 15 * 1024 * 1024;
+export const MAX_PDF_BYTES = 15 * 1024 * 1024;
 
 const fetchPdfAsBase64 = async (url: string, maxBytes = MAX_PDF_BYTES) => {
   const response = await fetch(url);

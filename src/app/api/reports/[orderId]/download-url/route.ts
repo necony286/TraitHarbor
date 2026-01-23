@@ -77,11 +77,17 @@ export async function POST(
       }
 
       if (error.code === 'RESULT_INVALID') {
-        return NextResponse.json({ error: 'Unable to generate report.' }, { status: 500 });
+        return NextResponse.json(
+          { error: 'Report generation is temporarily unavailable. Please try again later.' },
+          { status: 503 }
+        );
       }
     }
 
     logError('Report download URL generation failed.', { orderId: order.id, error });
-    return NextResponse.json({ error: 'Unable to generate report.' }, { status: 500 });
+    return NextResponse.json(
+      { error: 'Report generation is temporarily unavailable. Please try again later.' },
+      { status: 503 }
+    );
   }
 }

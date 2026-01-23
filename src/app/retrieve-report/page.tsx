@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useMemo, useState } from 'react';
+import React, { useState } from 'react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { Container } from '../../../components/ui/Container';
@@ -12,18 +12,19 @@ import { EmptyState } from '../../../components/ui/States/EmptyState';
 
 type RequestStatus = 'idle' | 'loading' | 'sent';
 
+const REPORT_ERROR_PARAM = 'report_generation_unavailable';
+const REPORT_ERROR_MESSAGE =
+  'We’re having trouble generating your report right now. Please try again in a few minutes.';
+const EMAIL_SENT_MESSAGE = 'Check your email for a secure link to access your paid report.';
+const EMAIL_SEND_ERROR_MESSAGE = 'We could not send the email right now. Please try again shortly.';
+
 export default function RetrieveReportPage() {
   const [email, setEmail] = useState('');
   const [status, setStatus] = useState<RequestStatus>('idle');
   const [error, setError] = useState<string | null>(null);
   const searchParams = useSearchParams();
   const errorParam = searchParams.get('error');
-  const reportErrorMessage = useMemo(() => {
-    if (errorParam === 'report_generation_unavailable') {
-      return 'We’re having trouble generating your report right now. Please try again in a few minutes.';
-    }
-    return null;
-  }, [errorParam]);
+  const reportErrorMessage = errorParam === REPORT_ERROR_PARAM ? REPORT_ERROR_MESSAGE : null;
 
   const submitRequest = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -40,7 +41,7 @@ export default function RetrieveReportPage() {
       });
 
       if (!response.ok) {
-        setError('We could not send the email right now. Please try again shortly.');
+        setError(EMAIL_SEND_ERROR_MESSAGE);
         setStatus('idle');
       } else {
         setStatus('sent');
@@ -65,9 +66,7 @@ export default function RetrieveReportPage() {
 
           <form onSubmit={submitRequest} className="mt-8 space-y-4">
             {reportErrorMessage ? (
-              <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-700">
-                {reportErrorMessage}
-              </div>
+              <EmptyState message={reportErrorMessage} tone="neutral" className="rounded-2xl text-slate-700" />
             ) : null}
             <FormField id="report-email" label="Email address" error={error}>
               <Input
@@ -82,7 +81,7 @@ export default function RetrieveReportPage() {
             </FormField>
 
             {status === 'sent' ? (
-              <EmptyState message="Check your email for a secure link to access your paid report." tone="success" />
+              <EmptyState message={EMAIL_SENT_MESSAGE} tone="success" />
             ) : null}
 
             <Button type="submit" disabled={status === 'loading'} className="w-full">

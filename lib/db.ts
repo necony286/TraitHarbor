@@ -88,7 +88,7 @@ const normalizeTimestamp = (value: unknown) => {
     return value;
   }
 
-  let normalized = value.includes(' ') ? value.replace(' ', 'T') : value;
+  let normalized = value.replace(' ', 'T');
 
   if (normalized.endsWith('Z')) {
     return normalized;

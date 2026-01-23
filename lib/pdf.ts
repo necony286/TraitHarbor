@@ -1,6 +1,6 @@
 import { access, readFile } from 'fs/promises';
 import path from 'path';
-import type { Page } from 'puppeteer-core';
+import type { Browser, Page } from 'puppeteer-core';
 import type puppeteer from 'puppeteer-core';
 
 type PuppeteerModule = typeof puppeteer;
@@ -233,7 +233,13 @@ const canUseLocalFallback = async () => {
 const connectBrowserless = async (wsUrl: string) => {
   const puppeteer = await loadPuppeteer();
   try {
-    return await puppeteer.connect({ browserWSEndpoint: wsUrl });
+    const browser = await puppeteer.connect({ browserWSEndpoint: wsUrl });
+    return {
+      browser,
+      cleanup: async () => {
+        await browser.disconnect();
+      }
+    };
   } catch (error) {
     throw new BrowserlessConnectError(
       error instanceof Error ? error.message : 'Failed to connect to Browserless.'
@@ -243,21 +249,33 @@ const connectBrowserless = async (wsUrl: string) => {
 
 const launchLocalBrowser = async () => {
   const puppeteer = await loadPuppeteer();
-  return puppeteer.launch({
+  const browser = await puppeteer.launch({
     executablePath: process.env.CHROME_EXECUTABLE_PATH,
     args: ['--no-sandbox', '--disable-setuid-sandbox'],
     headless: true
   });
+  return {
+    browser,
+    cleanup: async () => {
+      await browser.close();
+    }
+  };
 };
 
-const getBrowser = async () => {
+type BrowserHandle = {
+  browser: Browser;
+  cleanup: () => Promise<void>;
+};
+
+const getBrowser = async (): Promise<BrowserHandle> => {
   logBrowserFactoryState();
+  const localFallbackAvailable = await canUseLocalFallback();
   let wsUrl: string;
 
   try {
     wsUrl = resolveBrowserlessWsUrl();
   } catch (error) {
-    if (error instanceof BrowserlessConfigError && (await canUseLocalFallback())) {
+    if (error instanceof BrowserlessConfigError && localFallbackAvailable) {
       return await launchLocalBrowser();
     }
     throw error;
@@ -266,7 +284,7 @@ const getBrowser = async () => {
   try {
     return await connectBrowserless(wsUrl);
   } catch (error) {
-    if (await canUseLocalFallback()) {
+    if (localFallbackAvailable) {
       return await launchLocalBrowser();
     }
     throw error;
@@ -334,7 +352,7 @@ export async function buildReportHtml(payload: ReportPayload) {
 export async function generateReportPdf(payload: ReportPayload) {
   return withPdfConcurrencyGuard(async () => {
     const html = await buildReportHtml(payload);
-    const browser = await getBrowser();
+    const { browser, cleanup } = await getBrowser();
     let page: Page | null = null;
 
     try {
@@ -359,7 +377,7 @@ export async function generateReportPdf(payload: ReportPayload) {
       if (page) {
         await page.close();
       }
-      await browser.close();
+      await cleanup();
     }
   });
 }

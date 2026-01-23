@@ -201,8 +201,8 @@ export const getFacetScoresByResultId = async (
     .maybeSingle();
 
   if (error) {
-    const message = error.message ?? '';
-    if (message.includes('facet_scores') && message.includes('does not exist')) {
+    // PostgreSQL error code for "undefined column"
+    if (error.code === '42703' && error.message.includes('facet_scores')) {
       return { data: null, error: null };
     }
     return { data: null, error: mapDbError(error, 'Failed to fetch facet scores.') };

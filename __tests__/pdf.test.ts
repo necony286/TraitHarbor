@@ -1,6 +1,24 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { getScoreBandLabel, RESOURCES_BY_TRAIT } from '../lib/report-content';
 import { buildReportHtml, traitSectionOrder, type ReportPayload, type ReportTraits } from '../lib/pdf';
+
+vi.mock('../lib/report-content', async (importActual) => {
+  const actual = await importActual<typeof import('../lib/report-content')>();
+
+  return {
+    ...actual,
+    RESOURCES_BY_TRAIT: {
+      ...actual.RESOURCES_BY_TRAIT,
+      Openness: [
+        ...actual.RESOURCES_BY_TRAIT.Openness,
+        {
+          label: 'Unsafe resource',
+          url: 'javascript:alert(1)'
+        }
+      ]
+    }
+  };
+});
 
 const createReportPayload = (
   traits: ReportTraits,
@@ -145,5 +163,21 @@ describe('report template', () => {
     expect(html).toContain('<h3>Openness</h3>');
     expect(html).toContain(`href="${resource.url}"`);
     expect(html).toContain(`>${resource.label}</a>`);
+  });
+
+  it('filters out unsafe resource links', async () => {
+    const traits: ReportTraits = {
+      O: 85,
+      C: 70,
+      E: 60,
+      A: 55,
+      N: 45
+    };
+    const html = await buildReportHtml(createReportPayload(traits));
+    const [resource] = RESOURCES_BY_TRAIT.Openness;
+
+    expect(html).toContain(`href="${resource.url}"`);
+    expect(html).not.toContain(unsafeResource.url);
+    expect(html).not.toContain(`${unsafeResource.label}</a>`);
   });
 });

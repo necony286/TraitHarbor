@@ -213,7 +213,7 @@ h2 {
   }
 
   .report__overview {
-    break-after: page;
+    break-after: always;
     page-break-after: always;
   }
 

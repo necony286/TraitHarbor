@@ -141,7 +141,12 @@ const buildTraitSections = (
       const band = getScoreBandLabel(score);
       const scoreValue = traitPercentages[name] ?? score;
       const facetBars = facetSummary ? buildFacetBars(facetSummary.facets) : '';
-      const sectionDefinitions = [
+      type SectionDefinition = {
+        title: string;
+        content: string;
+        fallback: string;
+      };
+      const sectionDefinitions: SectionDefinition[] = [
         {
           title: 'Strengths',
           content: strengths,

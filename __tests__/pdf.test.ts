@@ -177,7 +177,7 @@ describe('report template', () => {
     const [resource] = RESOURCES_BY_TRAIT.Openness;
 
     expect(html).toContain(`href="${resource.url}"`);
-    expect(html).not.toContain('javascript:alert(1)');
-    expect(html).not.toContain('Unsafe resource</a>');
+    expect(html).not.toContain(unsafeResource.url);
+    expect(html).not.toContain(`${unsafeResource.label}</a>`);
   });
 });

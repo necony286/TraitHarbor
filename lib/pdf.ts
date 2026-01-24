@@ -50,9 +50,9 @@ export type ReportPayload = {
 };
 
 type SectionDefinition = {
-  title: string;
-  content: string;
-  fallback: string;
+  readonly title: string;
+  readonly content: string;
+  readonly fallback: string;
 };
 
 const MAX_PDF_BYTES = 700 * 1024;

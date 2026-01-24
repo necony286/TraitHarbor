@@ -13,7 +13,7 @@ export type TraitExtremes = {
   allScoresEqual: boolean;
 };
 
-const DEFAULT_BALANCE_THRESHOLD = 8;
+export const DEFAULT_BALANCE_THRESHOLD = 8;
 
 export const getTraitExtremes = (
   traits: TraitScore[],

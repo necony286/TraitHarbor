@@ -46,7 +46,7 @@ const NARRATIVE_VOICE: NarrativeVoice = {
 };
 
 export const withPrefix = (message: string, fallback: string) =>
-  /^(you|your)\b(?!-)/i.test(message) ? message : `${fallback}: ${message}`;
+  /^(you|your)\b(?![-.]\w)/i.test(message) ? message : `${fallback}: ${message}`;
 
 const traitContent: Record<
   TraitName,

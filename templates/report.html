@@ -16,37 +16,29 @@
         <p class="muted">Generated on {{date}}</p>
       </section>
 
-      <section class="report__summary">
-        <h2>Personality Profile Summary</h2>
-        <p>{{profile_summary}}</p>
-      </section>
-
       <section class="report__overview">
-        <h2>Trait Overview</h2>
+        <h2>Big Five snapshot</h2>
         {{overview_chart}}
         {{highest_lowest_callout}}
       </section>
 
+      {{comparison_section}}
+
       {{trait_sections}}
 
-      <section class="report__comparison">
-        <h2>How You Compare to Others</h2>
-        <p>{{comparison_text}}</p>
-      </section>
-
-      <section class="report__work">
-        <h2>Career &amp; Work Style Insights</h2>
-        <p>{{work_style}}</p>
-      </section>
-
-      <section class="report__relationships">
-        <h2>Relationships &amp; Communication Style</h2>
-        <p>{{relationship_insights}}</p>
+      <section class="report__pattern">
+        <h2>Your pattern</h2>
+        <p>{{pattern_summary}}</p>
       </section>
 
       <section class="report__roadmap">
-        <h2>Personal Development Roadmap</h2>
+        <h2>Action plan</h2>
         <div class="roadmap roadmap--cards">{{roadmap_blocks}}</div>
+      </section>
+
+      <section class="report__resources">
+        <h2>Resources + methodology</h2>
+        <p>{{resources_methodology}}</p>
       </section>
     </main>
   </body>

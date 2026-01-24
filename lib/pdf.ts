@@ -20,11 +20,13 @@ import {
   getFacetInsights,
   getGrowthTips,
   getPersonalDevelopmentRoadmap,
-  getProfileSummary,
-  getRelationshipInsights,
+  getPatternSummary,
+  getRelationshipTips,
+  getResourcesMethodologyText,
   getScoreBandLabel,
   getStrengths,
-  getWorkStyleInsights
+  getTraitMeaning,
+  getWorkStyleTips
 } from './report-content';
 
 
@@ -40,6 +42,7 @@ export type ReportPayload = {
   date: Date;
   traits: ReportTraits;
   traitPercentages: Record<string, number>;
+  traitPercentiles?: Record<string, number>;
   highestTrait: string;
   lowestTrait: string;
   traitRankOrder: string[];
@@ -109,20 +112,27 @@ const buildTraitSections = (
     .map(
       ({ name, scoreKey }) => {
         const score = scores[scoreKey];
+        const meaning = getTraitMeaning(name, score);
         const strengths = getStrengths(name, score).map(escapeHtml).join(' ');
         const growth = getGrowthTips(name, score).map(escapeHtml).join(' ');
+        const workStyle = getWorkStyleTips(name, score).map(escapeHtml).join(' ');
+        const relationships = getRelationshipTips(name, score).map(escapeHtml).join(' ');
         const facets = getFacetInsights(name, facetScores).map(escapeHtml).join(' ');
         const band = getScoreBandLabel(score);
         const scoreValue = traitPercentages[name] ?? score;
 
         return `      <section class="report__trait">
-        <h2>${name} — ${band} (${scoreValue}%)</h2>
-        <h3>How this trait shows up for you</h3>
-        <p>${facets || 'Facet insights will appear here when available.'}</p>
-        <h3>Strengths to leverage</h3>
+        <h2>${name} — ${band} (${scoreValue}/100)</h2>
+        <h3>What it means for you</h3>
+        <p>${facets || escapeHtml(meaning)}</p>
+        <h3>Strengths</h3>
         <p>${strengths || 'Identify the strengths that support your goals.'}</p>
-        <h3>Growth &amp; balance tips</h3>
+        <h3>Watch-outs</h3>
         <p>${growth || 'Focus on one growth habit that keeps you balanced.'}</p>
+        <h3>Career tip</h3>
+        <p>${workStyle || 'Choose environments that align with how you prefer to work.'}</p>
+        <h3>Relationship tip</h3>
+        <p>${relationships || 'Notice how this trait shapes how you connect with others.'}</p>
       </section>`;
       }
     )
@@ -403,10 +413,9 @@ export async function buildReportHtml(payload: ReportPayload) {
   const lowestTrait = payload.lowestTrait.trim() || '';
   const traitRankOrder = payload.traitRankOrder.filter(Boolean);
 
-  const profileSummary = getProfileSummary(clampedTraitPercentages, traitRankOrder);
   const comparisonText = getComparisonText(traitRankOrder);
-  const workStyle = getWorkStyleInsights(clampedTraitPercentages, traitRankOrder);
-  const relationshipInsights = getRelationshipInsights(clampedTraitPercentages, traitRankOrder);
+  const patternSummary = getPatternSummary(clampedTraitPercentages, traitRankOrder);
+  const resourcesMethodology = getResourcesMethodologyText();
   const roadmapBlocks = buildRoadmapBlocks(
     getPersonalDevelopmentRoadmap(clampedTraitPercentages, traitRankOrder)
   );
@@ -421,12 +430,22 @@ export async function buildReportHtml(payload: ReportPayload) {
   const highestLowestCallout = allScoresEqual
     ? ''
     : buildHighestLowestCallout(resolvedHighestTrait, resolvedLowestTrait);
+  const hasPercentiles =
+    payload.traitPercentiles &&
+    Object.values(payload.traitPercentiles).some((value) => Number.isFinite(value));
+  const comparisonSection = hasPercentiles
+    ? `      <section class="report__comparison">
+        <h2>How You Compare to Others</h2>
+        <p>${escapeHtml(comparisonText)}</p>
+      </section>`
+    : '';
 
   return template
     .replace('{{styles}}', styles)
     .replace('{{trait_sections}}', buildTraitSections(scores, clampedTraitPercentages, payload.facetScores))
     .replace('{{overview_chart}}', overviewChart)
     .replace('{{highest_lowest_callout}}', highestLowestCallout)
+    .replace('{{comparison_section}}', comparisonSection)
     .replaceAll('{{date}}', escapeHtml(formatDate(payload.date)))
     .replaceAll('{{score_O}}', scores.O.toString())
     .replaceAll('{{score_C}}', scores.C.toString())
@@ -437,11 +456,9 @@ export async function buildReportHtml(payload: ReportPayload) {
     .replaceAll('{{lowest_trait}}', escapeHtml(lowestTrait))
     .replaceAll('{{trait_rank_order}}', escapeHtml(traitRankOrder.join(', ')))
     .replaceAll('{{trait_rank_list}}', traitRankList)
-    .replaceAll('{{profile_summary}}', escapeHtml(profileSummary))
-    .replaceAll('{{comparison_text}}', escapeHtml(comparisonText))
-    .replaceAll('{{work_style}}', escapeHtml(workStyle))
-    .replaceAll('{{relationship_insights}}', escapeHtml(relationshipInsights))
-    .replaceAll('{{roadmap_blocks}}', roadmapBlocks);
+    .replaceAll('{{pattern_summary}}', escapeHtml(patternSummary))
+    .replaceAll('{{roadmap_blocks}}', roadmapBlocks)
+    .replaceAll('{{resources_methodology}}', escapeHtml(resourcesMethodology));
 }
 
 export async function generateReportPdf(payload: ReportPayload) {

@@ -345,6 +345,30 @@ export const getStrengths = (trait: string, score: number): string[] =>
 export const getGrowthTips = (trait: string, score: number): string[] =>
   getTraitContent(trait, score)?.growth ?? [];
 
+export const getTraitMeaning = (trait: string, score: number): string => {
+  const voice = NARRATIVE_VOICE;
+  const band = getScoreBand(score);
+  const traitName = resolveTraitName(trait);
+  const base = `${voice.possessiveDeterminer} ${traitName} score is ${band.toLowerCase()}.`;
+
+  switch (band) {
+    case 'High':
+      return `${base} This trait shows up often and likely shapes how ${voice.subjectPronoun} think, feel, and act.`;
+    case 'Medium':
+      return `${base} ${voice.subjectPronoun} can flex this trait depending on the situation, balancing it with other strengths.`;
+    case 'Low':
+      return `${base} ${voice.subjectPronoun} rely on this trait less, leaning on other qualities in most situations.`;
+    default:
+      return base;
+  }
+};
+
+export const getWorkStyleTips = (trait: string, score: number): string[] =>
+  getTraitContent(trait, score)?.workStyle ?? [];
+
+export const getRelationshipTips = (trait: string, score: number): string[] =>
+  getTraitContent(trait, score)?.relationships ?? [];
+
 export const getProfileSummary = (
   traitPercentages: Record<string, number>,
   traitRankOrder: string[]
@@ -358,7 +382,7 @@ export const getProfileSummary = (
   const lowestTrait = traitRankOrder[traitRankOrder.length - 1];
   const formatPercent = (trait: string) => {
     const value = traitPercentages[trait];
-    return Number.isFinite(value) ? ` (${Math.round(value)}%)` : '';
+    return Number.isFinite(value) ? ` (${Math.round(value)}/100)` : '';
   };
 
   const statements = [`${voice.possessiveName} highest trait is ${highestTrait}${formatPercent(highestTrait)}.`];
@@ -399,11 +423,11 @@ export const getFacetInsights = (
   const insights: string[] = [];
   const [topFacet] = facets;
   if (topFacet) {
-    insights.push(`Top facet: ${topFacet.facetName} (${topFacet.score}%).`);
+    insights.push(`Top facet: ${topFacet.facetName} (${topFacet.score}/100).`);
   }
   const lowestFacet = facets[facets.length - 1];
   if (lowestFacet && lowestFacet.facetName !== topFacet.facetName) {
-    insights.push(`Growth facet: ${lowestFacet.facetName} (${lowestFacet.score}%).`);
+    insights.push(`Growth facet: ${lowestFacet.facetName} (${lowestFacet.score}/100).`);
   }
 
   return insights;
@@ -457,6 +481,42 @@ export const getComparisonText = (traitRankOrder: string[]): string => {
   const voice = NARRATIVE_VOICE;
   return `${voice.possessiveName} trait rank order is ${traitRankOrder.join(', ')}.`;
 };
+
+export const getPatternSummary = (
+  traitPercentages: Record<string, number>,
+  traitRankOrder: string[]
+): string => {
+  const voice = NARRATIVE_VOICE;
+  if (!traitRankOrder.length) {
+    return `${voice.possessiveName} pattern reflects a balanced mix of Big Five traits that shifts with context.`;
+  }
+
+  const [primaryTrait, secondaryTrait] = traitRankOrder;
+  const primaryScore = traitPercentages[primaryTrait] ?? 0;
+  const secondaryScore = traitPercentages[secondaryTrait] ?? 0;
+  const primaryStrength = getStrengths(primaryTrait, primaryScore)[0];
+  const secondaryStrength = secondaryTrait
+    ? getStrengths(secondaryTrait, secondaryScore)[0]
+    : undefined;
+
+  if (secondaryTrait) {
+    const primaryLine = primaryStrength
+      ? `It suggests ${primaryStrength.toLowerCase()}`
+      : `It suggests ${voice.subjectPronoun} lean on ${primaryTrait} as a core strength.`;
+    const secondaryLine = secondaryStrength
+      ? `Meanwhile, ${secondaryTrait} adds another layer: ${secondaryStrength.toLowerCase()}`
+      : `Meanwhile, ${secondaryTrait} adds another dimension to ${voice.possessiveDeterminer} style.`;
+    return `${voice.possessiveName} top traits are ${primaryTrait} and ${secondaryTrait}. ${primaryLine} ${secondaryLine}`.trim();
+  }
+
+  const singleLine = primaryStrength
+    ? `It suggests ${primaryStrength.toLowerCase()}`
+    : `It suggests ${voice.subjectPronoun} lean on ${primaryTrait} as a core strength.`;
+  return `${voice.possessiveName} standout trait is ${primaryTrait}. ${singleLine}`.trim();
+};
+
+export const getResourcesMethodologyText = (): string =>
+  'Scores are normalized on a 0–100 scale (not percentiles) based on your responses to the Big Five inventory. This report is for personal insight only and does not diagnose or treat any mental health condition.';
 
 export const getPersonalDevelopmentRoadmap = (
   traitPercentages: Record<string, number>,

@@ -134,14 +134,17 @@ const buildListItems = (items: string[]) =>
 const buildOverviewChart = (
   traitScores: Record<typeof traitSectionOrder[number]['scoreKey'], number>
 ) => {
-  const scores = traitSectionOrder.map(({ scoreKey }) => clampScore(traitScores[scoreKey]));
-  const maxScore = Math.max(...scores);
-  const minScore = Math.min(...scores);
+  const scoresWithNames = traitSectionOrder.map(({ name, scoreKey }) => ({
+    name,
+    score: clampScore(traitScores[scoreKey])
+  }));
+  const scoreValues = scoresWithNames.map(({ score }) => score);
+  const maxScore = Math.max(...scoreValues);
+  const minScore = Math.min(...scoreValues);
   const highlightExtremes = maxScore !== minScore;
 
-  const rows = traitSectionOrder
-    .map(({ name, scoreKey }, index) => {
-      const score = scores[index];
+  const rows = scoresWithNames
+    .map(({ name, score }) => {
       const classes = ['chart__row'];
       if (highlightExtremes) {
         if (score === maxScore) {
@@ -174,6 +177,11 @@ const buildHighestLowestCallout = (highestTrait: string, lowestTrait: string) =>
   }
 
   if (highest && lowest) {
+    if (highest === lowest) {
+      return `      <p class="overview__callout">Highest &amp; Lowest trait: <strong>${escapeHtml(
+        highest
+      )}</strong>.</p>`;
+    }
     return `      <p class="overview__callout">Highest trait: <strong>${escapeHtml(
       highest
     )}</strong>. Lowest trait: <strong>${escapeHtml(lowest)}</strong>.</p>`;
@@ -406,10 +414,11 @@ export async function buildReportHtml(payload: ReportPayload) {
   const resolvedHighestTrait = highestTrait || fallbackRankedTraits[0]?.name || '';
   const resolvedLowestTrait =
     lowestTrait || fallbackRankedTraits[fallbackRankedTraits.length - 1]?.name || '';
-  const highestLowestCallout = buildHighestLowestCallout(
-    resolvedHighestTrait,
-    resolvedLowestTrait
-  );
+  const allScoresEqual =
+    fallbackRankedTraits[0]?.score === fallbackRankedTraits[fallbackRankedTraits.length - 1]?.score;
+  const highestLowestCallout = allScoresEqual
+    ? ''
+    : buildHighestLowestCallout(resolvedHighestTrait, resolvedLowestTrait);
 
   return template
     .replace('{{styles}}', styles)

@@ -98,6 +98,15 @@ const escapeHtml = (value: string) =>
     .replaceAll('"', '&quot;')
     .replaceAll("'", '&#39;');
 
+const isSafeUrl = (value: string) => {
+  try {
+    const parsedUrl = new URL(value);
+    return parsedUrl.protocol === 'http:' || parsedUrl.protocol === 'https:';
+  } catch {
+    return false;
+  }
+};
+
 const clampScore = (value: number) => Math.max(0, Math.min(100, Math.round(value)));
 
 const formatDate = (date: Date) =>
@@ -196,10 +205,11 @@ const buildResourceGroups = () =>
   traitSectionOrder
     .map(({ name }) => {
       const resources = RESOURCES_BY_TRAIT[name] ?? [];
-      if (!resources.length) {
+      const safeResources = resources.filter(({ url }) => isSafeUrl(url));
+      if (!safeResources.length) {
         return '';
       }
-      const links = resources
+      const links = safeResources
         .map(
           ({ label, url }) =>
             `          <li><a href="${escapeHtml(url)}">${escapeHtml(label)}</a></li>`

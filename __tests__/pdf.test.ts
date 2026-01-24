@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { getScoreBandLabel } from '../lib/report-content';
+import { getScoreBandLabel, RESOURCES_BY_TRAIT } from '../lib/report-content';
 import { buildReportHtml, traitSectionOrder, type ReportPayload, type ReportTraits } from '../lib/pdf';
 
 const createReportPayload = (
@@ -128,5 +128,22 @@ describe('report template', () => {
     expect(html).toContain(
       '<p class="overview__callout">Highest traits: <strong>Openness</strong> and <strong>Conscientiousness</strong> (tied). Lowest trait: <strong>Neuroticism</strong>.</p>'
     );
+  });
+
+  it('renders the resources section with trait links', async () => {
+    const traits: ReportTraits = {
+      O: 85,
+      C: 70,
+      E: 60,
+      A: 55,
+      N: 45
+    };
+    const html = await buildReportHtml(createReportPayload(traits));
+    const [resource] = RESOURCES_BY_TRAIT.Openness;
+
+    expect(html).toContain('<section class="report__resources">');
+    expect(html).toContain('<h3>Openness</h3>');
+    expect(html).toContain(`href="${resource.url}"`);
+    expect(html).toContain(`>${resource.label}</a>`);
   });
 });

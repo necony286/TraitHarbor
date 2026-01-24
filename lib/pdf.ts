@@ -141,24 +141,33 @@ const buildTraitSections = (
       const band = getScoreBandLabel(score);
       const scoreValue = traitPercentages[name] ?? score;
       const facetBars = facetSummary ? buildFacetBars(facetSummary.facets) : '';
+      const sectionDefinitions = [
+        {
+          title: 'Strengths',
+          content: strengths,
+          fallback: 'Identify the strengths that support your goals.'
+        },
+        {
+          title: 'Watch-outs',
+          content: growth,
+          fallback: 'Focus on one growth habit that keeps you balanced.'
+        },
+        {
+          title: 'Career tip',
+          content: workStyle,
+          fallback: 'Choose environments that align with how you prefer to work.'
+        },
+        {
+          title: 'Relationship tip',
+          content: relationships,
+          fallback: 'Notice how this trait shapes how you connect with others.'
+        }
+      ];
       const sections = [
         buildAvoidBreakSection('What it means for you', facetCallouts || escapeHtml(meaning)),
         facetBars ? `<div class="avoid-break">${facetBars}</div>` : '',
-        buildAvoidBreakSection(
-          'Strengths',
-          strengths || 'Identify the strengths that support your goals.'
-        ),
-        buildAvoidBreakSection(
-          'Watch-outs',
-          growth || 'Focus on one growth habit that keeps you balanced.'
-        ),
-        buildAvoidBreakSection(
-          'Career tip',
-          workStyle || 'Choose environments that align with how you prefer to work.'
-        ),
-        buildAvoidBreakSection(
-          'Relationship tip',
-          relationships || 'Notice how this trait shapes how you connect with others.'
+        ...sectionDefinitions.map(({ title, content, fallback }) =>
+          buildAvoidBreakSection(title, content || fallback)
         )
       ]
         .filter(Boolean)

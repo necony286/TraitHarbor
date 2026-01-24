@@ -98,7 +98,7 @@ describe('report template', () => {
     expect(html).not.toContain('<p class="overview__callout">');
   });
 
-  it('renders a combined callout when highest and lowest traits match', async () => {
+  it('renders tied callouts when multiple traits share extremes', async () => {
     const traits: ReportTraits = {
       O: 78,
       C: 62,
@@ -107,15 +107,26 @@ describe('report template', () => {
       N: 62
     };
 
-    const html = await buildReportHtml(
-      createReportPayload(traits, {
-        highestTrait: 'Openness',
-        lowestTrait: 'Openness'
-      })
-    );
+    const html = await buildReportHtml(createReportPayload(traits));
 
     expect(html).toContain(
-      '<p class="overview__callout">Highest &amp; Lowest trait: <strong>Openness</strong>.</p>'
+      '<p class="overview__callout">Highest trait: <strong>Openness</strong>. Lowest traits: <strong>Conscientiousness</strong>, <strong>Extraversion</strong>, <strong>Agreeableness</strong>, and <strong>Neuroticism</strong> (tied).</p>'
+    );
+  });
+
+  it('renders a tied highest traits callout when there is a tie for the top score', async () => {
+    const traits: ReportTraits = {
+      O: 80,
+      C: 80,
+      E: 60,
+      A: 50,
+      N: 40
+    };
+
+    const html = await buildReportHtml(createReportPayload(traits));
+
+    expect(html).toContain(
+      '<p class="overview__callout">Highest traits: <strong>Openness</strong> and <strong>Conscientiousness</strong> (tied). Lowest trait: <strong>Neuroticism</strong>.</p>'
     );
   });
 });

@@ -491,7 +491,7 @@ export async function generateReportPdf(payload: ReportPayload) {
       page.setDefaultNavigationTimeout(PDF_TIMEOUT_MS);
       await page.setContent(html, { waitUntil: 'load', timeout: PDF_TIMEOUT_MS });
       await page.emulateMediaType('print');
-      await page.waitForTimeout(50);
+      await new Promise((resolve) => setTimeout(resolve, 50));
 
       const pdf = await page.pdf({
         format: 'A4',

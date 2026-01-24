@@ -329,6 +329,34 @@ const traitContent: Record<
   }
 };
 
+export type TraitResource = {
+  label: string;
+  url: string;
+};
+
+export const RESOURCES_BY_TRAIT: Record<string, TraitResource[]> = {
+  Openness: [
+    { label: 'Openness to experience (overview)', url: 'https://en.wikipedia.org/wiki/Openness_to_experience' },
+    { label: 'Openness (APA Dictionary of Psychology)', url: 'https://dictionary.apa.org/openness' }
+  ],
+  Conscientiousness: [
+    { label: 'Conscientiousness (overview)', url: 'https://en.wikipedia.org/wiki/Conscientiousness' },
+    { label: 'Conscientiousness (APA Dictionary of Psychology)', url: 'https://dictionary.apa.org/conscientiousness' }
+  ],
+  Extraversion: [
+    { label: 'Extraversion (overview)', url: 'https://en.wikipedia.org/wiki/Extraversion' },
+    { label: 'Extraversion (APA Dictionary of Psychology)', url: 'https://dictionary.apa.org/extraversion' }
+  ],
+  Agreeableness: [
+    { label: 'Agreeableness (overview)', url: 'https://en.wikipedia.org/wiki/Agreeableness' },
+    { label: 'Agreeableness (APA Dictionary of Psychology)', url: 'https://dictionary.apa.org/agreeableness' }
+  ],
+  Neuroticism: [
+    { label: 'Neuroticism (overview)', url: 'https://en.wikipedia.org/wiki/Neuroticism' },
+    { label: 'Neuroticism (APA Dictionary of Psychology)', url: 'https://dictionary.apa.org/neuroticism' }
+  ]
+};
+
 const getTraitContent = (trait: string, score: number) => {
   const traitName = resolveTraitName(trait);
   const content = traitContent[traitName];

@@ -141,7 +141,8 @@ const buildOverviewChart = (
   const scoreValues = scoresWithNames.map(({ score }) => score);
   const maxScore = Math.max(...scoreValues);
   const minScore = Math.min(...scoreValues);
-  const highlightExtremes = maxScore !== minScore;
+  const allScoresEqual = maxScore === minScore;
+  const highlightExtremes = !allScoresEqual;
 
   const rows = scoresWithNames
     .map(({ name, score }) => {
@@ -163,9 +164,12 @@ const buildOverviewChart = (
     })
     .join('\n');
 
-  return `      <div class="chart">
+  return {
+    html: `      <div class="chart">
 ${rows}
-      </div>`;
+      </div>`,
+    allScoresEqual
+  };
 };
 
 const buildHighestLowestCallout = (highestTrait: string, lowestTrait: string) => {
@@ -407,15 +411,13 @@ export async function buildReportHtml(payload: ReportPayload) {
     getPersonalDevelopmentRoadmap(clampedTraitPercentages, traitRankOrder)
   );
   const traitRankList = buildListItems(traitRankOrder);
-  const overviewChart = buildOverviewChart(scores);
+  const { html: overviewChart, allScoresEqual } = buildOverviewChart(scores);
   const fallbackRankedTraits = traitSectionOrder
     .map(({ name, scoreKey }) => ({ name, score: scores[scoreKey] }))
     .sort((a, b) => b.score - a.score);
   const resolvedHighestTrait = highestTrait || fallbackRankedTraits[0]?.name || '';
   const resolvedLowestTrait =
     lowestTrait || fallbackRankedTraits[fallbackRankedTraits.length - 1]?.name || '';
-  const allScoresEqual =
-    fallbackRankedTraits[0]?.score === fallbackRankedTraits[fallbackRankedTraits.length - 1]?.score;
   const highestLowestCallout = allScoresEqual
     ? ''
     : buildHighestLowestCallout(resolvedHighestTrait, resolvedLowestTrait);

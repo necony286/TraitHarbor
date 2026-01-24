@@ -64,4 +64,60 @@ describe('report template', () => {
     expect(html).toContain('&lt;script&gt;alert(&quot;x&quot;)&lt;/script&gt;');
     expect(html).not.toContain('<script>alert("x")</script>');
   });
+
+  it('suppresses the highest/lowest callout when all trait scores are equal', async () => {
+    const traits: ReportTraits = {
+      O: 50,
+      C: 50,
+      E: 50,
+      A: 50,
+      N: 50
+    };
+
+    const html = await buildReportHtml({
+      date: new Date(Date.UTC(2024, 0, 2, 12, 0, 0)),
+      traits,
+      traitPercentages: {
+        Openness: traits.O,
+        Conscientiousness: traits.C,
+        Extraversion: traits.E,
+        Agreeableness: traits.A,
+        Neuroticism: traits.N
+      },
+      highestTrait: 'Openness',
+      lowestTrait: 'Neuroticism',
+      traitRankOrder: ['Openness', 'Conscientiousness', 'Extraversion', 'Agreeableness', 'Neuroticism']
+    });
+
+    expect(html).not.toContain('<p class="overview__callout">');
+  });
+
+  it('renders a combined callout when highest and lowest traits match', async () => {
+    const traits: ReportTraits = {
+      O: 78,
+      C: 62,
+      E: 62,
+      A: 62,
+      N: 62
+    };
+
+    const html = await buildReportHtml({
+      date: new Date(Date.UTC(2024, 0, 2, 12, 0, 0)),
+      traits,
+      traitPercentages: {
+        Openness: traits.O,
+        Conscientiousness: traits.C,
+        Extraversion: traits.E,
+        Agreeableness: traits.A,
+        Neuroticism: traits.N
+      },
+      highestTrait: 'Openness',
+      lowestTrait: 'Openness',
+      traitRankOrder: ['Openness', 'Conscientiousness', 'Extraversion', 'Agreeableness', 'Neuroticism']
+    });
+
+    expect(html).toContain(
+      '<p class="overview__callout">Highest &amp; Lowest trait: <strong>Openness</strong>.</p>'
+    );
+  });
 });

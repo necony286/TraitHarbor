@@ -491,8 +491,8 @@ export async function buildReportHtml(payload: ReportPayload) {
     getPersonalDevelopmentRoadmap(clampedTraitPercentages, traitRankOrder)
   );
   const traitRankList = buildListItems(traitRankOrder);
-  const { html: overviewChart, highestTraits, lowestTraits, isBalanced } = buildOverviewChart(scores);
-  const highestLowestCallout = buildHighestLowestCallout({ highestTraits, lowestTraits, isBalanced });
+  const { html: overviewChart, allScoresEqual, highestTraits, lowestTraits, isBalanced } = buildOverviewChart(scores);
+  const highestLowestCallout = allScoresEqual ? '' : buildHighestLowestCallout({ highestTraits, lowestTraits, isBalanced });
   const hasPercentiles =
     payload.traitPercentiles &&
     Object.values(payload.traitPercentiles).some((value) => Number.isFinite(value));

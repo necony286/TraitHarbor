@@ -12,7 +12,6 @@ describe('report template', () => {
       N: 45
     };
     const html = await buildReportHtml({
-      name: 'Alex',
       date: new Date(Date.UTC(2024, 0, 2, 12, 0, 0)),
       traits,
       traitPercentages: {
@@ -42,7 +41,6 @@ describe('report template', () => {
 
   it('escapes user-provided strings in the report template', async () => {
     const html = await buildReportHtml({
-      name: 'Alex',
       date: new Date(Date.UTC(2024, 0, 2, 12, 0, 0)),
       traits: {
         O: 85,

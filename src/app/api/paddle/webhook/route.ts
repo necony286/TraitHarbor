@@ -213,8 +213,7 @@ export async function POST(request: Request) {
       try {
         const { url } = await getOrCreateReportDownloadUrl({
           order: updatedOrder,
-          ttlSeconds: REPORT_ATTACHMENT_TTL_SECONDS,
-          name: 'You'
+          ttlSeconds: REPORT_ATTACHMENT_TTL_SECONDS
         });
 
         attachmentUrl = url;

@@ -5,7 +5,7 @@
 - Sections: cover, overview, chart, traits (5), tips, resources.
 
 ## Variables
-- {name}, {date}, {scores.O}, {scores.C}, {scores.E}, {scores.A}, {scores.N}
+- {date}, {scores.O}, {scores.C}, {scores.E}, {scores.A}, {scores.N}
 
 ## Tech
 - HTML+CSS template → Puppeteer/Playwright → Buffer → Storage (signed URL 24h).

@@ -99,12 +99,10 @@ const resolveReportFileKey = async (order: OrderDetail) => {
 
 export const getOrCreateReportDownloadUrl = async ({
   order,
-  ttlSeconds,
-  name = 'You'
+  ttlSeconds
 }: {
   order: OrderDetail;
   ttlSeconds: number;
-  name?: string;
 }) => {
   const reportPath = getReportPath(order.id);
   const reportFileKey = await resolveReportFileKey(order);
@@ -151,7 +149,6 @@ export const getOrCreateReportDownloadUrl = async ({
   }
 
   const pdfBuffer = await generateReportPdf({
-    name,
     date: new Date(order.created_at),
     traits: parsedResult.data.traits,
     traitPercentages,

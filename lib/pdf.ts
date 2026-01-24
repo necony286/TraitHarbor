@@ -37,7 +37,6 @@ export type ReportTraits = {
 };
 
 export type ReportPayload = {
-  name: string;
   date: Date;
   traits: ReportTraits;
   traitPercentages: Record<string, number>;
@@ -45,7 +44,6 @@ export type ReportPayload = {
   lowestTrait: string;
   traitRankOrder: string[];
   facetScores?: Record<string, Record<string, number>>;
-  userName?: string;
 };
 
 const MAX_PDF_BYTES = 700 * 1024;

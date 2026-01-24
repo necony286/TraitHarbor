@@ -21,7 +21,9 @@ const getScoreBand = (score: number): ScoreBand => {
 
 const normalizeTrait = (trait: string) => trait.trim().toLowerCase();
 
-const traitKeyMap: Record<string, string> = {
+type TraitName = 'Openness' | 'Conscientiousness' | 'Extraversion' | 'Agreeableness' | 'Neuroticism';
+
+const traitKeyMap: Record<string, TraitName> = {
   openness: 'Openness',
   conscientiousness: 'Conscientiousness',
   extraversion: 'Extraversion',
@@ -44,7 +46,7 @@ const NARRATIVE_VOICE: NarrativeVoice = {
 };
 
 const traitContent: Record<
-  string,
+  TraitName,
   Record<ScoreBand, { strengths: string[]; growth: string[]; workStyle: string[]; relationships: string[] }>
 > = {
   Openness: {
@@ -334,7 +336,7 @@ export type TraitResource = {
   url: string;
 };
 
-export const RESOURCES_BY_TRAIT: Record<keyof typeof traitContent, TraitResource[]> = {
+export const RESOURCES_BY_TRAIT: Record<TraitName, TraitResource[]> = {
   Openness: [
     { label: 'Openness to experience (overview)', url: 'https://en.wikipedia.org/wiki/Openness_to_experience' },
     { label: 'Openness (APA Dictionary of Psychology)', url: 'https://dictionary.apa.org/openness' }

@@ -53,11 +53,11 @@ const traitContent: Record<
     High: {
       strengths: [
         'You absorb new ideas quickly and enjoy exploring novel perspectives.',
-        'Creativity and curiosity help you spot unconventional solutions.'
+        'You use creativity and curiosity to spot unconventional solutions.'
       ],
       growth: [
-        'Balance experimentation with follow-through to keep momentum.',
-        'Anchor big ideas in practical next steps.'
+        'You balance experimentation with follow-through to keep momentum.',
+        'You anchor big ideas in practical next steps.'
       ],
       workStyle: [
         'You thrive in roles that reward experimentation and imaginative thinking.',
@@ -65,7 +65,7 @@ const traitContent: Record<
       ],
       relationships: [
         'You bring an open-minded, curious energy to conversations.',
-        'Sharing new experiences can deepen your connections.'
+        'You share new experiences to deepen your connections.'
       ]
     },
     Medium: {
@@ -74,8 +74,8 @@ const traitContent: Record<
         'You stay open to new ideas while valuing proven approaches.'
       ],
       growth: [
-        'Seek out occasional novelty to keep your thinking flexible.',
-        'Give yourself permission to experiment in low-risk ways.'
+        'You seek out occasional novelty to keep your thinking flexible.',
+        'You give yourself permission to experiment in low-risk ways.'
       ],
       workStyle: [
         'You adapt well to a mix of routine and innovation.',
@@ -83,25 +83,25 @@ const traitContent: Record<
       ],
       relationships: [
         'You balance curiosity with respect for familiar routines.',
-        'Staying open to others\' ideas keeps collaboration smooth.'
+        'You stay open to others\' ideas to keep collaboration smooth.'
       ]
     },
     Low: {
       strengths: [
         'You value proven methods and keep your focus on what works.',
-        'Practical thinking helps you stay grounded.'
+        'Your practical thinking helps you stay grounded.'
       ],
       growth: [
-        'Try small experiments to expand your comfort zone.',
-        'Invite fresh perspectives to avoid blind spots.'
+        'You try small experiments to expand your comfort zone.',
+        'You invite fresh perspectives to avoid blind spots.'
       ],
       workStyle: [
         'You excel in environments with clear expectations and structure.',
-        'Consistency and reliability are strengths you bring to teams.'
+        'Your consistency and reliability are strengths you bring to teams.'
       ],
       relationships: [
         'You offer steadiness and dependability to others.',
-        'Occasionally exploring new experiences together can add variety.'
+        'You occasionally explore new experiences together to add variety.'
       ]
     }
   },
@@ -109,19 +109,19 @@ const traitContent: Record<
     High: {
       strengths: [
         'You are organized, dependable, and follow through on commitments.',
-        'Planning ahead helps you deliver consistent results.'
+        'You plan ahead to deliver consistent results.'
       ],
       growth: [
-        'Allow room for flexibility when plans change.',
-        'Avoid overextending by prioritizing what matters most.'
+        'You allow room for flexibility when plans change.',
+        'You avoid overextending by prioritizing what matters most.'
       ],
       workStyle: [
         'You thrive in roles that reward structure, planning, and ownership.',
-        'Clear goals and timelines keep you energized.'
+        'Your clear goals and timelines keep you energized.'
       ],
       relationships: [
         'You show care by being reliable and considerate.',
-        'Remember to balance responsibility with spontaneous moments.'
+        'You remember to balance responsibility with spontaneous moments.'
       ]
     },
     Medium: {
@@ -130,8 +130,8 @@ const traitContent: Record<
         'You can plan ahead while staying open to change.'
       ],
       growth: [
-        'Build simple routines to support your goals.',
-        'Clarify priorities to avoid unnecessary stress.'
+        'You build simple routines to support your goals.',
+        'You clarify priorities to avoid unnecessary stress.'
       ],
       workStyle: [
         'You work well in environments that offer guidance with flexibility.',
@@ -139,7 +139,7 @@ const traitContent: Record<
       ],
       relationships: [
         'You contribute steady support without being overly rigid.',
-        'Consistent follow-through strengthens trust.'
+        'Your consistent follow-through strengthens trust.'
       ]
     },
     Low: {
@@ -148,16 +148,16 @@ const traitContent: Record<
         'You keep things light when plans shift unexpectedly.'
       ],
       growth: [
-        'Set small, achievable routines to build momentum.',
-        'Use reminders or checklists to support follow-through.'
+        'You set small, achievable routines to build momentum.',
+        'You use reminders or checklists to support follow-through.'
       ],
       workStyle: [
         'You enjoy roles that allow spontaneity and change.',
-        'Short sprints and clear checkpoints can keep you on track.'
+        'You use short sprints and clear checkpoints to stay on track.'
       ],
       relationships: [
         'Your flexibility can keep relationships easygoing.',
-        'Follow-through on shared plans helps others feel supported.'
+        'Your follow-through on shared plans helps others feel supported.'
       ]
     }
   },
@@ -165,19 +165,19 @@ const traitContent: Record<
     High: {
       strengths: [
         'You bring energy to groups and enjoy engaging with others.',
-        'Social confidence helps you build momentum quickly.'
+        'Your social confidence helps you build momentum quickly.'
       ],
       growth: [
-        'Make space for quiet reflection to recharge fully.',
-        'Balance talking with active listening.'
+        'You make space for quiet reflection to recharge fully.',
+        'You balance talking with active listening.'
       ],
       workStyle: [
         'You thrive in collaborative, high-interaction environments.',
-        'Opportunities to lead or present are energizing.'
+        'You feel energized by opportunities to lead or present.'
       ],
       relationships: [
         'You help others feel welcomed and connected.',
-        'Pausing to listen can deepen understanding.'
+        'You pause to listen to deepen understanding.'
       ]
     },
     Medium: {
@@ -186,16 +186,16 @@ const traitContent: Record<
         'You adapt to both collaborative and independent work.'
       ],
       growth: [
-        'Notice when you need more stimulation versus quiet focus.',
-        'Lean into networking when it aligns with your goals.'
+        'You notice when you need more stimulation versus quiet focus.',
+        'You lean into networking when it aligns with your goals.'
       ],
       workStyle: [
         'You work well with a mix of collaboration and solo focus.',
-        'Balanced environments help you stay steady.'
+        'You stay steady in balanced environments.'
       ],
       relationships: [
         'You can connect easily while respecting others\' pace.',
-        'Mixing social time with downtime keeps you balanced.'
+        'You mix social time with downtime to stay balanced.'
       ]
     },
     Low: {
@@ -204,16 +204,16 @@ const traitContent: Record<
         'You listen deeply and avoid unnecessary distractions.'
       ],
       growth: [
-        'Seek supportive social settings to expand your comfort zone.',
-        'Practice sharing ideas early rather than waiting too long.'
+        'You seek supportive social settings to expand your comfort zone.',
+        'You practice sharing ideas early rather than waiting too long.'
       ],
       workStyle: [
         'You excel in roles with deep focus and independent work.',
-        'Quiet time helps you produce your best work.'
+        'You use quiet time to produce your best work.'
       ],
       relationships: [
         'You offer steady, attentive presence to those close to you.',
-        'Letting others in gradually can strengthen bonds.'
+        'You let others in gradually to strengthen bonds.'
       ]
     }
   },
@@ -221,19 +221,19 @@ const traitContent: Record<
     High: {
       strengths: [
         'You are supportive, cooperative, and considerate of others.',
-        'Empathy helps you build trust quickly.'
+        'Your empathy helps you build trust quickly.'
       ],
       growth: [
-        'Set boundaries so your needs stay visible.',
-        'Practice advocating for yourself in tough conversations.'
+        'You set boundaries so your needs stay visible.',
+        'You practice advocating for yourself in tough conversations.'
       ],
       workStyle: [
         'You foster harmony and collaboration on teams.',
-        'People feel safe sharing ideas around you.'
+        'You make people feel safe sharing ideas around you.'
       ],
       relationships: [
         'You show care through kindness and understanding.',
-        'Clear boundaries help relationships stay balanced.'
+        'Your clear boundaries help relationships stay balanced.'
       ]
     },
     Medium: {
@@ -242,8 +242,8 @@ const traitContent: Record<
         'You can collaborate while maintaining your own perspective.'
       ],
       growth: [
-        'Lean into curiosity when conflict arises.',
-        'Offer appreciation explicitly to reinforce connection.'
+        'You lean into curiosity when conflict arises.',
+        'You offer appreciation explicitly to reinforce connection.'
       ],
       workStyle: [
         'You can work well in teams while staying objective.',
@@ -251,7 +251,7 @@ const traitContent: Record<
       ],
       relationships: [
         'You bring a blend of warmth and clarity to communication.',
-        'Staying open to compromise keeps relationships steady.'
+        'You stay open to compromise to keep relationships steady.'
       ]
     },
     Low: {
@@ -260,16 +260,16 @@ const traitContent: Record<
         'You can stay objective in emotionally charged situations.'
       ],
       growth: [
-        'Practice acknowledging others\' feelings before debating solutions.',
-        'Small gestures of appreciation can go a long way.'
+        'You practice acknowledging others\' feelings before debating solutions.',
+        'You use small gestures of appreciation to go a long way.'
       ],
       workStyle: [
         'You are comfortable with constructive critique and debate.',
-        'Clear expectations help you collaborate effectively.'
+        'You set clear expectations to collaborate effectively.'
       ],
       relationships: [
         'Your honesty can help others see issues clearly.',
-        'Showing warmth intentionally can deepen trust.'
+        'You show warmth intentionally to deepen trust.'
       ]
     }
   },
@@ -280,16 +280,16 @@ const traitContent: Record<
         'Your vigilance can help you prepare thoroughly.'
       ],
       growth: [
-        'Build stress-reduction rituals to protect your energy.',
-        'Challenge anxious thoughts with evidence and perspective.'
+        'You build stress-reduction rituals to protect your energy.',
+        'You challenge anxious thoughts with evidence and perspective.'
       ],
       workStyle: [
         'You benefit from clear expectations and regular check-ins.',
-        'Structured plans can reduce uncertainty.'
+        'You use structured plans to reduce uncertainty.'
       ],
       relationships: [
-        'Honest communication about stress helps others support you.',
-        'Self-soothing habits keep emotions from overwhelming connection.'
+        'You use honest communication about stress so others can support you.',
+        'Your self-soothing habits keep emotions from overwhelming connection.'
       ]
     },
     Medium: {
@@ -298,26 +298,26 @@ const traitContent: Record<
         'You can stay calm while still noticing risks.'
       ],
       growth: [
-        'Use grounding routines when stress levels rise.',
-        'Name emotions early to keep them manageable.'
+        'You use grounding routines when stress levels rise.',
+        'You name emotions early to keep them manageable.'
       ],
       workStyle: [
         'You can handle pressure while keeping a realistic outlook.',
-        'Balanced workloads help you stay at your best.'
+        'You keep balanced workloads to stay at your best.'
       ],
       relationships: [
         'You are attuned to emotional shifts in others.',
-        'Checking in regularly can strengthen trust.'
+        'You check in regularly to strengthen trust.'
       ]
     },
     Low: {
       strengths: [
         'You remain calm under pressure and recover quickly from setbacks.',
-        'Emotional steadiness helps you stay composed.'
+        'Your emotional steadiness helps you stay composed.'
       ],
       growth: [
-        'Stay alert to risks so issues don\'t go unnoticed.',
-        'Invite feedback if others seem concerned.'
+        'You stay alert to risks so issues don\'t go unnoticed.',
+        'You invite feedback if others seem concerned.'
       ],
       workStyle: [
         'You bring calm focus to high-pressure situations.',
@@ -325,7 +325,7 @@ const traitContent: Record<
       ],
       relationships: [
         'Your calm presence can be reassuring to others.',
-        'Naming emotions still matters, even when you feel steady.'
+        'You still name emotions, even when you feel steady.'
       ]
     }
   }
@@ -458,11 +458,11 @@ export const getFacetSummary = (
   const callouts: string[] = [];
   const [topFacet] = facets;
   if (topFacet) {
-    callouts.push(`Strongest facet: ${topFacet.facetName} (${topFacet.score}/100).`);
+    callouts.push(`Your strongest facet: ${topFacet.facetName} (${topFacet.score}/100).`);
   }
   const lowestFacet = facets[facets.length - 1];
   if (lowestFacet && lowestFacet.facetName !== topFacet.facetName) {
-    callouts.push(`Weakest facet: ${lowestFacet.facetName} (${lowestFacet.score}/100).`);
+    callouts.push(`Your weakest facet: ${lowestFacet.facetName} (${lowestFacet.score}/100).`);
   }
 
   return { facets, callouts };
@@ -508,7 +508,7 @@ export const getRelationshipInsights = (
   const lowestContent = getTraitContent(lowestTrait, lowestScore);
   const relationshipLines = lowestContent?.relationships ?? [];
 
-  return `Relationships may feel smoother when ${voice.subjectPronoun} stay mindful of ${lowestTrait}. ${relationshipLines.join(
+  return `Your relationships may feel smoother when ${voice.subjectPronoun} stay mindful of ${lowestTrait}. ${relationshipLines.join(
     ' '
   )}`.trim();
 };
@@ -556,7 +556,7 @@ export const getPatternSummary = (
 };
 
 export const getResourcesMethodologyText = (): string =>
-  'Scores are normalized on a 0–100 scale (not percentiles) based on your responses to the Big Five inventory. This report is for personal insight only and does not diagnose or treat any mental health condition.';
+  'Your scores are normalized on a 0–100 scale (not percentiles) based on your responses to the Big Five inventory. This report is for personal insight only and does not diagnose or treat any mental health condition.';
 
 export const getPersonalDevelopmentRoadmap = (
   traitPercentages: Record<string, number>,
@@ -575,12 +575,12 @@ export const getPersonalDevelopmentRoadmap = (
   const growth = getGrowthTips(bottomTrait, bottomScore);
 
   const doMore = strengths[0]
-    ? `Do more of this: ${strengths[0]}`
-    : `Lean into ${topTrait} by choosing one task this week that highlights what you do best.`;
+    ? `You do more of this: ${strengths[0]}`
+    : `You lean into ${topTrait} by choosing one task this week that highlights what you do best.`;
   const watchOut = growth[0]
-    ? `Watch out for this: ${growth[0]}`
-    : `Notice when ${bottomTrait} habits create friction, and pause to reset before reacting.`;
-  const microHabit = `For 7 days, spend 10 minutes on a ${topTrait}-aligned action each morning, then end the day by naming one ${bottomTrait}-related moment you handled with care.`;
+    ? `You watch out for this: ${growth[0]}`
+    : `You notice when ${bottomTrait} habits create friction, and pause to reset before reacting.`;
+  const microHabit = `You spend 7 days dedicating 10 minutes to a ${topTrait}-aligned action each morning, then end the day by naming one ${bottomTrait}-related moment you handled with care.`;
 
   return [
     {

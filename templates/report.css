@@ -128,3 +128,18 @@ h2 {
   border-radius: 12px;
   background: #f8fafc;
 }
+
+@media print {
+  .report__trait {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  .report__cover {
+    page-break-after: always;
+  }
+
+  .report__roadmap {
+    page-break-before: always;
+  }
+}

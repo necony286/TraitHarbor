@@ -191,6 +191,22 @@ h2 {
   background: #f8fafc;
 }
 
+.resource-groups {
+  display: grid;
+  gap: 12px;
+}
+
+.resource-group h3 {
+  margin: 0 0 6px;
+  font-size: 15px;
+}
+
+.resource-group ul {
+  margin: 0;
+  padding-left: 18px;
+  color: #344054;
+}
+
 @media print {
   .avoid-break {
     break-inside: avoid;

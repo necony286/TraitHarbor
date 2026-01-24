@@ -26,7 +26,8 @@ import {
   getScoreBandLabel,
   getStrengths,
   getTraitMeaning,
-  getWorkStyleTips
+  getWorkStyleTips,
+  RESOURCES_BY_TRAIT
 } from './report-content';
 import { getTraitExtremes } from './trait-extremes';
 
@@ -190,6 +191,29 @@ ${sections}
 
 const buildListItems = (items: string[]) =>
   items.length ? items.map((item) => `        <li>${escapeHtml(item)}</li>`).join('\n') : '';
+
+const buildResourceGroups = () =>
+  traitSectionOrder
+    .map(({ name }) => {
+      const resources = RESOURCES_BY_TRAIT[name] ?? [];
+      if (!resources.length) {
+        return '';
+      }
+      const links = resources
+        .map(
+          ({ label, url }) =>
+            `          <li><a href="${escapeHtml(url)}">${escapeHtml(label)}</a></li>`
+        )
+        .join('\n');
+      return `        <div class="resource-group">
+          <h3>${escapeHtml(name)}</h3>
+          <ul>
+${links}
+          </ul>
+        </div>`;
+    })
+    .filter(Boolean)
+    .join('\n');
 
 const buildOverviewChart = (
   traitScores: Record<typeof traitSectionOrder[number]['scoreKey'], number>
@@ -487,6 +511,7 @@ export async function buildReportHtml(payload: ReportPayload) {
   const comparisonText = getComparisonText(traitRankOrder);
   const patternSummary = getPatternSummary(clampedTraitPercentages, traitRankOrder);
   const resourcesMethodology = getResourcesMethodologyText();
+  const resourcesByTrait = buildResourceGroups();
   const roadmapBlocks = buildRoadmapBlocks(
     getPersonalDevelopmentRoadmap(clampedTraitPercentages, traitRankOrder)
   );
@@ -521,7 +546,8 @@ export async function buildReportHtml(payload: ReportPayload) {
     .replaceAll('{{trait_rank_list}}', traitRankList)
     .replaceAll('{{pattern_summary}}', escapeHtml(patternSummary))
     .replaceAll('{{roadmap_blocks}}', roadmapBlocks)
-    .replaceAll('{{resources_methodology}}', escapeHtml(resourcesMethodology));
+    .replaceAll('{{resources_methodology}}', escapeHtml(resourcesMethodology))
+    .replaceAll('{{resources_by_trait}}', resourcesByTrait);
 }
 
 export async function generateReportPdf(payload: ReportPayload) {

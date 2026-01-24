@@ -122,55 +122,55 @@ const buildTraitSections = (
   scores: Record<typeof traitSectionOrder[number]['scoreKey'], number>,
   traitPercentages: Record<string, number>,
   facetScores?: Record<string, Record<string, number>>
-) =>
-  traitSectionOrder
-    .map(
-      ({ name, scoreKey }) => {
-        const score = scores[scoreKey];
-        const meaning = getTraitMeaning(name, score);
-        const strengths = getStrengths(name, score).map(escapeHtml).join(' ');
-        const growth = getGrowthTips(name, score).map(escapeHtml).join(' ');
-        const workStyle = getWorkStyleTips(name, score).map(escapeHtml).join(' ');
-        const relationships = getRelationshipTips(name, score).map(escapeHtml).join(' ');
-        const facetSummary = getFacetSummary(name, facetScores);
-        const facetCallouts = facetSummary?.callouts.map(escapeHtml).join(' ') ?? '';
-        const band = getScoreBandLabel(score);
-        const scoreValue = traitPercentages[name] ?? score;
-        const facetBars = facetSummary ? buildFacetBars(facetSummary.facets) : '';
-        const buildAvoidBreakSection = (title: string, content: string) => `        <div class="avoid-break">
+) => {
+  const buildAvoidBreakSection = (title: string, content: string) => `        <div class="avoid-break">
           <h3>${title}</h3>
           <p>${content}</p>
         </div>`;
-        const sections = [
-          buildAvoidBreakSection('What it means for you', facetCallouts || escapeHtml(meaning)),
-          facetBars ? `<div class="avoid-break">${facetBars}</div>` : '',
-          buildAvoidBreakSection(
-            'Strengths',
-            strengths || 'Identify the strengths that support your goals.'
-          ),
-          buildAvoidBreakSection(
-            'Watch-outs',
-            growth || 'Focus on one growth habit that keeps you balanced.'
-          ),
-          buildAvoidBreakSection(
-            'Career tip',
-            workStyle || 'Choose environments that align with how you prefer to work.'
-          ),
-          buildAvoidBreakSection(
-            'Relationship tip',
-            relationships || 'Notice how this trait shapes how you connect with others.'
-          )
-        ]
-          .filter(Boolean)
-          .join('\n');
 
-        return `      <section class="report__trait">
+  return traitSectionOrder
+    .map(({ name, scoreKey }) => {
+      const score = scores[scoreKey];
+      const meaning = getTraitMeaning(name, score);
+      const strengths = getStrengths(name, score).map(escapeHtml).join(' ');
+      const growth = getGrowthTips(name, score).map(escapeHtml).join(' ');
+      const workStyle = getWorkStyleTips(name, score).map(escapeHtml).join(' ');
+      const relationships = getRelationshipTips(name, score).map(escapeHtml).join(' ');
+      const facetSummary = getFacetSummary(name, facetScores);
+      const facetCallouts = facetSummary?.callouts.map(escapeHtml).join(' ') ?? '';
+      const band = getScoreBandLabel(score);
+      const scoreValue = traitPercentages[name] ?? score;
+      const facetBars = facetSummary ? buildFacetBars(facetSummary.facets) : '';
+      const sections = [
+        buildAvoidBreakSection('What it means for you', facetCallouts || escapeHtml(meaning)),
+        facetBars ? `<div class="avoid-break">${facetBars}</div>` : '',
+        buildAvoidBreakSection(
+          'Strengths',
+          strengths || 'Identify the strengths that support your goals.'
+        ),
+        buildAvoidBreakSection(
+          'Watch-outs',
+          growth || 'Focus on one growth habit that keeps you balanced.'
+        ),
+        buildAvoidBreakSection(
+          'Career tip',
+          workStyle || 'Choose environments that align with how you prefer to work.'
+        ),
+        buildAvoidBreakSection(
+          'Relationship tip',
+          relationships || 'Notice how this trait shapes how you connect with others.'
+        )
+      ]
+        .filter(Boolean)
+        .join('\n');
+
+      return `      <section class="report__trait">
         <h2>${name} — ${band} (${scoreValue}/100)</h2>
 ${sections}
       </section>`;
-      }
-    )
+    })
     .join('\n\n');
+};
 
 const buildListItems = (items: string[]) =>
   items.length ? items.map((item) => `        <li>${escapeHtml(item)}</li>`).join('\n') : '';

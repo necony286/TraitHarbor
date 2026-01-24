@@ -49,6 +49,12 @@ export type ReportPayload = {
   facetScores?: Record<string, Record<string, number>>;
 };
 
+type SectionDefinition = {
+  title: string;
+  content: string;
+  fallback: string;
+};
+
 const MAX_PDF_BYTES = 700 * 1024;
 const MAX_CONCURRENT_PDF = 2;
 const PDF_TIMEOUT_MS = 60_000;
@@ -141,11 +147,6 @@ const buildTraitSections = (
       const band = getScoreBandLabel(score);
       const scoreValue = traitPercentages[name] ?? score;
       const facetBars = facetSummary ? buildFacetBars(facetSummary.facets) : '';
-      type SectionDefinition = {
-        title: string;
-        content: string;
-        fallback: string;
-      };
       const sectionDefinitions: SectionDefinition[] = [
         {
           title: 'Strengths',

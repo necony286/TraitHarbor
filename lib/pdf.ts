@@ -131,6 +131,65 @@ const buildTraitSections = (
 const buildListItems = (items: string[]) =>
   items.length ? items.map((item) => `        <li>${escapeHtml(item)}</li>`).join('\n') : '';
 
+const buildOverviewChart = (
+  traitScores: Record<typeof traitSectionOrder[number]['scoreKey'], number>
+) => {
+  const scores = traitSectionOrder.map(({ scoreKey }) => clampScore(traitScores[scoreKey]));
+  const maxScore = Math.max(...scores);
+  const minScore = Math.min(...scores);
+  const highlightExtremes = maxScore !== minScore;
+
+  const rows = traitSectionOrder
+    .map(({ name, scoreKey }, index) => {
+      const score = scores[index];
+      const classes = ['chart__row'];
+      if (highlightExtremes) {
+        if (score === maxScore) {
+          classes.push('chart__row--hi');
+        }
+        if (score === minScore) {
+          classes.push('chart__row--lo');
+        }
+      }
+
+      return `        <div class="${classes.join(' ')}">
+          <div class="chart__label">${escapeHtml(name)}</div>
+          <div class="chart__bar"><span style="width: ${score}%;"></span></div>
+          <div class="chart__value">${score}/100</div>
+        </div>`;
+    })
+    .join('\n');
+
+  return `      <div class="chart">
+${rows}
+      </div>`;
+};
+
+const buildHighestLowestCallout = (highestTrait: string, lowestTrait: string) => {
+  const highest = highestTrait.trim();
+  const lowest = lowestTrait.trim();
+
+  if (!highest && !lowest) {
+    return '';
+  }
+
+  if (highest && lowest) {
+    return `      <p class="overview__callout">Highest trait: <strong>${escapeHtml(
+      highest
+    )}</strong>. Lowest trait: <strong>${escapeHtml(lowest)}</strong>.</p>`;
+  }
+
+  if (highest) {
+    return `      <p class="overview__callout">Highest trait: <strong>${escapeHtml(
+      highest
+    )}</strong>.</p>`;
+  }
+
+  return `      <p class="overview__callout">Lowest trait: <strong>${escapeHtml(
+    lowest
+  )}</strong>.</p>`;
+};
+
 const buildRoadmapBlocks = (
   roadmap: Array<{ recommendationType: string; items: string[] }>
 ) =>
@@ -340,10 +399,23 @@ export async function buildReportHtml(payload: ReportPayload) {
     getPersonalDevelopmentRoadmap(clampedTraitPercentages, traitRankOrder)
   );
   const traitRankList = buildListItems(traitRankOrder);
+  const overviewChart = buildOverviewChart(scores);
+  const fallbackRankedTraits = traitSectionOrder
+    .map(({ name, scoreKey }) => ({ name, score: scores[scoreKey] }))
+    .sort((a, b) => b.score - a.score);
+  const resolvedHighestTrait = highestTrait || fallbackRankedTraits[0]?.name || '';
+  const resolvedLowestTrait =
+    lowestTrait || fallbackRankedTraits[fallbackRankedTraits.length - 1]?.name || '';
+  const highestLowestCallout = buildHighestLowestCallout(
+    resolvedHighestTrait,
+    resolvedLowestTrait
+  );
 
   return template
     .replace('{{styles}}', styles)
     .replace('{{trait_sections}}', buildTraitSections(scores, clampedTraitPercentages, payload.facetScores))
+    .replace('{{overview_chart}}', overviewChart)
+    .replace('{{highest_lowest_callout}}', highestLowestCallout)
     .replaceAll('{{date}}', escapeHtml(formatDate(payload.date)))
     .replaceAll('{{score_O}}', scores.O.toString())
     .replaceAll('{{score_C}}', scores.C.toString())

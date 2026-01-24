@@ -158,7 +158,7 @@ describe('email config validation', () => {
       'Failed to fetch PDF for email attachment; sending link-only.',
       expect.objectContaining({
         orderId: reportPayload.orderId,
-        error: expect.stringContaining(String(MAX_EMAIL_ATTACHMENT_BYTES))
+        error: expect.stringMatching(/exceeds.*${MAX_EMAIL_ATTACHMENT_BYTES}/)
       })
     );
     expect(sendMock).toHaveBeenCalledWith(

@@ -208,6 +208,11 @@ h2 {
   }
 
   .report__cover {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  .report__overview {
     break-after: always;
     page-break-after: always;
   }

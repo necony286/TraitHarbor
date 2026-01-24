@@ -334,7 +334,7 @@ export type TraitResource = {
   url: string;
 };
 
-export const RESOURCES_BY_TRAIT: Record<string, TraitResource[]> = {
+export const RESOURCES_BY_TRAIT: Record<keyof typeof traitContent, TraitResource[]> = {
   Openness: [
     { label: 'Openness to experience (overview)', url: 'https://en.wikipedia.org/wiki/Openness_to_experience' },
     { label: 'Openness (APA Dictionary of Psychology)', url: 'https://dictionary.apa.org/openness' }

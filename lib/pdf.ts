@@ -460,7 +460,12 @@ export async function generateReportPdf(payload: ReportPayload) {
       const pdf = await page.pdf({
         format: 'A4',
         printBackground: true,
-        margin: { top: '24px', bottom: '24px', left: '24px', right: '24px' }
+        displayHeaderFooter: true,
+        footerTemplate:
+          `<div style="width: 100%; font-size: 10px; color: #4b5563; padding: 0 24px; text-align: right;">` +
+          `TraitHarbor Premium Report — Page <span class='pageNumber'></span> of <span class='totalPages'></span>` +
+          `</div>`,
+        margin: { top: '24px', bottom: '56px', left: '24px', right: '24px' }
       });
 
       if (pdf.byteLength > MAX_PDF_BYTES) {

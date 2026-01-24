@@ -198,7 +198,8 @@ const buildOverviewChart = (
     name,
     score: clampScore(traitScores[scoreKey])
   }));
-  const { highestTraits, lowestTraits, allScoresEqual } = getTraitExtremes(scoresWithNames);
+  const { highestTraits, lowestTraits, allScoresEqual, isBalanced } =
+    getTraitExtremes(scoresWithNames);
   const highlightExtremes = !allScoresEqual;
   const highestTraitSet = new Set(highestTraits);
   const lowestTraitSet = new Set(lowestTraits);
@@ -229,7 +230,8 @@ ${rows}
       </div>`,
     allScoresEqual,
     highestTraits,
-    lowestTraits
+    lowestTraits,
+    isBalanced
   };
 };
 
@@ -239,16 +241,26 @@ const joinWithAnd = (items: string[]) => listFormatter.format(items);
 
 const buildHighestLowestCallout = ({
   highestTraits,
-  lowestTraits
+  lowestTraits,
+  isBalanced
 }: {
   highestTraits: string[];
   lowestTraits: string[];
+  isBalanced: boolean;
 }) => {
   const highest = highestTraits.map((trait) => `<strong>${escapeHtml(trait)}</strong>`);
   const lowest = lowestTraits.map((trait) => `<strong>${escapeHtml(trait)}</strong>`);
 
   if (!highest.length && !lowest.length) {
     return '';
+  }
+
+  if (isBalanced) {
+    const tied = highest.length > 1 ? ' (tied)' : '';
+    const traitList = joinWithAnd(highest);
+    return `      <div class="avoid-break">
+        <p class="overview__callout">Your scores are fairly balanced overall, with a slight edge in ${traitList}${tied}.</p>
+      </div>`;
   }
 
   const buildStatement = (traits: string[], label: 'Highest' | 'Lowest') => {
@@ -479,11 +491,8 @@ export async function buildReportHtml(payload: ReportPayload) {
     getPersonalDevelopmentRoadmap(clampedTraitPercentages, traitRankOrder)
   );
   const traitRankList = buildListItems(traitRankOrder);
-  const { html: overviewChart, allScoresEqual, highestTraits, lowestTraits } =
-    buildOverviewChart(scores);
-  const highestLowestCallout = allScoresEqual
-    ? ''
-    : buildHighestLowestCallout({ highestTraits, lowestTraits });
+  const { html: overviewChart, allScoresEqual, highestTraits, lowestTraits, isBalanced } = buildOverviewChart(scores);
+  const highestLowestCallout = allScoresEqual ? '' : buildHighestLowestCallout({ highestTraits, lowestTraits, isBalanced });
   const hasPercentiles =
     payload.traitPercentiles &&
     Object.values(payload.traitPercentiles).some((value) => Number.isFinite(value));

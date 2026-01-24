@@ -303,7 +303,7 @@ const traitContent: Record<
       ],
       workStyle: [
         'You can handle pressure while keeping a realistic outlook.',
-        'You keep balanced workloads to stay at your best.'
+'You stay at your best with a balanced workload.'
       ],
       relationships: [
         'You are attuned to emotional shifts in others.',

@@ -3,16 +3,18 @@ import { describe, expect, it } from 'vitest';
 import { getPersonalDevelopmentRoadmap, withPrefix } from '../lib/report-content';
 
 describe('withPrefix', () => {
-  it('keeps existing you/your prefixes in any casing', () => {
-    expect(withPrefix('You show up prepared.', 'Fallback')).toBe('You show up prepared.');
-    expect(withPrefix('your energy is steady.', 'Fallback')).toBe('your energy is steady.');
-    expect(withPrefix('YOUR focus stays sharp.', 'Fallback')).toBe('YOUR focus stays sharp.');
-  });
-
-  it('adds the fallback prefix when none is present', () => {
-    expect(withPrefix('Focus on consistency.', 'You do more of this')).toBe(
-      'You do more of this: Focus on consistency.'
-    );
+  it.each([
+    { message: 'You show up prepared.', fallback: 'Fallback', expected: 'You show up prepared.' },
+    { message: 'your energy is steady.', fallback: 'Fallback', expected: 'your energy is steady.' },
+    { message: 'YOUR focus stays sharp.', fallback: 'Fallback', expected: 'YOUR focus stays sharp.' },
+    { message: 'You, are prepared.', fallback: 'Fallback', expected: 'You, are prepared.' },
+    {
+      message: 'Focus on consistency.',
+      fallback: 'You do more of this',
+      expected: 'You do more of this: Focus on consistency.'
+    }
+  ])('should correctly process the message: $message', ({ message, fallback, expected }) => {
+    expect(withPrefix(message, fallback)).toBe(expected);
   });
 });
 

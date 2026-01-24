@@ -43,8 +43,6 @@ const NARRATIVE_VOICE: NarrativeVoice = {
   possessiveName: 'Your'
 };
 
-const applyNarrativeVoice = (text: string) => text;
-
 const traitContent: Record<
   string,
   Record<ScoreBand, { strengths: string[]; growth: string[]; workStyle: string[]; relationships: string[] }>
@@ -444,7 +442,7 @@ export const getRelationshipInsights = (
   const lowestTrait = traitRankOrder[traitRankOrder.length - 1];
   const lowestScore = traitPercentages[lowestTrait] ?? 0;
   const lowestContent = getTraitContent(lowestTrait, lowestScore);
-  const relationshipLines = (lowestContent?.relationships ?? []).map((line) => applyNarrativeVoice(line));
+  const relationshipLines = lowestContent?.relationships ?? [];
 
   return `Relationships may feel smoother when ${voice.subjectPronoun} stay mindful of ${lowestTrait}. ${relationshipLines.join(
     ' '

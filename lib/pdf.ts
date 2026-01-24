@@ -330,7 +330,6 @@ export async function buildReportHtml(payload: ReportPayload) {
     N: clampScore(payload.traits.N)
   };
 
-  const normalizedUserName = payload.userName?.trim();
   const highestTrait = payload.highestTrait.trim() || '';
   const lowestTrait = payload.lowestTrait.trim() || '';
   const traitRankOrder = payload.traitRankOrder.filter(Boolean);
@@ -347,8 +346,6 @@ export async function buildReportHtml(payload: ReportPayload) {
   return template
     .replace('{{styles}}', styles)
     .replace('{{trait_sections}}', buildTraitSections(scores, clampedTraitPercentages, payload.facetScores))
-    .replaceAll('{{name}}', escapeHtml(payload.name))
-    .replaceAll('{{user_name}}', escapeHtml(normalizedUserName || payload.name))
     .replaceAll('{{date}}', escapeHtml(formatDate(payload.date)))
     .replaceAll('{{score_O}}', scores.O.toString())
     .replaceAll('{{score_C}}', scores.C.toString())

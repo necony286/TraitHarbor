@@ -471,25 +471,31 @@ export const getPersonalDevelopmentRoadmap = (
   const topScore = traitPercentages[topTrait] ?? 0;
   const bottomScore = traitPercentages[bottomTrait] ?? 0;
 
-  const roadmap: Array<{ recommendationType: string; items: string[] }> = [];
-
   const strengths = getStrengths(topTrait, topScore);
-  if (strengths.length) {
-    roadmap.push({
-      recommendationType: `Leverage ${topTrait} strengths`,
-      items: strengths
-    });
-  }
-
   const growth = getGrowthTips(bottomTrait, bottomScore);
-  if (growth.length) {
-    roadmap.push({
-      recommendationType: `Balance ${bottomTrait} tendencies`,
-      items: growth
-    });
-  }
 
-  return roadmap;
+  const doMore = strengths[0]
+    ? `Do more of this: ${strengths[0]}`
+    : `Lean into ${topTrait} by choosing one task this week that highlights what you do best.`;
+  const watchOut = growth[0]
+    ? `Watch out for this: ${growth[0]}`
+    : `Notice when ${bottomTrait} habits create friction, and pause to reset before reacting.`;
+  const microHabit = `For 7 days, spend 10 minutes on a ${topTrait}-aligned action each morning, then end the day by naming one ${bottomTrait}-related moment you handled with care.`;
+
+  return [
+    {
+      recommendationType: `Do more of… ${topTrait}`,
+      items: [doMore]
+    },
+    {
+      recommendationType: `Watch out for… ${bottomTrait}`,
+      items: [watchOut]
+    },
+    {
+      recommendationType: '1-week micro-habit',
+      items: [microHabit]
+    }
+  ];
 };
 
 export const getScoreBandLabel = (score: number) => getScoreBand(score);

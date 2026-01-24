@@ -462,9 +462,9 @@ export async function generateReportPdf(payload: ReportPayload) {
         printBackground: true,
         displayHeaderFooter: true,
         footerTemplate:
-          "<div style=\"width:100%;font-size:10px;color:#4b5563;padding:0 24px;\">" +
-          "TraitHarbor Premium Report — Page <span class='pageNumber'></span> of <span class='totalPages'></span>" +
-          '</div>',
+          `<div style="width: 100%; font-size: 10px; color: #4b5563; padding: 0 24px; text-align: right;">` +
+          `TraitHarbor Premium Report — Page <span class='pageNumber'></span> of <span class='totalPages'></span>` +
+          `</div>`,
         margin: { top: '24px', bottom: '56px', left: '24px', right: '24px' }
       });
 

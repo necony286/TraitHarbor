@@ -44,6 +44,18 @@ h2 {
   font-size: 18px;
 }
 
+.report__overview {
+  padding: 16px;
+  border-radius: 12px;
+  border: 1px solid #eaecf0;
+  background: #f8fafc;
+}
+
+.overview__callout {
+  margin: 12px 0 0;
+  color: #344054;
+}
+
 .chart {
   display: flex;
   flex-direction: column;
@@ -52,9 +64,11 @@ h2 {
 
 .chart__row {
   display: grid;
-  grid-template-columns: 140px 1fr 48px;
+  grid-template-columns: 140px 1fr 64px;
   align-items: center;
   gap: 12px;
+  padding: 6px 8px;
+  border-radius: 10px;
 }
 
 .chart__bar {
@@ -70,6 +84,20 @@ h2 {
   inset: 0;
   background: #7b5cff;
   border-radius: 999px;
+}
+
+.chart__value {
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+  color: #475467;
+}
+
+.chart__row--hi {
+  background: #eef4ff;
+}
+
+.chart__row--lo {
+  background: #fef3f2;
 }
 
 .trait-grid {

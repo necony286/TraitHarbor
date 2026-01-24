@@ -5,21 +5,37 @@ import { buildReportHtml, traitSectionOrder, type ReportPayload, type ReportTrai
 const createReportPayload = (
   traits: ReportTraits,
   overrides: Partial<Omit<ReportPayload, 'traits' | 'traitPercentages'>> = {}
-): ReportPayload => ({
-  date: new Date(Date.UTC(2024, 0, 2, 12, 0, 0)),
-  traits,
-  traitPercentages: {
+): ReportPayload => {
+  const traitPercentages = {
     Openness: traits.O,
     Conscientiousness: traits.C,
     Extraversion: traits.E,
     Agreeableness: traits.A,
     Neuroticism: traits.N
-  },
-  highestTrait: 'Openness',
-  lowestTrait: 'Neuroticism',
-  traitRankOrder: ['Openness', 'Conscientiousness', 'Extraversion', 'Agreeableness', 'Neuroticism'],
-  ...overrides
-});
+  };
+  const traitRankOrder = traitSectionOrder
+    .map(({ name, scoreKey }, index) => ({
+      name,
+      score: traits[scoreKey],
+      index
+    }))
+    .sort((a, b) => (b.score - a.score) || (a.index - b.index))
+    .map(({ name }) => name);
+
+  const basePayload: ReportPayload = {
+    date: new Date(Date.UTC(2024, 0, 2, 12, 0, 0)),
+    traits,
+    traitPercentages,
+    highestTrait: traitRankOrder[0],
+    lowestTrait: traitRankOrder[traitRankOrder.length - 1],
+    traitRankOrder
+  };
+
+  return {
+    ...basePayload,
+    ...overrides
+  };
+};
 
 describe('report template', () => {
   it('hydrates report html with trait scores', async () => {

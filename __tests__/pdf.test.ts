@@ -53,7 +53,7 @@ describe('report template', () => {
 
     for (const trait of expectedTraits) {
       const band = getScoreBandLabel(trait.score);
-      expect(html).toContain(`${trait.name} — ${band} (${trait.score}%)`);
+      expect(html).toContain(`${trait.name} — ${band} (${trait.score}/100)`);
     }
   });
 

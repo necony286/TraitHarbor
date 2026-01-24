@@ -217,9 +217,4 @@ h2 {
     page-break-before: always;
   }
 
-  .roadmap__block,
-  .overview__callout {
-    break-inside: avoid;
-    page-break-inside: avoid;
-  }
 }

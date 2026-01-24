@@ -53,6 +53,10 @@ h2 {
 
 .overview__callout {
   margin: 12px 0 0;
+  padding: 10px 12px;
+  border: 1px solid #eaecf0;
+  border-radius: 12px;
+  background: #ffffff;
   color: #344054;
 }
 
@@ -123,6 +127,29 @@ h2 {
   color: #344054;
 }
 
+.roadmap--cards {
+  display: grid;
+  gap: 12px;
+}
+
+.roadmap__block {
+  padding: 12px 16px;
+  border: 1px solid #eaecf0;
+  border-radius: 12px;
+  background: #ffffff;
+}
+
+.roadmap__block h3 {
+  margin: 0 0 6px;
+  font-size: 15px;
+}
+
+.roadmap__block ul {
+  margin: 0;
+  padding-left: 18px;
+  color: #344054;
+}
+
 .report__resources {
   padding: 16px;
   border-radius: 12px;
@@ -143,5 +170,11 @@ h2 {
   .report__roadmap {
     break-before: always;
     page-break-before: always;
+  }
+
+  .roadmap__block,
+  .overview__callout {
+    break-inside: avoid;
+    page-break-inside: avoid;
   }
 }

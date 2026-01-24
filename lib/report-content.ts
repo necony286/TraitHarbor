@@ -423,7 +423,7 @@ export const getWorkStyleInsights = (
   const [primaryTrait, secondaryTrait] = traitRankOrder;
   const primaryScore = traitPercentages[primaryTrait] ?? 0;
   const primaryContent = getTraitContent(primaryTrait, primaryScore);
-  const primaryLines = (primaryContent?.workStyle ?? []).map((line) => applyNarrativeVoice(line));
+  const primaryLines = primaryContent?.workStyle ?? [];
 
   if (secondaryTrait) {
     return `${voice.possessiveName} strongest drivers at work are ${primaryTrait} and ${secondaryTrait}. ${primaryLines.join(' ')}`.trim();

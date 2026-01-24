@@ -28,6 +28,7 @@ import {
   getTraitMeaning,
   getWorkStyleTips
 } from './report-content';
+import { getTraitExtremes } from './trait-extremes';
 
 
 export type ReportTraits = {
@@ -197,20 +198,19 @@ const buildOverviewChart = (
     name,
     score: clampScore(traitScores[scoreKey])
   }));
-  const scoreValues = scoresWithNames.map(({ score }) => score);
-  const maxScore = Math.max(...scoreValues);
-  const minScore = Math.min(...scoreValues);
-  const allScoresEqual = maxScore === minScore;
+  const { highestTraits, lowestTraits, allScoresEqual } = getTraitExtremes(scoresWithNames);
   const highlightExtremes = !allScoresEqual;
+  const highestTraitSet = new Set(highestTraits);
+  const lowestTraitSet = new Set(lowestTraits);
 
   const rows = scoresWithNames
     .map(({ name, score }) => {
       const classes = ['chart__row'];
       if (highlightExtremes) {
-        if (score === maxScore) {
+        if (highestTraitSet.has(name)) {
           classes.push('chart__row--hi');
         }
-        if (score === minScore) {
+        if (lowestTraitSet.has(name)) {
           classes.push('chart__row--lo');
         }
       }
@@ -227,33 +227,50 @@ const buildOverviewChart = (
     html: `      <div class="chart">
 ${rows}
       </div>`,
-    allScoresEqual
+    allScoresEqual,
+    highestTraits,
+    lowestTraits
   };
 };
 
-const buildHighestLowestCallout = (highestTrait: string, lowestTrait: string) => {
-  const highest = highestTrait.trim();
-  const lowest = lowestTrait.trim();
+const joinWithAnd = (items: string[]) => {
+  if (items.length <= 1) {
+    return items.join('');
+  }
+  if (items.length === 2) {
+    return `${items[0]} and ${items[1]}`;
+  }
+  return `${items.slice(0, -1).join(', ')}, and ${items[items.length - 1]}`;
+};
 
-  if (!highest && !lowest) {
+const buildHighestLowestCallout = ({
+  highestTraits,
+  lowestTraits
+}: {
+  highestTraits: string[];
+  lowestTraits: string[];
+}) => {
+  const highest = highestTraits.map((trait) => `<strong>${escapeHtml(trait)}</strong>`);
+  const lowest = lowestTraits.map((trait) => `<strong>${escapeHtml(trait)}</strong>`);
+
+  if (!highest.length && !lowest.length) {
     return '';
   }
 
-  let calloutText = '';
+  const statements: string[] = [];
 
-  if (highest && lowest) {
-    if (highest === lowest) {
-      calloutText = `Highest &amp; Lowest trait: <strong>${escapeHtml(highest)}</strong>.`;
-    } else {
-      calloutText = `Highest trait: <strong>${escapeHtml(
-        highest
-      )}</strong>. Lowest trait: <strong>${escapeHtml(lowest)}</strong>.`;
-    }
-  } else if (highest) {
-    calloutText = `Highest trait: <strong>${escapeHtml(highest)}</strong>.`;
-  } else {
-    calloutText = `Lowest trait: <strong>${escapeHtml(lowest)}</strong>.`;
+  if (highest.length) {
+    const label = highest.length > 1 ? 'Highest traits' : 'Highest trait';
+    const tied = highest.length > 1 ? ' (tied)' : '';
+    statements.push(`${label}: ${joinWithAnd(highest)}${tied}.`);
   }
+  if (lowest.length) {
+    const label = lowest.length > 1 ? 'Lowest traits' : 'Lowest trait';
+    const tied = lowest.length > 1 ? ' (tied)' : '';
+    statements.push(`${label}: ${joinWithAnd(lowest)}${tied}.`);
+  }
+
+  const calloutText = statements.join(' ');
 
   return `      <div class="avoid-break">
         <p class="overview__callout">${calloutText}</p>
@@ -470,16 +487,11 @@ export async function buildReportHtml(payload: ReportPayload) {
     getPersonalDevelopmentRoadmap(clampedTraitPercentages, traitRankOrder)
   );
   const traitRankList = buildListItems(traitRankOrder);
-  const { html: overviewChart, allScoresEqual } = buildOverviewChart(scores);
-  const fallbackRankedTraits = traitSectionOrder
-    .map(({ name, scoreKey }) => ({ name, score: scores[scoreKey] }))
-    .sort((a, b) => b.score - a.score);
-  const resolvedHighestTrait = highestTrait || fallbackRankedTraits[0]?.name || '';
-  const resolvedLowestTrait =
-    lowestTrait || fallbackRankedTraits[fallbackRankedTraits.length - 1]?.name || '';
+  const { html: overviewChart, allScoresEqual, highestTraits, lowestTraits } =
+    buildOverviewChart(scores);
   const highestLowestCallout = allScoresEqual
     ? ''
-    : buildHighestLowestCallout(resolvedHighestTrait, resolvedLowestTrait);
+    : buildHighestLowestCallout({ highestTraits, lowestTraits });
   const hasPercentiles =
     payload.traitPercentiles &&
     Object.values(payload.traitPercentiles).some((value) => Number.isFinite(value));

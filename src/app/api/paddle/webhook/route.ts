@@ -224,6 +224,11 @@ export async function POST(request: Request) {
             orderId: order.id,
             message: error.message
           });
+        } else if (error instanceof Error && error.name === 'TimeoutError') {
+          logWarn('PDF generation timed out for report email attachment.', {
+            orderId: order.id,
+            message: error.message
+          });
         } else {
           logWarn('Failed to generate signed PDF URL for paid order email.', {
             orderId: order.id,

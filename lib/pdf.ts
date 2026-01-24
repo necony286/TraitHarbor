@@ -51,7 +51,7 @@ export type ReportPayload = {
 
 const MAX_PDF_BYTES = 700 * 1024;
 const MAX_CONCURRENT_PDF = 2;
-const PDF_TIMEOUT_MS = 30_000;
+const PDF_TIMEOUT_MS = 60_000;
 
 export class PdfRenderConcurrencyError extends Error {
   constructor() {
@@ -489,8 +489,9 @@ export async function generateReportPdf(payload: ReportPayload) {
       page = await browser.newPage();
       page.setDefaultTimeout(PDF_TIMEOUT_MS);
       page.setDefaultNavigationTimeout(PDF_TIMEOUT_MS);
-      await page.setContent(html, { waitUntil: 'networkidle0', timeout: PDF_TIMEOUT_MS });
-      await page.emulateMediaType('screen');
+      await page.setContent(html, { waitUntil: 'load', timeout: PDF_TIMEOUT_MS });
+      await page.emulateMediaType('print');
+      await page.waitForTimeout(50);
 
       const pdf = await page.pdf({
         format: 'A4',

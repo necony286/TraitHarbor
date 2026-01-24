@@ -575,10 +575,10 @@ export const getPersonalDevelopmentRoadmap = (
   const growth = getGrowthTips(bottomTrait, bottomScore);
 
   const doMore = strengths[0]
-    ? `You do more of this: ${strengths[0]}`
+    ? strengths[0]
     : `You lean into ${topTrait} by choosing one task this week that highlights what you do best.`;
   const watchOut = growth[0]
-    ? `You watch out for this: ${growth[0]}`
+    ? growth[0]
     : `You notice when ${bottomTrait} habits create friction, and pause to reset before reacting.`;
   const microHabit = `You spend 7 days dedicating 10 minutes to a ${topTrait}-aligned action each morning, then end the day by naming one ${bottomTrait}-related moment you handled with care.`;
 

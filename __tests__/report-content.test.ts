@@ -8,6 +8,12 @@ describe('withPrefix', () => {
     { message: 'your energy is steady.', fallback: 'Fallback', expected: 'your energy is steady.' },
     { message: 'YOUR focus stays sharp.', fallback: 'Fallback', expected: 'YOUR focus stays sharp.' },
     { message: 'You, are prepared.', fallback: 'Fallback', expected: 'You, are prepared.' },
+    { message: "You're prepared.", fallback: 'Fallback', expected: "You're prepared." },
+    {
+      message: 'youtube is a website.',
+      fallback: 'You do this',
+      expected: 'You do this: youtube is a website.'
+    },
     {
       message: 'Focus on consistency.',
       fallback: 'You do more of this',

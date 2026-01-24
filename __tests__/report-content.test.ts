@@ -21,6 +21,11 @@ describe('withPrefix', () => {
       expected: 'You do this: yourself is a pronoun.'
     },
     {
+      message: 'you-tube is not the same as youtube.',
+      fallback: 'You do this',
+      expected: 'You do this: you-tube is not the same as youtube.'
+    },
+    {
       message: 'Focus on consistency.',
       fallback: 'You do more of this',
       expected: 'You do more of this: Focus on consistency.'
@@ -38,6 +43,6 @@ describe('getPersonalDevelopmentRoadmap', () => {
     );
 
     expect(result[0]?.items[0]).toBe('You absorb new ideas quickly and enjoy exploring novel perspectives.');
-    expect(result[1]?.items[0]).toBe('You stay alert to risks so issues don\\'t go unnoticed.');
+    expect(result[1]?.items[0]).toBe("You stay alert to risks so issues don't go unnoticed.");
   });
 });

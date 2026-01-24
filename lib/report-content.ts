@@ -574,15 +574,13 @@ export const getPersonalDevelopmentRoadmap = (
   const strengths = getStrengths(topTrait, topScore);
   const growth = getGrowthTips(bottomTrait, bottomScore);
 
+  const withPrefix = (message: string, fallback: string) =>
+    /^(you|your) /i.test(message) ? message : `${fallback}: ${message}`;
   const doMore = strengths[0]
-    ? strengths[0].startsWith('You ') || strengths[0].startsWith('Your ')
-      ? strengths[0]
-      : `You do more of this: ${strengths[0]}`
+    ? withPrefix(strengths[0], 'You do more of this')
     : `You lean into ${topTrait} by choosing one task this week that highlights what you do best.`;
   const watchOut = growth[0]
-    ? growth[0].startsWith('You ') || growth[0].startsWith('Your ')
-      ? growth[0]
-      : `You watch out for this: ${growth[0]}`
+    ? withPrefix(growth[0], 'You watch out for this')
     : `You notice when ${bottomTrait} habits create friction, and pause to reset before reacting.`;
   const microHabit = `You spend 7 days dedicating 10 minutes to a ${topTrait}-aligned action each morning, then end the day by naming one ${bottomTrait}-related moment you handled with care.`;
 

@@ -1,6 +1,8 @@
 alter table scores
   add column if not exists facet_scores jsonb;
 
+drop function if exists create_response_with_scores(uuid, jsonb, jsonb, integer);
+
 create or replace function create_response_with_scores(
   user_id uuid,
   answers jsonb,

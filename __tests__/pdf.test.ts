@@ -6,13 +6,9 @@ const createReportPayload = (
   traits: ReportTraits,
   overrides: Partial<Omit<ReportPayload, 'traits' | 'traitPercentages'>> = {}
 ): ReportPayload => {
-  const traitPercentages = {
-    Openness: traits.O,
-    Conscientiousness: traits.C,
-    Extraversion: traits.E,
-    Agreeableness: traits.A,
-    Neuroticism: traits.N
-  };
+  const traitPercentages = Object.fromEntries(
+    traitSectionOrder.map(({ name, scoreKey }) => [name, traits[scoreKey]])
+  );
   const traitRankOrder = traitSectionOrder
     .map(({ name, scoreKey }, index) => ({
       name,

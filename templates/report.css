@@ -192,6 +192,16 @@ h2 {
 }
 
 @media print {
+  .avoid-break {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  h3 {
+    break-after: avoid;
+    page-break-after: avoid;
+  }
+
   .report__trait {
     break-inside: avoid;
     page-break-inside: avoid;

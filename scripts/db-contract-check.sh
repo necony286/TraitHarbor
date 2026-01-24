@@ -15,10 +15,10 @@ VALUES ('11111111-1111-1111-1111-111111111111')
 ON CONFLICT DO NOTHING;
 
 SELECT create_response_with_scores(
-  '11111111-1111-1111-1111-111111111111',
-  '{"O": 11, "C": 22, "E": 33, "A": 44, "N": 55}'::jsonb,
-  '{"q1": 1}'::jsonb,
-  1
+  user_id := '11111111-1111-1111-1111-111111111111',
+  answers := '{"q1": 1}'::jsonb,
+  traits := '{"O": 11, "C": 22, "E": 33, "A": 44, "N": 55}'::jsonb,
+  expected_count := 1
 ) AS response_id \gset
 
 SELECT count(*) = 1 AS rpc_created_score

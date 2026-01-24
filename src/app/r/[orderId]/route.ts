@@ -93,8 +93,7 @@ export async function GET(
   try {
     const { url, cached } = await getOrCreateReportDownloadUrl({
       order,
-      ttlSeconds: 300,
-      name: 'You'
+      ttlSeconds: 300
     });
 
     logInfo('Report download redirect issued.', { orderId, cached });

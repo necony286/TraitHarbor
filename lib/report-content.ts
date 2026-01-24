@@ -413,7 +413,7 @@ export const getWorkStyleInsights = (
   traitPercentages: Record<string, number>,
   traitRankOrder: string[]
 ): string => {
-  const voice = getNarrativeVoice();
+  const voice = NARRATIVE_VOICE;
   if (!traitRankOrder.length) {
     return `${voice.possessiveName} work style reflects a blend of focus, collaboration, and adaptability.`;
   }
@@ -434,7 +434,7 @@ export const getRelationshipInsights = (
   traitPercentages: Record<string, number>,
   traitRankOrder: string[]
 ): string => {
-  const voice = getNarrativeVoice();
+  const voice = NARRATIVE_VOICE;
   if (!traitRankOrder.length) {
     return `${voice.possessiveName} relationships benefit from steady communication and mutual understanding.`;
   }
@@ -454,7 +454,7 @@ export const getComparisonText = (traitRankOrder: string[]): string => {
     return '';
   }
 
-  const voice = getNarrativeVoice();
+  const voice = NARRATIVE_VOICE;
   return `${voice.possessiveName} trait rank order is ${traitRankOrder.join(', ')}.`;
 };
 

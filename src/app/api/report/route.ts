@@ -14,8 +14,7 @@ import { REPORT_UNAVAILABLE_ERROR } from '../../../../lib/constants';
 
 const requestSchema = z
   .object({
-    orderId: z.string().uuid(),
-    name: z.string().trim().min(1).max(80).optional()
+    orderId: z.string().uuid()
   })
   .strict();
 
@@ -76,8 +75,7 @@ export async function POST(request: Request) {
   try {
     const { url, cached } = await getOrCreateReportDownloadUrl({
       order,
-      ttlSeconds: 300,
-      name: parsed.data.name ?? 'You'
+      ttlSeconds: 300
     });
 
     logInfo('Report generated for access.', { orderId: order.id, cached });

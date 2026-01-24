@@ -34,14 +34,14 @@ const resolveTraitName = (trait: string) => {
   return traitKeyMap[normalized] ?? trait.trim();
 };
 
-const getNarrativeVoice = (): NarrativeVoice => ({
+const NARRATIVE_VOICE: NarrativeVoice = {
   subject: 'You',
   subjectPronoun: 'you',
   objectPronoun: 'you',
   possessiveDeterminer: 'your',
   possessiveAdjective: 'Your',
   possessiveName: 'Your'
-});
+};
 
 const applyNarrativeVoice = (text: string) => text;
 

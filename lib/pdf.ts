@@ -335,6 +335,7 @@ export async function buildReportHtml(payload: ReportPayload) {
   const highestTrait = payload.highestTrait.trim() || '';
   const lowestTrait = payload.lowestTrait.trim() || '';
   const traitRankOrder = payload.traitRankOrder.filter(Boolean);
+  const coverTitle = 'Your Personality Profile';
 
   const profileSummary = getProfileSummary(clampedTraitPercentages, traitRankOrder, narrativeName);
   const comparisonText = getComparisonText(traitRankOrder, narrativeName);
@@ -350,6 +351,7 @@ export async function buildReportHtml(payload: ReportPayload) {
     .replace('{{trait_sections}}', buildTraitSections(scores, clampedTraitPercentages, payload.facetScores))
     .replaceAll('{{name}}', escapeHtml(payload.name))
     .replaceAll('{{user_name}}', escapeHtml(normalizedUserName || payload.name))
+    .replaceAll('{{cover_title}}', escapeHtml(coverTitle))
     .replaceAll('{{date}}', escapeHtml(formatDate(payload.date)))
     .replaceAll('{{score_O}}', scores.O.toString())
     .replaceAll('{{score_C}}', scores.C.toString())

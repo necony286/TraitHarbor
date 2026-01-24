@@ -17,7 +17,7 @@ const loadPuppeteer = async (): Promise<PuppeteerModule> => {
 };
 import {
   getComparisonText,
-  getFacetInsights,
+  getFacetSummary,
   getGrowthTips,
   getPersonalDevelopmentRoadmap,
   getPatternSummary,
@@ -103,6 +103,21 @@ export const traitSectionOrder = [
   { name: 'Neuroticism', token: 'neuroticism', scoreKey: 'N' }
 ] as const;
 
+const buildFacetBars = (facets: { facetName: string; score: number }[]) =>
+  facets.length
+    ? `<div class="facet-grid">
+${facets
+  .map(
+    ({ facetName, score }) => `          <div class="facet-row">
+            <span class="facet-label">${escapeHtml(facetName)}</span>
+            <div class="facet-bar"><span style="width:${clampScore(score)}%"></span></div>
+            <span class="facet-value">${clampScore(score)}</span>
+          </div>`
+  )
+  .join('\n')}
+        </div>`
+    : '';
+
 const buildTraitSections = (
   scores: Record<typeof traitSectionOrder[number]['scoreKey'], number>,
   traitPercentages: Record<string, number>,
@@ -117,14 +132,17 @@ const buildTraitSections = (
         const growth = getGrowthTips(name, score).map(escapeHtml).join(' ');
         const workStyle = getWorkStyleTips(name, score).map(escapeHtml).join(' ');
         const relationships = getRelationshipTips(name, score).map(escapeHtml).join(' ');
-        const facets = getFacetInsights(name, facetScores).map(escapeHtml).join(' ');
+        const facetSummary = getFacetSummary(name, facetScores);
+        const facetCallouts = facetSummary?.callouts.map(escapeHtml).join(' ') ?? '';
         const band = getScoreBandLabel(score);
         const scoreValue = traitPercentages[name] ?? score;
+        const facetBars = facetSummary ? buildFacetBars(facetSummary.facets) : '';
 
         return `      <section class="report__trait">
         <h2>${name} — ${band} (${scoreValue}/100)</h2>
         <h3>What it means for you</h3>
-        <p>${facets || escapeHtml(meaning)}</p>
+        <p>${facetCallouts || escapeHtml(meaning)}</p>
+        ${facetBars}
         <h3>Strengths</h3>
         <p>${strengths || 'Identify the strengths that support your goals.'}</p>
         <h3>Watch-outs</h3>

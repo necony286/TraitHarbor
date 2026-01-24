@@ -84,6 +84,7 @@ export async function POST(request: Request) {
       userId,
       answers: sanitizedAnswers,
       traits: result.traits,
+      facetScores: result.facetScores,
       expectedCount: items.length
     });
     createdResultId = response.data;

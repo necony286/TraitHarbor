@@ -47,6 +47,7 @@ describe('score API route', () => {
       userId: '9f4e6c02-87f7-4105-8ad0-7d2cf2c9f42f',
       traits: { O: 50, C: 0, E: 0, A: 0, N: 0 },
       answers: mockAnswers,
+      facetScores: {},
       expectedCount: mockItems.length
     });
     expect(response.status).toBe(500);

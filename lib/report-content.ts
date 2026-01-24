@@ -393,12 +393,17 @@ export const getProfileSummary = (
   return statements.join(' ');
 };
 
-export const getFacetInsights = (
+export type FacetSummary = {
+  facets: { facetName: string; score: number }[];
+  callouts: string[];
+};
+
+export const getFacetSummary = (
   trait: string,
   facetScores?: Record<string, Record<string, number>>
-): string[] => {
+): FacetSummary | null => {
   if (!facetScores) {
-    return [];
+    return null;
   }
 
   const traitName = resolveTraitName(trait);
@@ -407,7 +412,7 @@ export const getFacetInsights = (
   );
 
   if (!entry) {
-    return [];
+    return null;
   }
 
   const [, scores] = entry;
@@ -417,21 +422,26 @@ export const getFacetInsights = (
     .sort((a, b) => b.score - a.score);
 
   if (!facets.length) {
-    return [];
+    return null;
   }
 
-  const insights: string[] = [];
+  const callouts: string[] = [];
   const [topFacet] = facets;
   if (topFacet) {
-    insights.push(`Top facet: ${topFacet.facetName} (${topFacet.score}/100).`);
+    callouts.push(`Strongest facet: ${topFacet.facetName} (${topFacet.score}/100).`);
   }
   const lowestFacet = facets[facets.length - 1];
   if (lowestFacet && lowestFacet.facetName !== topFacet.facetName) {
-    insights.push(`Growth facet: ${lowestFacet.facetName} (${lowestFacet.score}/100).`);
+    callouts.push(`Weakest facet: ${lowestFacet.facetName} (${lowestFacet.score}/100).`);
   }
 
-  return insights;
+  return { facets, callouts };
 };
+
+export const getFacetInsights = (
+  trait: string,
+  facetScores?: Record<string, Record<string, number>>
+): string[] => getFacetSummary(trait, facetScores)?.callouts ?? [];
 
 export const getWorkStyleInsights = (
   traitPercentages: Record<string, number>,

@@ -265,7 +265,7 @@ const traitContent: Record<
       ],
       workStyle: [
         'You are comfortable with constructive critique and debate.',
-        'You set clear expectations to collaborate effectively.'
+'You collaborate more effectively when expectations are clear.'
       ],
       relationships: [
         'Your honesty can help others see issues clearly.',

@@ -1,6 +1,25 @@
 import { describe, expect, it } from 'vitest';
 import { getScoreBandLabel } from '../lib/report-content';
-import { buildReportHtml, traitSectionOrder, type ReportTraits } from '../lib/pdf';
+import { buildReportHtml, traitSectionOrder, type ReportPayload, type ReportTraits } from '../lib/pdf';
+
+const createReportPayload = (
+  traits: ReportTraits,
+  overrides: Partial<Omit<ReportPayload, 'traits' | 'traitPercentages'>> = {}
+): ReportPayload => ({
+  date: new Date(Date.UTC(2024, 0, 2, 12, 0, 0)),
+  traits,
+  traitPercentages: {
+    Openness: traits.O,
+    Conscientiousness: traits.C,
+    Extraversion: traits.E,
+    Agreeableness: traits.A,
+    Neuroticism: traits.N
+  },
+  highestTrait: 'Openness',
+  lowestTrait: 'Neuroticism',
+  traitRankOrder: ['Openness', 'Conscientiousness', 'Extraversion', 'Agreeableness', 'Neuroticism'],
+  ...overrides
+});
 
 describe('report template', () => {
   it('hydrates report html with trait scores', async () => {
@@ -11,20 +30,7 @@ describe('report template', () => {
       A: 55,
       N: 45
     };
-    const html = await buildReportHtml({
-      date: new Date(Date.UTC(2024, 0, 2, 12, 0, 0)),
-      traits,
-      traitPercentages: {
-        Openness: traits.O,
-        Conscientiousness: traits.C,
-        Extraversion: traits.E,
-        Agreeableness: traits.A,
-        Neuroticism: traits.N
-      },
-      highestTrait: 'Openness',
-      lowestTrait: 'Neuroticism',
-      traitRankOrder: ['Openness', 'Conscientiousness', 'Extraversion', 'Agreeableness', 'Neuroticism']
-    });
+    const html = await buildReportHtml(createReportPayload(traits));
 
     expect(html).toContain('Your Personality Profile');
     expect(html).not.toContain('{{trait_sections}}');
@@ -40,26 +46,27 @@ describe('report template', () => {
   });
 
   it('escapes user-provided strings in the report template', async () => {
-    const html = await buildReportHtml({
-      date: new Date(Date.UTC(2024, 0, 2, 12, 0, 0)),
-      traits: {
-        O: 85,
-        C: 70,
-        E: 60,
-        A: 55,
-        N: 45
-      },
-      traitPercentages: {
-        Openness: 85,
-        Conscientiousness: 70,
-        Extraversion: 60,
-        Agreeableness: 55,
-        Neuroticism: 45
-      },
-      highestTrait: '<script>alert("x")</script>',
-      lowestTrait: 'Neuroticism',
-      traitRankOrder: ['<script>alert("x")</script>', 'Conscientiousness', 'Extraversion', 'Agreeableness', 'Neuroticism']
-    });
+    const html = await buildReportHtml(
+      createReportPayload(
+        {
+          O: 85,
+          C: 70,
+          E: 60,
+          A: 55,
+          N: 45
+        },
+        {
+          highestTrait: '<script>alert("x")</script>',
+          traitRankOrder: [
+            '<script>alert("x")</script>',
+            'Conscientiousness',
+            'Extraversion',
+            'Agreeableness',
+            'Neuroticism'
+          ]
+        }
+      )
+    );
 
     expect(html).toContain('&lt;script&gt;alert(&quot;x&quot;)&lt;/script&gt;');
     expect(html).not.toContain('<script>alert("x")</script>');
@@ -74,20 +81,7 @@ describe('report template', () => {
       N: 50
     };
 
-    const html = await buildReportHtml({
-      date: new Date(Date.UTC(2024, 0, 2, 12, 0, 0)),
-      traits,
-      traitPercentages: {
-        Openness: traits.O,
-        Conscientiousness: traits.C,
-        Extraversion: traits.E,
-        Agreeableness: traits.A,
-        Neuroticism: traits.N
-      },
-      highestTrait: 'Openness',
-      lowestTrait: 'Neuroticism',
-      traitRankOrder: ['Openness', 'Conscientiousness', 'Extraversion', 'Agreeableness', 'Neuroticism']
-    });
+    const html = await buildReportHtml(createReportPayload(traits));
 
     expect(html).not.toContain('<p class="overview__callout">');
   });
@@ -101,20 +95,12 @@ describe('report template', () => {
       N: 62
     };
 
-    const html = await buildReportHtml({
-      date: new Date(Date.UTC(2024, 0, 2, 12, 0, 0)),
-      traits,
-      traitPercentages: {
-        Openness: traits.O,
-        Conscientiousness: traits.C,
-        Extraversion: traits.E,
-        Agreeableness: traits.A,
-        Neuroticism: traits.N
-      },
-      highestTrait: 'Openness',
-      lowestTrait: 'Openness',
-      traitRankOrder: ['Openness', 'Conscientiousness', 'Extraversion', 'Agreeableness', 'Neuroticism']
-    });
+    const html = await buildReportHtml(
+      createReportPayload(traits, {
+        highestTrait: 'Openness',
+        lowestTrait: 'Openness'
+      })
+    );
 
     expect(html).toContain(
       '<p class="overview__callout">Highest &amp; Lowest trait: <strong>Openness</strong>.</p>'

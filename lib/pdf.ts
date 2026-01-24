@@ -137,30 +137,36 @@ const buildTraitSections = (
         const band = getScoreBandLabel(score);
         const scoreValue = traitPercentages[name] ?? score;
         const facetBars = facetSummary ? buildFacetBars(facetSummary.facets) : '';
+        const buildAvoidBreakSection = (title: string, content: string) => `        <div class="avoid-break">
+          <h3>${title}</h3>
+          <p>${content}</p>
+        </div>`;
+        const sections = [
+          buildAvoidBreakSection('What it means for you', facetCallouts || escapeHtml(meaning)),
+          facetBars ? `<div class="avoid-break">${facetBars}</div>` : '',
+          buildAvoidBreakSection(
+            'Strengths',
+            strengths || 'Identify the strengths that support your goals.'
+          ),
+          buildAvoidBreakSection(
+            'Watch-outs',
+            growth || 'Focus on one growth habit that keeps you balanced.'
+          ),
+          buildAvoidBreakSection(
+            'Career tip',
+            workStyle || 'Choose environments that align with how you prefer to work.'
+          ),
+          buildAvoidBreakSection(
+            'Relationship tip',
+            relationships || 'Notice how this trait shapes how you connect with others.'
+          )
+        ]
+          .filter(Boolean)
+          .join('\n');
 
         return `      <section class="report__trait">
         <h2>${name} — ${band} (${scoreValue}/100)</h2>
-        <div class="avoid-break">
-          <h3>What it means for you</h3>
-          <p>${facetCallouts || escapeHtml(meaning)}</p>
-        </div>
-        ${facetBars ? `<div class="avoid-break">${facetBars}</div>` : ''}
-        <div class="avoid-break">
-          <h3>Strengths</h3>
-          <p>${strengths || 'Identify the strengths that support your goals.'}</p>
-        </div>
-        <div class="avoid-break">
-          <h3>Watch-outs</h3>
-          <p>${growth || 'Focus on one growth habit that keeps you balanced.'}</p>
-        </div>
-        <div class="avoid-break">
-          <h3>Career tip</h3>
-          <p>${workStyle || 'Choose environments that align with how you prefer to work.'}</p>
-        </div>
-        <div class="avoid-break">
-          <h3>Relationship tip</h3>
-          <p>${relationships || 'Notice how this trait shapes how you connect with others.'}</p>
-        </div>
+${sections}
       </section>`;
       }
     )
@@ -218,33 +224,24 @@ const buildHighestLowestCallout = (highestTrait: string, lowestTrait: string) =>
     return '';
   }
 
+  let calloutText = '';
+
   if (highest && lowest) {
     if (highest === lowest) {
-      return `      <div class="avoid-break">
-        <p class="overview__callout">Highest &amp; Lowest trait: <strong>${escapeHtml(
-          highest
-        )}</strong>.</p>
-      </div>`;
+      calloutText = `Highest &amp; Lowest trait: <strong>${escapeHtml(highest)}</strong>.`;
+    } else {
+      calloutText = `Highest trait: <strong>${escapeHtml(
+        highest
+      )}</strong>. Lowest trait: <strong>${escapeHtml(lowest)}</strong>.`;
     }
-    return `      <div class="avoid-break">
-        <p class="overview__callout">Highest trait: <strong>${escapeHtml(
-          highest
-        )}</strong>. Lowest trait: <strong>${escapeHtml(lowest)}</strong>.</p>
-      </div>`;
-  }
-
-  if (highest) {
-    return `      <div class="avoid-break">
-        <p class="overview__callout">Highest trait: <strong>${escapeHtml(
-          highest
-        )}</strong>.</p>
-      </div>`;
+  } else if (highest) {
+    calloutText = `Highest trait: <strong>${escapeHtml(highest)}</strong>.`;
+  } else {
+    calloutText = `Lowest trait: <strong>${escapeHtml(lowest)}</strong>.`;
   }
 
   return `      <div class="avoid-break">
-        <p class="overview__callout">Lowest trait: <strong>${escapeHtml(
-          lowest
-        )}</strong>.</p>
+        <p class="overview__callout">${calloutText}</p>
       </div>`;
 };
 

@@ -27,7 +27,7 @@ describe('report template', () => {
       traitRankOrder: ['Openness', 'Conscientiousness', 'Extraversion', 'Agreeableness', 'Neuroticism']
     });
 
-    expect(html).toContain("Alex's Personality Profile");
+    expect(html).toContain('Your Personality Profile');
     expect(html).not.toContain('{{trait_sections}}');
     const expectedTraits = traitSectionOrder.map(({ name, scoreKey }) => ({
       name,
@@ -42,7 +42,7 @@ describe('report template', () => {
 
   it('escapes user-provided strings in the report template', async () => {
     const html = await buildReportHtml({
-      name: '<script>alert("x")</script>',
+      name: 'Alex',
       date: new Date(Date.UTC(2024, 0, 2, 12, 0, 0)),
       traits: {
         O: 85,
@@ -58,10 +58,9 @@ describe('report template', () => {
         Agreeableness: 55,
         Neuroticism: 45
       },
-      highestTrait: 'Openness',
+      highestTrait: '<script>alert("x")</script>',
       lowestTrait: 'Neuroticism',
-      traitRankOrder: ['Openness', 'Conscientiousness', 'Extraversion', 'Agreeableness', 'Neuroticism'],
-      userName: '<script>alert("x")</script>'
+      traitRankOrder: ['<script>alert("x")</script>', 'Conscientiousness', 'Extraversion', 'Agreeableness', 'Neuroticism']
     });
 
     expect(html).toContain('&lt;script&gt;alert(&quot;x&quot;)&lt;/script&gt;');

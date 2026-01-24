@@ -158,7 +158,7 @@ describe('email config validation', () => {
       'Failed to fetch PDF for email attachment; sending link-only.',
       expect.objectContaining({
         orderId: reportPayload.orderId,
-        error: expect.stringMatching(/exceeds.*${MAX_EMAIL_ATTACHMENT_BYTES}/)
+        error: `PDF exceeds ${MAX_EMAIL_ATTACHMENT_BYTES} bytes.`
       })
     );
     expect(sendMock).toHaveBeenCalledWith(
@@ -191,7 +191,7 @@ describe('email config validation', () => {
       'Failed to fetch PDF for email attachment; sending link-only.',
       expect.objectContaining({
         orderId: reportPayload.orderId,
-        error: expect.stringMatching(/exceeds.*${MAX_EMAIL_ATTACHMENT_BYTES}/)
+        error: `PDF exceeds ${MAX_EMAIL_ATTACHMENT_BYTES} bytes.`
       })
     );
     expect(sendMock).toHaveBeenCalledWith(

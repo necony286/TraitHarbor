@@ -175,9 +175,13 @@ describe('report template', () => {
     };
     const html = await buildReportHtml(createReportPayload(traits));
     const [resource] = RESOURCES_BY_TRAIT.Openness;
+    const unsafeResource = RESOURCES_BY_TRAIT.Openness.find(
+      (candidate) => candidate.label === 'Unsafe resource'
+    );
 
     expect(html).toContain(`href="${resource.url}"`);
-    expect(html).not.toContain(unsafeResource.url);
-    expect(html).not.toContain(`${unsafeResource.label}</a>`);
+    expect(unsafeResource).toBeDefined();
+    expect(html).not.toContain(unsafeResource?.url);
+    expect(html).not.toContain(`${unsafeResource?.label}</a>`);
   });
 });

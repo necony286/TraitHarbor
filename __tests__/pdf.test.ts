@@ -181,7 +181,7 @@ describe('report template', () => {
 
     expect(html).toContain(`href="${resource.url}"`);
     expect(unsafeResource).toBeDefined();
-    expect(html).not.toContain(unsafeResource?.url);
-    expect(html).not.toContain(`${unsafeResource?.label}</a>`);
+    expect(html).not.toContain(unsafeResource.url);
+    expect(html).not.toContain(unsafeResource.label + '</a>');
   });
 });

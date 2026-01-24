@@ -136,10 +136,12 @@ h2 {
   }
 
   .report__cover {
+    break-after: always;
     page-break-after: always;
   }
 
   .report__roadmap {
+    break-before: always;
     page-break-before: always;
   }
 }

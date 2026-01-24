@@ -35,30 +35,16 @@ const resolveTraitName = (trait: string) => {
   return traitKeyMap[normalized] ?? trait.trim();
 };
 
-const formatPossessiveName = (name: string) => (name.endsWith('s') || name.endsWith('S') ? `${name}'` : `${name}'s`);
-
 const getNarrativeVoice = (narrativeName?: string): NarrativeVoice => {
-  const trimmedName = narrativeName?.trim();
-  if (!trimmedName || trimmedName === 'You') {
-    return {
-      isSecondPerson: true,
-      subject: 'You',
-      subjectPronoun: 'you',
-      objectPronoun: 'you',
-      possessiveDeterminer: 'your',
-      possessiveAdjective: 'Your',
-      possessiveName: 'Your'
-    };
-  }
-
+  void narrativeName;
   return {
-    isSecondPerson: false,
-    subject: trimmedName,
-    subjectPronoun: 'they',
-    objectPronoun: 'them',
-    possessiveDeterminer: 'their',
-    possessiveAdjective: 'Their',
-    possessiveName: formatPossessiveName(trimmedName)
+    isSecondPerson: true,
+    subject: 'You',
+    subjectPronoun: 'you',
+    objectPronoun: 'you',
+    possessiveDeterminer: 'your',
+    possessiveAdjective: 'Your',
+    possessiveName: 'Your'
   };
 };
 

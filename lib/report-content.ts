@@ -45,6 +45,9 @@ const NARRATIVE_VOICE: NarrativeVoice = {
   possessiveName: 'Your'
 };
 
+export const withPrefix = (message: string, fallback: string) =>
+  /^(you|your) /i.test(message) ? message : `${fallback}: ${message}`;
+
 const traitContent: Record<
   TraitName,
   Record<ScoreBand, { strengths: string[]; growth: string[]; workStyle: string[]; relationships: string[] }>
@@ -574,8 +577,6 @@ export const getPersonalDevelopmentRoadmap = (
   const strengths = getStrengths(topTrait, topScore);
   const growth = getGrowthTips(bottomTrait, bottomScore);
 
-  const withPrefix = (message: string, fallback: string) =>
-    /^(you|your) /i.test(message) ? message : `${fallback}: ${message}`;
   const doMore = strengths[0]
     ? withPrefix(strengths[0], 'You do more of this')
     : `You lean into ${topTrait} by choosing one task this week that highlights what you do best.`;

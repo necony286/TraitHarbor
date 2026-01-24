@@ -331,15 +331,14 @@ export async function buildReportHtml(payload: ReportPayload) {
   };
 
   const normalizedUserName = payload.userName?.trim();
-  const narrativeName = normalizedUserName || payload.name || 'You';
   const highestTrait = payload.highestTrait.trim() || '';
   const lowestTrait = payload.lowestTrait.trim() || '';
   const traitRankOrder = payload.traitRankOrder.filter(Boolean);
 
-  const profileSummary = getProfileSummary(clampedTraitPercentages, traitRankOrder, narrativeName);
-  const comparisonText = getComparisonText(traitRankOrder, narrativeName);
-  const workStyle = getWorkStyleInsights(clampedTraitPercentages, traitRankOrder, narrativeName);
-  const relationshipInsights = getRelationshipInsights(clampedTraitPercentages, traitRankOrder, narrativeName);
+  const profileSummary = getProfileSummary(clampedTraitPercentages, traitRankOrder);
+  const comparisonText = getComparisonText(traitRankOrder);
+  const workStyle = getWorkStyleInsights(clampedTraitPercentages, traitRankOrder);
+  const relationshipInsights = getRelationshipInsights(clampedTraitPercentages, traitRankOrder);
   const roadmapBlocks = buildRoadmapBlocks(
     getPersonalDevelopmentRoadmap(clampedTraitPercentages, traitRankOrder)
   );

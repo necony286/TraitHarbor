@@ -351,7 +351,7 @@ export const getProfileSummary = (
   traitPercentages: Record<string, number>,
   traitRankOrder: string[]
 ): string => {
-  const voice = getNarrativeVoice();
+  const voice = NARRATIVE_VOICE;
   if (!traitRankOrder.length) {
     return `${voice.possessiveName} profile reflects a balanced mix of personality traits.`;
   }

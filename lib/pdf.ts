@@ -233,15 +233,9 @@ ${rows}
   };
 };
 
-const joinWithAnd = (items: string[]) => {
-  if (items.length <= 1) {
-    return items.join('');
-  }
-  if (items.length === 2) {
-    return `${items[0]} and ${items[1]}`;
-  }
-  return `${items.slice(0, -1).join(', ')}, and ${items[items.length - 1]}`;
-};
+const listFormatter = new Intl.ListFormat('en-US', { style: 'long', type: 'conjunction' });
+
+const joinWithAnd = (items: string[]) => listFormatter.format(items);
 
 const buildHighestLowestCallout = ({
   highestTraits,
@@ -257,20 +251,18 @@ const buildHighestLowestCallout = ({
     return '';
   }
 
-  const statements: string[] = [];
+  const buildStatement = (traits: string[], label: 'Highest' | 'Lowest') => {
+    if (!traits.length) {
+      return null;
+    }
+    const traitLabel = `${label} ${traits.length > 1 ? 'traits' : 'trait'}`;
+    const tied = traits.length > 1 ? ' (tied)' : '';
+    return `${traitLabel}: ${joinWithAnd(traits)}${tied}.`;
+  };
 
-  if (highest.length) {
-    const label = highest.length > 1 ? 'Highest traits' : 'Highest trait';
-    const tied = highest.length > 1 ? ' (tied)' : '';
-    statements.push(`${label}: ${joinWithAnd(highest)}${tied}.`);
-  }
-  if (lowest.length) {
-    const label = lowest.length > 1 ? 'Lowest traits' : 'Lowest trait';
-    const tied = lowest.length > 1 ? ' (tied)' : '';
-    statements.push(`${label}: ${joinWithAnd(lowest)}${tied}.`);
-  }
-
-  const calloutText = statements.join(' ');
+  const calloutText = [buildStatement(highest, 'Highest'), buildStatement(lowest, 'Lowest')]
+    .filter((statement): statement is string => Boolean(statement))
+    .join(' ');
 
   return `      <div class="avoid-break">
         <p class="overview__callout">${calloutText}</p>

@@ -261,7 +261,7 @@ const traitContent: Record<
       ],
       growth: [
         'You practice acknowledging others\' feelings before debating solutions.',
-        'You use small gestures of appreciation to go a long way.'
+'Your small gestures of appreciation can go a long way.'
       ],
       workStyle: [
         'You are comfortable with constructive critique and debate.',

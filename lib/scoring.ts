@@ -2,6 +2,7 @@ import { TRAIT_DATA, type TraitKey } from '../src/data/traits';
 import { QuizItem } from './ipip';
 
 type Trait = TraitKey;
+export type FacetScores = Record<string, Record<string, number>>;
 
 export type AnswerMap = Record<string, number>;
 export type TraitScores = Record<Trait, number>;
@@ -10,9 +11,11 @@ export type ScoreResult = {
   traits: TraitScores;
   raw: TraitScores;
   counts: TraitScores;
+  facetScores: FacetScores;
 };
 
 const TRAITS: Trait[] = TRAIT_DATA.map((trait) => trait.key);
+const TRAIT_NAME_BY_KEY = new Map(TRAIT_DATA.map((trait) => [trait.key, trait.name]));
 
 const emptyTraitScores = (): TraitScores => ({
   O: 0,
@@ -38,6 +41,8 @@ export const getMissingAnswerIds = (answers: AnswerMap, items: QuizItem[]) =>
 export const scoreAnswers = (answers: AnswerMap, items: QuizItem[]): ScoreResult => {
   const raw = emptyTraitScores();
   const counts = emptyTraitScores();
+  const facetRaw: FacetScores = {};
+  const facetCounts: FacetScores = {};
 
   items.forEach((item) => {
     counts[item.trait] += 1;
@@ -46,6 +51,14 @@ export const scoreAnswers = (answers: AnswerMap, items: QuizItem[]): ScoreResult
     const mapped = mapLikertToScore(answer);
     const adjusted = item.reverseKeyed ? -mapped : mapped;
     raw[item.trait] += adjusted;
+
+    if (item.facet) {
+      const traitName = TRAIT_NAME_BY_KEY.get(item.trait) ?? item.trait;
+      facetRaw[traitName] ??= {};
+      facetCounts[traitName] ??= {};
+      facetRaw[traitName][item.facet] = (facetRaw[traitName][item.facet] ?? 0) + adjusted;
+      facetCounts[traitName][item.facet] = (facetCounts[traitName][item.facet] ?? 0) + 1;
+    }
   });
 
   const traits = TRAITS.reduce<TraitScores>((accumulator, trait) => {
@@ -53,7 +66,19 @@ export const scoreAnswers = (answers: AnswerMap, items: QuizItem[]): ScoreResult
     return accumulator;
   }, emptyTraitScores());
 
-  return { traits, raw, counts };
+  const facetScores = Object.entries(facetRaw).reduce<FacetScores>((accumulator, [trait, facets]) => {
+    accumulator[trait] = Object.entries(facets).reduce<Record<string, number>>(
+      (facetAccumulator, [facet, value]) => {
+        const count = facetCounts[trait]?.[facet] ?? 0;
+        facetAccumulator[facet] = normalizeScore(value, count);
+        return facetAccumulator;
+      },
+      {}
+    );
+    return accumulator;
+  }, {});
+
+  return { traits, raw, counts, facetScores };
 };
 
 export const scoringFixtureItems: QuizItem[] = [

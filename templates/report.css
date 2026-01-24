@@ -121,6 +121,41 @@ h2 {
   font-size: 15px;
 }
 
+.facet-grid {
+  margin: 8px 0 16px;
+  display: grid;
+  gap: 8px;
+}
+
+.facet-row {
+  display: grid;
+  grid-template-columns: 140px 1fr 40px;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: #475467;
+}
+
+.facet-bar {
+  position: relative;
+  height: 8px;
+  background: #e4e7ec;
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.facet-bar span {
+  position: absolute;
+  inset: 0;
+  background: #7b5cff;
+  border-radius: 999px;
+}
+
+.facet-value {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
 .report__tips ul {
   margin: 0;
   padding-left: 18px;

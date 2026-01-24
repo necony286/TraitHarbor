@@ -2,7 +2,7 @@ import { z } from 'zod';
 import { PG_FOREIGN_KEY_VIOLATION_ERROR_CODE } from './db/constants';
 import { logWarn } from './logger';
 import { OrderStatus, orderDetailSchema, orderSchema } from './orders';
-import { TraitScores } from './scoring';
+import { FacetScores, TraitScores } from './scoring';
 import { getSupabaseAdminClient } from './supabase';
 
 const traitSchema = z.object({
@@ -32,8 +32,6 @@ type DbResult<T> = {
   error: DbError | null;
 };
 
-type FacetScores = Record<string, Record<string, number>>;
-
 type OrderLookup = {
   orderId?: string;
   paddleOrderId?: string;
@@ -43,6 +41,7 @@ type CreateResponseParams = {
   userId: string;
   answers: Record<string, number>;
   traits: TraitScores;
+  facetScores?: FacetScores | null;
   expectedCount: number;
 };
 
@@ -149,6 +148,7 @@ export const createResponseAndScores = async ({
   userId,
   answers,
   traits,
+  facetScores,
   expectedCount
 }: CreateResponseParams): Promise<DbResult<string>> => {
   const userError = await ensureUserRecord(userId);
@@ -161,6 +161,7 @@ export const createResponseAndScores = async ({
     user_id: userId,
     answers,
     traits,
+    facet_scores: facetScores ?? null,
     expected_count: expectedCount
   });
 

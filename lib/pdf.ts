@@ -234,7 +234,7 @@ const buildOverviewChart = (
   }));
   const { highestTraits, lowestTraits, allScoresEqual, isBalanced } =
     getTraitExtremes(scoresWithNames);
-  const highlightExtremes = !allScoresEqual;
+  const highlightExtremes = !allScoresEqual && !isBalanced;
   const highestTraitSet = new Set(highestTraits);
   const lowestTraitSet = new Set(lowestTraits);
 

@@ -2,14 +2,14 @@
   {
     "id": "Q1",
     "prompt": "Do you worry about things?",
-    "trait": "O",
+    "trait": "N",
     "reverseKeyed": false
   },
   {
     "id": "Q2",
     "prompt": "Do you make friends easily?",
-    "trait": "O",
-    "reverseKeyed": true
+    "trait": "E",
+    "reverseKeyed": false
   },
   {
     "id": "Q3",
@@ -20,56 +20,56 @@
   {
     "id": "Q4",
     "prompt": "Do you trust others?",
-    "trait": "O",
-    "reverseKeyed": true
+    "trait": "A",
+    "reverseKeyed": false
   },
   {
     "id": "Q5",
     "prompt": "Do you complete tasks successfully?",
-    "trait": "O",
+    "trait": "C",
     "reverseKeyed": false
   },
   {
     "id": "Q6",
     "prompt": "Do you get angry easily?",
-    "trait": "O",
-    "reverseKeyed": true
+    "trait": "N",
+    "reverseKeyed": false
   },
   {
     "id": "Q7",
     "prompt": "Do you love large parties?",
-    "trait": "O",
+    "trait": "E",
     "reverseKeyed": false
   },
   {
     "id": "Q8",
     "prompt": "Do you believe in the importance of art?",
     "trait": "O",
-    "reverseKeyed": true
+    "reverseKeyed": false
   },
   {
     "id": "Q9",
     "prompt": "Do you use others for your own ends?",
-    "trait": "O",
-    "reverseKeyed": false
+    "trait": "A",
+    "reverseKeyed": true
   },
   {
     "id": "Q10",
     "prompt": "Do you like to tidy up?",
-    "trait": "O",
-    "reverseKeyed": true
+    "trait": "C",
+    "reverseKeyed": false
   },
   {
     "id": "Q11",
     "prompt": "Do you often feel blue?",
-    "trait": "O",
+    "trait": "N",
     "reverseKeyed": false
   },
   {
     "id": "Q12",
     "prompt": "Do you take charge?",
-    "trait": "O",
-    "reverseKeyed": true
+    "trait": "E",
+    "reverseKeyed": false
   },
   {
     "id": "Q13",
@@ -80,56 +80,56 @@
   {
     "id": "Q14",
     "prompt": "Do you love to help others?",
-    "trait": "O",
-    "reverseKeyed": true
+    "trait": "A",
+    "reverseKeyed": false
   },
   {
     "id": "Q15",
     "prompt": "Do you keep your promises?",
-    "trait": "O",
+    "trait": "C",
     "reverseKeyed": false
   },
   {
     "id": "Q16",
     "prompt": "Do you find it difficult to approach others?",
-    "trait": "O",
-    "reverseKeyed": true
+    "trait": "N",
+    "reverseKeyed": false
   },
   {
     "id": "Q17",
     "prompt": "Are you always busy?",
-    "trait": "O",
+    "trait": "E",
     "reverseKeyed": false
   },
   {
     "id": "Q18",
     "prompt": "Do you prefer variety to routine?",
     "trait": "O",
-    "reverseKeyed": true
+    "reverseKeyed": false
   },
   {
     "id": "Q19",
     "prompt": "Do you love a good fight?",
-    "trait": "O",
-    "reverseKeyed": false
+    "trait": "A",
+    "reverseKeyed": true
   },
   {
     "id": "Q20",
     "prompt": "Do you work hard?",
-    "trait": "O",
-    "reverseKeyed": true
+    "trait": "C",
+    "reverseKeyed": false
   },
   {
     "id": "Q21",
     "prompt": "Do you go on binges?",
-    "trait": "O",
+    "trait": "N",
     "reverseKeyed": false
   },
   {
     "id": "Q22",
     "prompt": "Do you love excitement?",
-    "trait": "O",
-    "reverseKeyed": true
+    "trait": "E",
+    "reverseKeyed": false
   },
   {
     "id": "Q23",
@@ -140,7 +140,7 @@
   {
     "id": "Q24",
     "prompt": "Do you believe that you are better than others?",
-    "trait": "O",
+    "trait": "A",
     "reverseKeyed": true
   },
   {
@@ -152,25 +152,25 @@
   {
     "id": "Q26",
     "prompt": "Do you panic easily?",
-    "trait": "C",
-    "reverseKeyed": true
+    "trait": "N",
+    "reverseKeyed": false
   },
   {
     "id": "Q27",
     "prompt": "Do you radiate joy?",
-    "trait": "C",
+    "trait": "E",
     "reverseKeyed": false
   },
   {
     "id": "Q28",
     "prompt": "Do you tend to vote for liberal (progressive) political candidates?",
-    "trait": "C",
-    "reverseKeyed": true
+    "trait": "O",
+    "reverseKeyed": false
   },
   {
     "id": "Q29",
     "prompt": "Do you sympathise with the homeless?",
-    "trait": "C",
+    "trait": "A",
     "reverseKeyed": false
   },
   {
@@ -182,26 +182,26 @@
   {
     "id": "Q31",
     "prompt": "Do you fear the worst?",
-    "trait": "C",
+    "trait": "N",
     "reverseKeyed": false
   },
   {
     "id": "Q32",
     "prompt": "Do you feel comfortable around people?",
-    "trait": "C",
-    "reverseKeyed": true
+    "trait": "E",
+    "reverseKeyed": false
   },
   {
     "id": "Q33",
     "prompt": "Do you enjoy wild flights of fantasy?",
-    "trait": "C",
+    "trait": "O",
     "reverseKeyed": false
   },
   {
     "id": "Q34",
     "prompt": "Do you believe that others have good intentions?",
-    "trait": "C",
-    "reverseKeyed": true
+    "trait": "A",
+    "reverseKeyed": false
   },
   {
     "id": "Q35",
@@ -212,26 +212,26 @@
   {
     "id": "Q36",
     "prompt": "Do you get irritated easily?",
-    "trait": "C",
-    "reverseKeyed": true
+    "trait": "N",
+    "reverseKeyed": false
   },
   {
     "id": "Q37",
     "prompt": "Do you talk to a lot of different people at parties?",
-    "trait": "C",
+    "trait": "E",
     "reverseKeyed": false
   },
   {
     "id": "Q38",
     "prompt": "Do you see beauty in things that others might not notice?",
-    "trait": "C",
-    "reverseKeyed": true
+    "trait": "O",
+    "reverseKeyed": false
   },
   {
     "id": "Q39",
     "prompt": "Do you cheat to get ahead?",
-    "trait": "C",
-    "reverseKeyed": false
+    "trait": "A",
+    "reverseKeyed": true
   },
   {
     "id": "Q40",
@@ -242,26 +242,26 @@
   {
     "id": "Q41",
     "prompt": "Do you dislike yourself?",
-    "trait": "C",
+    "trait": "N",
     "reverseKeyed": false
   },
   {
     "id": "Q42",
     "prompt": "Do you try to lead others?",
-    "trait": "C",
-    "reverseKeyed": true
+    "trait": "E",
+    "reverseKeyed": false
   },
   {
     "id": "Q43",
-    "prompt": "Do you feel others’ emotions?",
-    "trait": "C",
+    "prompt": "Do you feel others\u2019 emotions?",
+    "trait": "O",
     "reverseKeyed": false
   },
   {
     "id": "Q44",
     "prompt": "Are you concerned about others?",
-    "trait": "C",
-    "reverseKeyed": true
+    "trait": "A",
+    "reverseKeyed": false
   },
   {
     "id": "Q45",
@@ -272,68 +272,68 @@
   {
     "id": "Q46",
     "prompt": "Are you afraid to draw attention to yourself?",
-    "trait": "C",
-    "reverseKeyed": true
+    "trait": "N",
+    "reverseKeyed": false
   },
   {
     "id": "Q47",
     "prompt": "Are you always on the go?",
-    "trait": "C",
+    "trait": "E",
     "reverseKeyed": false
   },
   {
     "id": "Q48",
     "prompt": "Do you prefer to stick with things that you know?",
-    "trait": "C",
+    "trait": "O",
     "reverseKeyed": true
   },
   {
     "id": "Q49",
     "prompt": "Do you yell at people?",
-    "trait": "E",
-    "reverseKeyed": false
+    "trait": "A",
+    "reverseKeyed": true
   },
   {
     "id": "Q50",
-    "prompt": "Do you do more than what’s expected of you?",
-    "trait": "E",
-    "reverseKeyed": true
+    "prompt": "Do you do more than what\u2019s expected of you?",
+    "trait": "C",
+    "reverseKeyed": false
   },
   {
     "id": "Q51",
     "prompt": "Do you rarely overindulge?",
-    "trait": "E",
-    "reverseKeyed": false
+    "trait": "N",
+    "reverseKeyed": true
   },
   {
     "id": "Q52",
     "prompt": "Do you seek adventure?",
     "trait": "E",
-    "reverseKeyed": true
+    "reverseKeyed": false
   },
   {
     "id": "Q53",
     "prompt": "Do you avoid philosophical discussions?",
-    "trait": "E",
-    "reverseKeyed": false
+    "trait": "O",
+    "reverseKeyed": true
   },
   {
     "id": "Q54",
     "prompt": "Do you think highly of yourself?",
-    "trait": "E",
+    "trait": "A",
     "reverseKeyed": true
   },
   {
     "id": "Q55",
     "prompt": "Do you carry out your plans?",
-    "trait": "E",
+    "trait": "C",
     "reverseKeyed": false
   },
   {
     "id": "Q56",
     "prompt": "Do you become overwhelmed by events?",
-    "trait": "E",
-    "reverseKeyed": true
+    "trait": "N",
+    "reverseKeyed": false
   },
   {
     "id": "Q57",
@@ -344,25 +344,25 @@
   {
     "id": "Q58",
     "prompt": "Do you believe that there is no absolute right or wrong?",
-    "trait": "E",
-    "reverseKeyed": true
+    "trait": "O",
+    "reverseKeyed": false
   },
   {
     "id": "Q59",
     "prompt": "Do you feel sympathy for those who are worse off than you?",
-    "trait": "E",
+    "trait": "A",
     "reverseKeyed": false
   },
   {
     "id": "Q60",
     "prompt": "Do you make rash decisions?",
-    "trait": "E",
+    "trait": "C",
     "reverseKeyed": true
   },
   {
     "id": "Q61",
     "prompt": "Are you afraid of many things?",
-    "trait": "E",
+    "trait": "N",
     "reverseKeyed": false
   },
   {
@@ -374,68 +374,68 @@
   {
     "id": "Q63",
     "prompt": "Do you love to daydream?",
-    "trait": "E",
+    "trait": "O",
     "reverseKeyed": false
   },
   {
     "id": "Q64",
     "prompt": "Do you trust what people say?",
-    "trait": "E",
-    "reverseKeyed": true
+    "trait": "A",
+    "reverseKeyed": false
   },
   {
     "id": "Q65",
     "prompt": "Do you handle tasks smoothly?",
-    "trait": "E",
+    "trait": "C",
     "reverseKeyed": false
   },
   {
     "id": "Q66",
     "prompt": "Do you lose your temper?",
-    "trait": "E",
-    "reverseKeyed": true
+    "trait": "N",
+    "reverseKeyed": false
   },
   {
     "id": "Q67",
     "prompt": "Do you prefer to be alone?",
     "trait": "E",
-    "reverseKeyed": false
+    "reverseKeyed": true
   },
   {
     "id": "Q68",
     "prompt": "Do you not like poetry?",
-    "trait": "E",
+    "trait": "O",
     "reverseKeyed": true
   },
   {
     "id": "Q69",
     "prompt": "Do you take advantage of others?",
-    "trait": "E",
-    "reverseKeyed": false
+    "trait": "A",
+    "reverseKeyed": true
   },
   {
     "id": "Q70",
     "prompt": "Do you leave a mess in your room?",
-    "trait": "E",
+    "trait": "C",
     "reverseKeyed": true
   },
   {
     "id": "Q71",
     "prompt": "Are you often down in the dumps?",
-    "trait": "E",
+    "trait": "N",
     "reverseKeyed": false
   },
   {
     "id": "Q72",
     "prompt": "Do you take control of things?",
     "trait": "E",
-    "reverseKeyed": true
+    "reverseKeyed": false
   },
   {
     "id": "Q73",
     "prompt": "Do you rarely notice your emotional reactions?",
-    "trait": "A",
-    "reverseKeyed": false
+    "trait": "O",
+    "reverseKeyed": true
   },
   {
     "id": "Q74",
@@ -446,56 +446,56 @@
   {
     "id": "Q75",
     "prompt": "Do you break rules?",
-    "trait": "A",
-    "reverseKeyed": false
+    "trait": "C",
+    "reverseKeyed": true
   },
   {
     "id": "Q76",
     "prompt": "Do you only feel comfortable with friends?",
-    "trait": "A",
-    "reverseKeyed": true
+    "trait": "N",
+    "reverseKeyed": false
   },
   {
     "id": "Q77",
     "prompt": "Do you do a lot in your spare time?",
-    "trait": "A",
+    "trait": "E",
     "reverseKeyed": false
   },
   {
     "id": "Q78",
     "prompt": "Do you dislike changes?",
-    "trait": "A",
+    "trait": "O",
     "reverseKeyed": true
   },
   {
     "id": "Q79",
     "prompt": "Do you insult people?",
     "trait": "A",
-    "reverseKeyed": false
+    "reverseKeyed": true
   },
   {
     "id": "Q80",
     "prompt": "Do you do just enough work to get by?",
-    "trait": "A",
+    "trait": "C",
     "reverseKeyed": true
   },
   {
     "id": "Q81",
     "prompt": "Do you easily resist temptations?",
-    "trait": "A",
-    "reverseKeyed": false
+    "trait": "N",
+    "reverseKeyed": true
   },
   {
     "id": "Q82",
     "prompt": "Do you enjoy being reckless?",
-    "trait": "A",
-    "reverseKeyed": true
+    "trait": "E",
+    "reverseKeyed": false
   },
   {
     "id": "Q83",
     "prompt": "Do you have difficulty understanding abstract ideas?",
-    "trait": "A",
-    "reverseKeyed": false
+    "trait": "O",
+    "reverseKeyed": true
   },
   {
     "id": "Q84",
@@ -506,55 +506,55 @@
   {
     "id": "Q85",
     "prompt": "Do you waste your time?",
-    "trait": "A",
-    "reverseKeyed": false
+    "trait": "C",
+    "reverseKeyed": true
   },
   {
     "id": "Q86",
-    "prompt": "Do you feel that you’re unable to deal with things?",
-    "trait": "A",
-    "reverseKeyed": true
+    "prompt": "Do you feel that you\u2019re unable to deal with things?",
+    "trait": "N",
+    "reverseKeyed": false
   },
   {
     "id": "Q87",
     "prompt": "Do you love life?",
-    "trait": "A",
+    "trait": "E",
     "reverseKeyed": false
   },
   {
     "id": "Q88",
     "prompt": "Do you tend to vote for conservative political candidates?",
-    "trait": "A",
+    "trait": "O",
     "reverseKeyed": true
   },
   {
     "id": "Q89",
-    "prompt": "Are you not interested in other people’s problems?",
+    "prompt": "Are you not interested in other people\u2019s problems?",
     "trait": "A",
-    "reverseKeyed": false
+    "reverseKeyed": true
   },
   {
     "id": "Q90",
     "prompt": "Do you rush into things?",
-    "trait": "A",
+    "trait": "C",
     "reverseKeyed": true
   },
   {
     "id": "Q91",
     "prompt": "Do you get stressed out easily?",
-    "trait": "A",
+    "trait": "N",
     "reverseKeyed": false
   },
   {
     "id": "Q92",
     "prompt": "Do you keep others at a distance?",
-    "trait": "A",
+    "trait": "E",
     "reverseKeyed": true
   },
   {
     "id": "Q93",
     "prompt": "Do you like to get lost in thought?",
-    "trait": "A",
+    "trait": "O",
     "reverseKeyed": false
   },
   {
@@ -566,68 +566,68 @@
   {
     "id": "Q95",
     "prompt": "Do you know how to get things done?",
-    "trait": "A",
+    "trait": "C",
     "reverseKeyed": false
   },
   {
     "id": "Q96",
     "prompt": "Are you not easily annoyed?",
-    "trait": "A",
+    "trait": "N",
     "reverseKeyed": true
   },
   {
     "id": "Q97",
     "prompt": "Do you avoid crowds?",
-    "trait": "N",
-    "reverseKeyed": false
+    "trait": "E",
+    "reverseKeyed": true
   },
   {
     "id": "Q98",
     "prompt": "Do you not enjoy going to art museums?",
-    "trait": "N",
+    "trait": "O",
     "reverseKeyed": true
   },
   {
     "id": "Q99",
-    "prompt": "Do you obstruct others’ plans?",
-    "trait": "N",
-    "reverseKeyed": false
+    "prompt": "Do you obstruct others\u2019 plans?",
+    "trait": "A",
+    "reverseKeyed": true
   },
   {
     "id": "Q100",
     "prompt": "Do you leave your belongings around?",
-    "trait": "N",
+    "trait": "C",
     "reverseKeyed": true
   },
   {
     "id": "Q101",
     "prompt": "Do you feel comfortable with yourself?",
     "trait": "N",
-    "reverseKeyed": false
+    "reverseKeyed": true
   },
   {
     "id": "Q102",
     "prompt": "Do you wait for others to lead the way?",
-    "trait": "N",
+    "trait": "E",
     "reverseKeyed": true
   },
   {
     "id": "Q103",
     "prompt": "Do you not understand people who get emotional?",
-    "trait": "N",
-    "reverseKeyed": false
+    "trait": "O",
+    "reverseKeyed": true
   },
   {
     "id": "Q104",
     "prompt": "Do you take no time for others?",
-    "trait": "N",
+    "trait": "A",
     "reverseKeyed": true
   },
   {
     "id": "Q105",
     "prompt": "Do you break your promises?",
-    "trait": "N",
-    "reverseKeyed": false
+    "trait": "C",
+    "reverseKeyed": true
   },
   {
     "id": "Q106",
@@ -638,56 +638,56 @@
   {
     "id": "Q107",
     "prompt": "Do you like to take it easy?",
-    "trait": "N",
-    "reverseKeyed": false
+    "trait": "E",
+    "reverseKeyed": true
   },
   {
     "id": "Q108",
     "prompt": "Are you attached to conventional ways?",
-    "trait": "N",
+    "trait": "O",
     "reverseKeyed": true
   },
   {
     "id": "Q109",
     "prompt": "Do you get back at others?",
-    "trait": "N",
-    "reverseKeyed": false
+    "trait": "A",
+    "reverseKeyed": true
   },
   {
     "id": "Q110",
     "prompt": "Do you put little time and effort into your work?",
-    "trait": "N",
+    "trait": "C",
     "reverseKeyed": true
   },
   {
     "id": "Q111",
     "prompt": "Are you able to control your cravings?",
     "trait": "N",
-    "reverseKeyed": false
+    "reverseKeyed": true
   },
   {
     "id": "Q112",
     "prompt": "Do you act wild and crazy?",
-    "trait": "N",
-    "reverseKeyed": true
+    "trait": "E",
+    "reverseKeyed": false
   },
   {
     "id": "Q113",
     "prompt": "Are you not interested in theoretical discussions?",
-    "trait": "N",
-    "reverseKeyed": false
+    "trait": "O",
+    "reverseKeyed": true
   },
   {
     "id": "Q114",
     "prompt": "Do you boast about your virtues?",
-    "trait": "N",
+    "trait": "A",
     "reverseKeyed": true
   },
   {
     "id": "Q115",
     "prompt": "Do you have difficulty starting tasks?",
-    "trait": "N",
-    "reverseKeyed": false
+    "trait": "C",
+    "reverseKeyed": true
   },
   {
     "id": "Q116",
@@ -698,25 +698,25 @@
   {
     "id": "Q117",
     "prompt": "Do you look at the bright side of life?",
-    "trait": "N",
+    "trait": "E",
     "reverseKeyed": false
   },
   {
     "id": "Q118",
     "prompt": "Do you believe that we should be tough on crime?",
-    "trait": "N",
+    "trait": "O",
     "reverseKeyed": true
   },
   {
     "id": "Q119",
     "prompt": "Do you try not to think about the needy?",
-    "trait": "N",
-    "reverseKeyed": false
+    "trait": "A",
+    "reverseKeyed": true
   },
   {
     "id": "Q120",
     "prompt": "Do you act without thinking?",
-    "trait": "N",
+    "trait": "C",
     "reverseKeyed": true
   }
 ]

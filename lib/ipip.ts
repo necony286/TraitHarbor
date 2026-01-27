@@ -28,7 +28,7 @@ const attachFacets = (quizItems: QuizItem[]) =>
 export function loadQuizItems(): QuizItem[] {
   const useFixture = process.env.NEXT_PUBLIC_QUIZ_FIXTURE_MODE === '1';
   if (useFixture && fixtureItems.length > 0) {
-    return fixtureItems;
+    return attachFacets(fixtureItems);
   }
 
   return attachFacets(items);

@@ -1,721 +1,721 @@
 [
   {
     "id": "Q1",
-    "prompt": "I enjoy exploring new ideas.",
+    "prompt": "Do you worry about things?",
     "trait": "O",
     "reverseKeyed": false
   },
   {
     "id": "Q2",
-    "prompt": "I avoid exploring unfamiliar ideas.",
+    "prompt": "Do you make friends easily?",
     "trait": "O",
     "reverseKeyed": true
   },
   {
     "id": "Q3",
-    "prompt": "I appreciate art and beauty.",
+    "prompt": "Do you have a vivid imagination?",
     "trait": "O",
     "reverseKeyed": false
   },
   {
     "id": "Q4",
-    "prompt": "I pay little attention to art or beauty.",
+    "prompt": "Do you trust others?",
     "trait": "O",
     "reverseKeyed": true
   },
   {
     "id": "Q5",
-    "prompt": "I like solving complex problems.",
+    "prompt": "Do you complete tasks successfully?",
     "trait": "O",
     "reverseKeyed": false
   },
   {
     "id": "Q6",
-    "prompt": "I feel uneasy with complex problems.",
+    "prompt": "Do you get angry easily?",
     "trait": "O",
     "reverseKeyed": true
   },
   {
     "id": "Q7",
-    "prompt": "I seek out new experiences.",
+    "prompt": "Do you love large parties?",
     "trait": "O",
     "reverseKeyed": false
   },
   {
     "id": "Q8",
-    "prompt": "I stick to familiar experiences.",
+    "prompt": "Do you believe in the importance of art?",
     "trait": "O",
     "reverseKeyed": true
   },
   {
     "id": "Q9",
-    "prompt": "I enjoy philosophical discussions.",
+    "prompt": "Do you use others for your own ends?",
     "trait": "O",
     "reverseKeyed": false
   },
   {
     "id": "Q10",
-    "prompt": "I lose interest in philosophical discussions.",
+    "prompt": "Do you like to tidy up?",
     "trait": "O",
     "reverseKeyed": true
   },
   {
     "id": "Q11",
-    "prompt": "I value creativity in daily life.",
+    "prompt": "Do you often feel blue?",
     "trait": "O",
     "reverseKeyed": false
   },
   {
     "id": "Q12",
-    "prompt": "I rarely look for creative approaches.",
+    "prompt": "Do you take charge?",
     "trait": "O",
     "reverseKeyed": true
   },
   {
     "id": "Q13",
-    "prompt": "I am curious about many topics.",
+    "prompt": "Do you experience your emotions intensely?",
     "trait": "O",
     "reverseKeyed": false
   },
   {
     "id": "Q14",
-    "prompt": "I rarely feel curious about new topics.",
+    "prompt": "Do you love to help others?",
     "trait": "O",
     "reverseKeyed": true
   },
   {
     "id": "Q15",
-    "prompt": "I enjoy learning languages.",
+    "prompt": "Do you keep your promises?",
     "trait": "O",
     "reverseKeyed": false
   },
   {
     "id": "Q16",
-    "prompt": "I avoid learning new languages.",
+    "prompt": "Do you find it difficult to approach others?",
     "trait": "O",
     "reverseKeyed": true
   },
   {
     "id": "Q17",
-    "prompt": "I think about abstract concepts.",
+    "prompt": "Are you always busy?",
     "trait": "O",
     "reverseKeyed": false
   },
   {
     "id": "Q18",
-    "prompt": "I avoid abstract ideas.",
+    "prompt": "Do you prefer variety to routine?",
     "trait": "O",
     "reverseKeyed": true
   },
   {
     "id": "Q19",
-    "prompt": "I notice patterns others miss.",
+    "prompt": "Do you love a good fight?",
     "trait": "O",
     "reverseKeyed": false
   },
   {
     "id": "Q20",
-    "prompt": "I miss patterns others notice.",
+    "prompt": "Do you work hard?",
     "trait": "O",
     "reverseKeyed": true
   },
   {
     "id": "Q21",
-    "prompt": "I enjoy trying unusual foods.",
+    "prompt": "Do you go on binges?",
     "trait": "O",
     "reverseKeyed": false
   },
   {
     "id": "Q22",
-    "prompt": "I avoid unusual foods.",
+    "prompt": "Do you love excitement?",
     "trait": "O",
     "reverseKeyed": true
   },
   {
     "id": "Q23",
-    "prompt": "I prefer variety to routine.",
+    "prompt": "Do you love to read challenging material?",
     "trait": "O",
     "reverseKeyed": false
   },
   {
     "id": "Q24",
-    "prompt": "I prefer routine over variety.",
+    "prompt": "Do you believe that you are better than others?",
     "trait": "O",
     "reverseKeyed": true
   },
   {
     "id": "Q25",
-    "prompt": "I keep tasks well organized.",
+    "prompt": "Are you always prepared?",
     "trait": "C",
     "reverseKeyed": false
   },
   {
     "id": "Q26",
-    "prompt": "I let tasks pile up.",
+    "prompt": "Do you panic easily?",
     "trait": "C",
     "reverseKeyed": true
   },
   {
     "id": "Q27",
-    "prompt": "I follow schedules carefully.",
+    "prompt": "Do you radiate joy?",
     "trait": "C",
     "reverseKeyed": false
   },
   {
     "id": "Q28",
-    "prompt": "I ignore schedules when I can.",
+    "prompt": "Do you tend to vote for liberal (progressive) political candidates?",
     "trait": "C",
     "reverseKeyed": true
   },
   {
     "id": "Q29",
-    "prompt": "I like checking items off a list.",
+    "prompt": "Do you sympathise with the homeless?",
     "trait": "C",
     "reverseKeyed": false
   },
   {
     "id": "Q30",
-    "prompt": "I leave checklists unfinished.",
+    "prompt": "Do you jump into things without thinking?",
     "trait": "C",
     "reverseKeyed": true
   },
   {
     "id": "Q31",
-    "prompt": "I arrive prepared for commitments.",
+    "prompt": "Do you fear the worst?",
     "trait": "C",
     "reverseKeyed": false
   },
   {
     "id": "Q32",
-    "prompt": "I show up unprepared.",
+    "prompt": "Do you feel comfortable around people?",
     "trait": "C",
     "reverseKeyed": true
   },
   {
     "id": "Q33",
-    "prompt": "I pay attention to details.",
+    "prompt": "Do you enjoy wild flights of fantasy?",
     "trait": "C",
     "reverseKeyed": false
   },
   {
     "id": "Q34",
-    "prompt": "I overlook small details.",
+    "prompt": "Do you believe that others have good intentions?",
     "trait": "C",
     "reverseKeyed": true
   },
   {
     "id": "Q35",
-    "prompt": "I work hard until a job is done.",
+    "prompt": "Do you excel in what you do?",
     "trait": "C",
     "reverseKeyed": false
   },
   {
     "id": "Q36",
-    "prompt": "I quit working when tasks get tiring.",
+    "prompt": "Do you get irritated easily?",
     "trait": "C",
     "reverseKeyed": true
   },
   {
     "id": "Q37",
-    "prompt": "I plan my day ahead of time.",
+    "prompt": "Do you talk to a lot of different people at parties?",
     "trait": "C",
     "reverseKeyed": false
   },
   {
     "id": "Q38",
-    "prompt": "I rarely plan my day.",
+    "prompt": "Do you see beauty in things that others might not notice?",
     "trait": "C",
     "reverseKeyed": true
   },
   {
     "id": "Q39",
-    "prompt": "I keep my living space tidy.",
+    "prompt": "Do you cheat to get ahead?",
     "trait": "C",
     "reverseKeyed": false
   },
   {
     "id": "Q40",
-    "prompt": "I leave my living space messy.",
+    "prompt": "Do you often forget to put things back in their proper place?",
     "trait": "C",
     "reverseKeyed": true
   },
   {
     "id": "Q41",
-    "prompt": "I track goals and milestones.",
+    "prompt": "Do you dislike yourself?",
     "trait": "C",
     "reverseKeyed": false
   },
   {
     "id": "Q42",
-    "prompt": "I lose track of my goals.",
+    "prompt": "Do you try to lead others?",
     "trait": "C",
     "reverseKeyed": true
   },
   {
     "id": "Q43",
-    "prompt": "I double-check my work.",
+    "prompt": "Do you feel others’ emotions?",
     "trait": "C",
     "reverseKeyed": false
   },
   {
     "id": "Q44",
-    "prompt": "I submit work without reviewing.",
+    "prompt": "Are you concerned about others?",
     "trait": "C",
     "reverseKeyed": true
   },
   {
     "id": "Q45",
-    "prompt": "I finish projects before starting new ones.",
+    "prompt": "Do you tell the truth?",
     "trait": "C",
     "reverseKeyed": false
   },
   {
     "id": "Q46",
-    "prompt": "I start new projects before finishing current ones.",
+    "prompt": "Are you afraid to draw attention to yourself?",
     "trait": "C",
     "reverseKeyed": true
   },
   {
     "id": "Q47",
-    "prompt": "I like dependable routines.",
+    "prompt": "Are you always on the go?",
     "trait": "C",
     "reverseKeyed": false
   },
   {
     "id": "Q48",
-    "prompt": "I dislike routines and skip them.",
+    "prompt": "Do you prefer to stick with things that you know?",
     "trait": "C",
     "reverseKeyed": true
   },
   {
     "id": "Q49",
-    "prompt": "I feel energized by social gatherings.",
+    "prompt": "Do you yell at people?",
     "trait": "E",
     "reverseKeyed": false
   },
   {
     "id": "Q50",
-    "prompt": "I feel drained by social gatherings.",
+    "prompt": "Do you do more than what’s expected of you?",
     "trait": "E",
     "reverseKeyed": true
   },
   {
     "id": "Q51",
-    "prompt": "I enjoy meeting new people.",
+    "prompt": "Do you rarely overindulge?",
     "trait": "E",
     "reverseKeyed": false
   },
   {
     "id": "Q52",
-    "prompt": "I avoid meeting new people.",
+    "prompt": "Do you seek adventure?",
     "trait": "E",
     "reverseKeyed": true
   },
   {
     "id": "Q53",
-    "prompt": "I like being the center of attention.",
+    "prompt": "Do you avoid philosophical discussions?",
     "trait": "E",
     "reverseKeyed": false
   },
   {
     "id": "Q54",
-    "prompt": "I shy away from being the center of attention.",
+    "prompt": "Do you think highly of yourself?",
     "trait": "E",
     "reverseKeyed": true
   },
   {
     "id": "Q55",
-    "prompt": "I start conversations easily.",
+    "prompt": "Do you carry out your plans?",
     "trait": "E",
     "reverseKeyed": false
   },
   {
     "id": "Q56",
-    "prompt": "I wait for others to start conversations.",
+    "prompt": "Do you become overwhelmed by events?",
     "trait": "E",
     "reverseKeyed": true
   },
   {
     "id": "Q57",
-    "prompt": "I feel comfortable speaking in groups.",
+    "prompt": "Do you have a lot of fun?",
     "trait": "E",
     "reverseKeyed": false
   },
   {
     "id": "Q58",
-    "prompt": "I feel uncomfortable speaking in groups.",
+    "prompt": "Do you believe that there is no absolute right or wrong?",
     "trait": "E",
     "reverseKeyed": true
   },
   {
     "id": "Q59",
-    "prompt": "I laugh and smile often.",
+    "prompt": "Do you feel sympathy for those who are worse off than you?",
     "trait": "E",
     "reverseKeyed": false
   },
   {
     "id": "Q60",
-    "prompt": "I rarely laugh or smile.",
+    "prompt": "Do you make rash decisions?",
     "trait": "E",
     "reverseKeyed": true
   },
   {
     "id": "Q61",
-    "prompt": "I enjoy leading group activities.",
+    "prompt": "Are you afraid of many things?",
     "trait": "E",
     "reverseKeyed": false
   },
   {
     "id": "Q62",
-    "prompt": "I avoid leading group activities.",
+    "prompt": "Do you avoid contact with others?",
     "trait": "E",
     "reverseKeyed": true
   },
   {
     "id": "Q63",
-    "prompt": "I share my thoughts openly.",
+    "prompt": "Do you love to daydream?",
     "trait": "E",
     "reverseKeyed": false
   },
   {
     "id": "Q64",
-    "prompt": "I keep most thoughts to myself.",
+    "prompt": "Do you trust what people say?",
     "trait": "E",
     "reverseKeyed": true
   },
   {
     "id": "Q65",
-    "prompt": "I make friends quickly.",
+    "prompt": "Do you handle tasks smoothly?",
     "trait": "E",
     "reverseKeyed": false
   },
   {
     "id": "Q66",
-    "prompt": "I struggle to make friends quickly.",
+    "prompt": "Do you lose your temper?",
     "trait": "E",
     "reverseKeyed": true
   },
   {
     "id": "Q67",
-    "prompt": "I feel upbeat around others.",
+    "prompt": "Do you prefer to be alone?",
     "trait": "E",
     "reverseKeyed": false
   },
   {
     "id": "Q68",
-    "prompt": "I feel subdued around others.",
+    "prompt": "Do you not like poetry?",
     "trait": "E",
     "reverseKeyed": true
   },
   {
     "id": "Q69",
-    "prompt": "I like busy, active days.",
+    "prompt": "Do you take advantage of others?",
     "trait": "E",
     "reverseKeyed": false
   },
   {
     "id": "Q70",
-    "prompt": "I prefer slow, quiet days.",
+    "prompt": "Do you leave a mess in your room?",
     "trait": "E",
     "reverseKeyed": true
   },
   {
     "id": "Q71",
-    "prompt": "I act spontaneously with friends.",
+    "prompt": "Are you often down in the dumps?",
     "trait": "E",
     "reverseKeyed": false
   },
   {
     "id": "Q72",
-    "prompt": "I hold back when with friends.",
+    "prompt": "Do you take control of things?",
     "trait": "E",
     "reverseKeyed": true
   },
   {
     "id": "Q73",
-    "prompt": "I feel sympathy for others' struggles.",
+    "prompt": "Do you rarely notice your emotional reactions?",
     "trait": "A",
     "reverseKeyed": false
   },
   {
     "id": "Q74",
-    "prompt": "I find it hard to relate to others' struggles.",
+    "prompt": "Are you indifferent to the feelings of others?",
     "trait": "A",
     "reverseKeyed": true
   },
   {
     "id": "Q75",
-    "prompt": "I make time to help people.",
+    "prompt": "Do you break rules?",
     "trait": "A",
     "reverseKeyed": false
   },
   {
     "id": "Q76",
-    "prompt": "I avoid getting involved in others' problems.",
+    "prompt": "Do you only feel comfortable with friends?",
     "trait": "A",
     "reverseKeyed": true
   },
   {
     "id": "Q77",
-    "prompt": "I trust that people mean well.",
+    "prompt": "Do you do a lot in your spare time?",
     "trait": "A",
     "reverseKeyed": false
   },
   {
     "id": "Q78",
-    "prompt": "I doubt that people mean well.",
+    "prompt": "Do you dislike changes?",
     "trait": "A",
     "reverseKeyed": true
   },
   {
     "id": "Q79",
-    "prompt": "I enjoy cooperating on projects.",
+    "prompt": "Do you insult people?",
     "trait": "A",
     "reverseKeyed": false
   },
   {
     "id": "Q80",
-    "prompt": "I prefer to work alone to avoid compromise.",
+    "prompt": "Do you do just enough work to get by?",
     "trait": "A",
     "reverseKeyed": true
   },
   {
     "id": "Q81",
-    "prompt": "I stay patient in tense moments.",
+    "prompt": "Do you easily resist temptations?",
     "trait": "A",
     "reverseKeyed": false
   },
   {
     "id": "Q82",
-    "prompt": "I lose patience quickly.",
+    "prompt": "Do you enjoy being reckless?",
     "trait": "A",
     "reverseKeyed": true
   },
   {
     "id": "Q83",
-    "prompt": "I listen carefully to others.",
+    "prompt": "Do you have difficulty understanding abstract ideas?",
     "trait": "A",
     "reverseKeyed": false
   },
   {
     "id": "Q84",
-    "prompt": "I interrupt others when they speak.",
+    "prompt": "Do you have a high opinion of yourself?",
     "trait": "A",
     "reverseKeyed": true
   },
   {
     "id": "Q85",
-    "prompt": "I forgive people who make mistakes.",
+    "prompt": "Do you waste your time?",
     "trait": "A",
     "reverseKeyed": false
   },
   {
     "id": "Q86",
-    "prompt": "I hold onto grudges.",
+    "prompt": "Do you feel that you’re unable to deal with things?",
     "trait": "A",
     "reverseKeyed": true
   },
   {
     "id": "Q87",
-    "prompt": "I speak kindly even when stressed.",
+    "prompt": "Do you love life?",
     "trait": "A",
     "reverseKeyed": false
   },
   {
     "id": "Q88",
-    "prompt": "I become sharp when stressed.",
+    "prompt": "Do you tend to vote for conservative political candidates?",
     "trait": "A",
     "reverseKeyed": true
   },
   {
     "id": "Q89",
-    "prompt": "I look for win-win solutions.",
+    "prompt": "Are you not interested in other people’s problems?",
     "trait": "A",
     "reverseKeyed": false
   },
   {
     "id": "Q90",
-    "prompt": "I focus on getting my way.",
+    "prompt": "Do you rush into things?",
     "trait": "A",
     "reverseKeyed": true
   },
   {
     "id": "Q91",
-    "prompt": "I enjoy making people feel welcome.",
+    "prompt": "Do you get stressed out easily?",
     "trait": "A",
     "reverseKeyed": false
   },
   {
     "id": "Q92",
-    "prompt": "I do not try to make people feel welcome.",
+    "prompt": "Do you keep others at a distance?",
     "trait": "A",
     "reverseKeyed": true
   },
   {
     "id": "Q93",
-    "prompt": "I believe most people are honest.",
+    "prompt": "Do you like to get lost in thought?",
     "trait": "A",
     "reverseKeyed": false
   },
   {
     "id": "Q94",
-    "prompt": "I expect people to take advantage of me.",
+    "prompt": "Do you distrust people?",
     "trait": "A",
     "reverseKeyed": true
   },
   {
     "id": "Q95",
-    "prompt": "I prefer harmony over conflict.",
+    "prompt": "Do you know how to get things done?",
     "trait": "A",
     "reverseKeyed": false
   },
   {
     "id": "Q96",
-    "prompt": "I do not mind conflict.",
+    "prompt": "Are you not easily annoyed?",
     "trait": "A",
     "reverseKeyed": true
   },
   {
     "id": "Q97",
-    "prompt": "I worry about many things.",
+    "prompt": "Do you avoid crowds?",
     "trait": "N",
     "reverseKeyed": false
   },
   {
     "id": "Q98",
-    "prompt": "I rarely worry about things.",
+    "prompt": "Do you not enjoy going to art museums?",
     "trait": "N",
     "reverseKeyed": true
   },
   {
     "id": "Q99",
-    "prompt": "I feel anxious before big events.",
+    "prompt": "Do you obstruct others’ plans?",
     "trait": "N",
     "reverseKeyed": false
   },
   {
     "id": "Q100",
-    "prompt": "I stay calm before big events.",
+    "prompt": "Do you leave your belongings around?",
     "trait": "N",
     "reverseKeyed": true
   },
   {
     "id": "Q101",
-    "prompt": "I get frustrated easily.",
+    "prompt": "Do you feel comfortable with yourself?",
     "trait": "N",
     "reverseKeyed": false
   },
   {
     "id": "Q102",
-    "prompt": "I rarely get frustrated.",
+    "prompt": "Do you wait for others to lead the way?",
     "trait": "N",
     "reverseKeyed": true
   },
   {
     "id": "Q103",
-    "prompt": "I feel self-conscious in groups.",
+    "prompt": "Do you not understand people who get emotional?",
     "trait": "N",
     "reverseKeyed": false
   },
   {
     "id": "Q104",
-    "prompt": "I rarely feel self-conscious in groups.",
+    "prompt": "Do you take no time for others?",
     "trait": "N",
     "reverseKeyed": true
   },
   {
     "id": "Q105",
-    "prompt": "I stress over unexpected changes.",
+    "prompt": "Do you break your promises?",
     "trait": "N",
     "reverseKeyed": false
   },
   {
     "id": "Q106",
-    "prompt": "I take unexpected changes in stride.",
+    "prompt": "Are you not bothered by difficult social situations?",
     "trait": "N",
     "reverseKeyed": true
   },
   {
     "id": "Q107",
-    "prompt": "I dwell on mistakes.",
+    "prompt": "Do you like to take it easy?",
     "trait": "N",
     "reverseKeyed": false
   },
   {
     "id": "Q108",
-    "prompt": "I move on quickly from mistakes.",
+    "prompt": "Are you attached to conventional ways?",
     "trait": "N",
     "reverseKeyed": true
   },
   {
     "id": "Q109",
-    "prompt": "I feel tense during busy days.",
+    "prompt": "Do you get back at others?",
     "trait": "N",
     "reverseKeyed": false
   },
   {
     "id": "Q110",
-    "prompt": "I stay relaxed during busy days.",
+    "prompt": "Do you put little time and effort into your work?",
     "trait": "N",
     "reverseKeyed": true
   },
   {
     "id": "Q111",
-    "prompt": "I get upset when plans fall through.",
+    "prompt": "Are you able to control your cravings?",
     "trait": "N",
     "reverseKeyed": false
   },
   {
     "id": "Q112",
-    "prompt": "I stay composed when plans change.",
+    "prompt": "Do you act wild and crazy?",
     "trait": "N",
     "reverseKeyed": true
   },
   {
     "id": "Q113",
-    "prompt": "I notice physical signs of stress.",
+    "prompt": "Are you not interested in theoretical discussions?",
     "trait": "N",
     "reverseKeyed": false
   },
   {
     "id": "Q114",
-    "prompt": "I rarely notice physical signs of stress.",
+    "prompt": "Do you boast about your virtues?",
     "trait": "N",
     "reverseKeyed": true
   },
   {
     "id": "Q115",
-    "prompt": "I worry about relationships.",
+    "prompt": "Do you have difficulty starting tasks?",
     "trait": "N",
     "reverseKeyed": false
   },
   {
     "id": "Q116",
-    "prompt": "I rarely worry about relationships.",
+    "prompt": "Do you remain calm under pressure?",
     "trait": "N",
     "reverseKeyed": true
   },
   {
     "id": "Q117",
-    "prompt": "I feel overwhelmed by responsibilities.",
+    "prompt": "Do you look at the bright side of life?",
     "trait": "N",
     "reverseKeyed": false
   },
   {
     "id": "Q118",
-    "prompt": "I rarely feel overwhelmed by responsibilities.",
+    "prompt": "Do you believe that we should be tough on crime?",
     "trait": "N",
     "reverseKeyed": true
   },
   {
     "id": "Q119",
-    "prompt": "I experience mood swings.",
+    "prompt": "Do you try not to think about the needy?",
     "trait": "N",
     "reverseKeyed": false
   },
   {
     "id": "Q120",
-    "prompt": "I rarely experience mood swings.",
+    "prompt": "Do you act without thinking?",
     "trait": "N",
     "reverseKeyed": true
   }

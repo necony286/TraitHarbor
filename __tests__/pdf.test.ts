@@ -116,6 +116,21 @@ describe('report template', () => {
     expect(html).not.toContain('<p class="overview__callout">');
   });
 
+  it('suppresses extreme highlighting in the chart when scores are balanced', async () => {
+    const traits: ReportTraits = {
+      O: 55,
+      C: 52,
+      E: 50,
+      A: 48,
+      N: 49
+    };
+
+    const html = await buildReportHtml(createReportPayload(traits));
+
+    expect(html).not.toContain('chart__row chart__row--hi');
+    expect(html).not.toContain('chart__row chart__row--lo');
+  });
+
   it('renders tied callouts when multiple traits share extremes', async () => {
     const traits: ReportTraits = {
       O: 78,

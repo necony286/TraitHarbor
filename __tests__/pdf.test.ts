@@ -1,5 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 import { getScoreBandLabel, RESOURCES_BY_TRAIT } from '../lib/report-content';
+import { DEFAULT_BALANCE_THRESHOLD } from '../lib/trait-extremes';
 import { buildReportHtml, traitSectionOrder, type ReportPayload, type ReportTraits } from '../lib/pdf';
 
 vi.mock('../lib/report-content', async (importActual) => {
@@ -124,6 +125,10 @@ describe('report template', () => {
       A: 48,
       N: 49
     };
+    const scores = Object.values(traits);
+    const spread = Math.max(...scores) - Math.min(...scores);
+
+    expect(spread).toBeLessThan(DEFAULT_BALANCE_THRESHOLD);
 
     const html = await buildReportHtml(createReportPayload(traits));
 

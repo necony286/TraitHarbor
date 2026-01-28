@@ -9,13 +9,17 @@ const QUIZ_STATE_KEY = 'traitharbor:quiz-state';
 const isBrowser = typeof window !== 'undefined';
 
 const REPORT_TTL_SECONDS = 60 * 60 * 24;
+export const REPORT_TEMPLATE_VERSION = process.env.REPORT_TEMPLATE_VERSION ?? 'v1';
 
 const getReportBucket = () => {
   if (typeof process === 'undefined') return 'reports';
   return process.env.SUPABASE_REPORTS_BUCKET ?? 'reports';
 };
 
-export const getReportPath = (orderId: string) => `orders/${orderId}.pdf`;
+export const getReportPath = (orderId: string) =>
+  `orders/${REPORT_TEMPLATE_VERSION}/${orderId}.pdf`;
+
+export const getLegacyReportPath = (orderId: string) => `orders/${orderId}.pdf`;
 
 const getReportStorageClient = async () => {
   const { getSupabaseAdminClient } = await import('./supabase');

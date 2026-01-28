@@ -13,7 +13,13 @@ import {
   updateOrderReportFileKey
 } from './db';
 import { logWarn } from './logger';
-import { getReportPath, getReportSignedUrl, getReportSignedUrlForPath, uploadReport } from './storage';
+import {
+  getLegacyReportPath,
+  getReportPath,
+  getReportSignedUrl,
+  getReportSignedUrlForPath,
+  uploadReport
+} from './storage';
 
 export class ReportGenerationError extends Error {
   code: 'RESULT_NOT_FOUND' | 'RESULT_INVALID' | 'SIGNED_URL_MISSING';
@@ -83,7 +89,7 @@ type OrderDetail = {
   user_id?: string | null;
 };
 
-const resolveReportFileKey = async (order: OrderDetail) => {
+const resolveReportFileKey = async (order: OrderDetail, reportPath: string) => {
   if (order.report_file_key) {
     return order.report_file_key;
   }
@@ -94,7 +100,7 @@ const resolveReportFileKey = async (order: OrderDetail) => {
     return existingAsset.path;
   }
 
-  return getReportPath(order.id);
+  return reportPath;
 };
 
 export const getOrCreateReportDownloadUrl = async ({
@@ -105,21 +111,32 @@ export const getOrCreateReportDownloadUrl = async ({
   ttlSeconds: number;
 }) => {
   const reportPath = getReportPath(order.id);
-  const reportFileKey = await resolveReportFileKey(order);
+  const legacyReportPath = getLegacyReportPath(order.id);
+  const reportFileKey = await resolveReportFileKey(order, reportPath);
 
-  const existingUrl = await getReportSignedUrlForPath(reportFileKey, ttlSeconds);
-  if (existingUrl) {
-    if (order.report_file_key !== reportFileKey) {
-      await updateOrderReportFileKey({ orderId: order.id, reportFileKey });
+  const versionedUrl = await getReportSignedUrlForPath(reportPath, ttlSeconds);
+  if (versionedUrl) {
+    if (order.report_file_key !== reportPath) {
+      await updateOrderReportFileKey({ orderId: order.id, reportFileKey: reportPath });
     }
-    return { url: existingUrl, cached: true, reportFileKey };
+    return { url: versionedUrl, cached: true, reportFileKey: reportPath };
   }
 
-  if (reportFileKey !== reportPath) {
-    const fallbackUrl = await getReportSignedUrlForPath(reportPath, ttlSeconds);
-    if (fallbackUrl) {
-      await updateOrderReportFileKey({ orderId: order.id, reportFileKey: reportPath });
-      return { url: fallbackUrl, cached: true, reportFileKey: reportPath };
+  if (reportFileKey !== reportPath && reportFileKey !== legacyReportPath) {
+    const existingUrl = await getReportSignedUrlForPath(reportFileKey, ttlSeconds);
+    if (existingUrl) {
+      if (order.report_file_key !== reportFileKey) {
+        await updateOrderReportFileKey({ orderId: order.id, reportFileKey });
+      }
+      return { url: existingUrl, cached: true, reportFileKey };
+    }
+  }
+
+  if (legacyReportPath !== reportPath) {
+    const legacyUrl = await getReportSignedUrlForPath(legacyReportPath, ttlSeconds);
+    if (legacyUrl) {
+      await updateOrderReportFileKey({ orderId: order.id, reportFileKey: legacyReportPath });
+      return { url: legacyUrl, cached: true, reportFileKey: legacyReportPath };
     }
   }
 

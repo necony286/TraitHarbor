@@ -36,7 +36,8 @@ const resolveTraitName = (trait: string) => {
   return traitKeyMap[normalized] ?? trait.trim();
 };
 
-const articleFor = (word: string): 'a' | 'an' => {
+export const articleFor = (word: string): 'a' | 'an' => {
+  // NOTE: This is a simplified check and may not work for all English words (e.g., 'hour', 'user').
   const normalized = word.trim().toLowerCase();
   return /^[aeiou]/.test(normalized) ? 'an' : 'a';
 };

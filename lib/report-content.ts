@@ -36,6 +36,11 @@ const resolveTraitName = (trait: string) => {
   return traitKeyMap[normalized] ?? trait.trim();
 };
 
+const articleFor = (word: string): 'a' | 'an' => {
+  const normalized = word.trim().toLowerCase();
+  return /^[aeiou]/.test(normalized) ? 'an' : 'a';
+};
+
 const NARRATIVE_VOICE: NarrativeVoice = {
   subject: 'You',
   subjectPronoun: 'you',
@@ -583,7 +588,7 @@ export const getPersonalDevelopmentRoadmap = (
   const watchOut = growth[0]
     ? withPrefix(growth[0], 'You watch out for this')
     : `You notice when ${bottomTrait} habits create friction, and pause to reset before reacting.`;
-  const microHabit = `You spend 7 days dedicating 10 minutes to a ${topTrait}-aligned action each morning, then end the day by naming one ${bottomTrait}-related moment you handled with care.`;
+  const microHabit = `You spend 7 days dedicating 10 minutes to ${articleFor(topTrait)} ${topTrait}-aligned action each morning, then end the day by naming one ${bottomTrait}-related moment you handled with care.`;
 
   return [
     {

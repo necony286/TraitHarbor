@@ -129,7 +129,7 @@ h2 {
 
 .facet-row {
   display: grid;
-  grid-template-columns: 140px 1fr 40px;
+  grid-template-columns: 140px 1fr var(--score-column-width, 64px);
   align-items: center;
   gap: 8px;
   font-size: 13px;

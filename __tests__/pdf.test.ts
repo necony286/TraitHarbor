@@ -1,5 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 import { getScoreBandLabel, RESOURCES_BY_TRAIT } from '../lib/report-content';
+import { DEFAULT_BALANCE_THRESHOLD, getTraitExtremes } from '../lib/trait-extremes';
 import { buildReportHtml, traitSectionOrder, type ReportPayload, type ReportTraits } from '../lib/pdf';
 
 vi.mock('../lib/report-content', async (importActual) => {
@@ -124,6 +125,13 @@ describe('report template', () => {
       A: 48,
       N: 49
     };
+    const scoresWithNames = traitSectionOrder.map(({ name, scoreKey }) => ({
+      name,
+      score: traits[scoreKey]
+    }));
+    const { isBalanced } = getTraitExtremes(scoresWithNames);
+
+    expect(isBalanced).toBe(true);
 
     const html = await buildReportHtml(createReportPayload(traits));
 

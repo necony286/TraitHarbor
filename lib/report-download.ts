@@ -114,29 +114,17 @@ export const getOrCreateReportDownloadUrl = async ({
   const legacyReportPath = getLegacyReportPath(order.id);
   const reportFileKey = await resolveReportFileKey(order, reportPath);
 
-  const versionedUrl = await getReportSignedUrlForPath(reportPath, ttlSeconds);
-  if (versionedUrl) {
-    if (order.report_file_key !== reportPath) {
-      await updateOrderReportFileKey({ orderId: order.id, reportFileKey: reportPath });
-    }
-    return { url: versionedUrl, cached: true, reportFileKey: reportPath };
-  }
+  const pathsToTry = [reportPath, reportFileKey, legacyReportPath].filter(
+    (pathToTry, index, list) => Boolean(pathToTry) && list.indexOf(pathToTry) === index
+  );
 
-  if (reportFileKey !== reportPath && reportFileKey !== legacyReportPath) {
-    const existingUrl = await getReportSignedUrlForPath(reportFileKey, ttlSeconds);
-    if (existingUrl) {
-      if (order.report_file_key !== reportFileKey) {
-        await updateOrderReportFileKey({ orderId: order.id, reportFileKey });
+  for (const pathToTry of pathsToTry) {
+    const signedUrl = await getReportSignedUrlForPath(pathToTry, ttlSeconds);
+    if (signedUrl) {
+      if (order.report_file_key !== pathToTry) {
+        await updateOrderReportFileKey({ orderId: order.id, reportFileKey: pathToTry });
       }
-      return { url: existingUrl, cached: true, reportFileKey };
-    }
-  }
-
-  if (legacyReportPath !== reportPath) {
-    const legacyUrl = await getReportSignedUrlForPath(legacyReportPath, ttlSeconds);
-    if (legacyUrl) {
-      await updateOrderReportFileKey({ orderId: order.id, reportFileKey: legacyReportPath });
-      return { url: legacyUrl, cached: true, reportFileKey: legacyReportPath };
+      return { url: signedUrl, cached: true, reportFileKey: pathToTry };
     }
   }
 

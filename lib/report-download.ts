@@ -114,9 +114,7 @@ export const getOrCreateReportDownloadUrl = async ({
   const legacyReportPath = getLegacyReportPath(order.id);
   const reportFileKey = await resolveReportFileKey(order, reportPath);
 
-  const pathsToTry = [reportPath, reportFileKey, legacyReportPath].filter(
-    (pathToTry, index, list) => Boolean(pathToTry) && list.indexOf(pathToTry) === index
-  );
+  const pathsToTry = [...new Set([reportPath, reportFileKey, legacyReportPath])].filter(Boolean);
 
   for (const pathToTry of pathsToTry) {
     const signedUrl = await getReportSignedUrlForPath(pathToTry, ttlSeconds);

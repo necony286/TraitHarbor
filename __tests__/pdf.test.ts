@@ -125,10 +125,13 @@ describe('report template', () => {
       A: 48,
       N: 49
     };
-    const scores = Object.values(traits);
-    const spread = Math.max(...scores) - Math.min(...scores);
+    const scoresWithNames = traitSectionOrder.map(({ name, scoreKey }) => ({
+      name,
+      score: traits[scoreKey]
+    }));
+    const { isBalanced } = getTraitExtremes(scoresWithNames);
 
-    expect(spread).toBeLessThan(DEFAULT_BALANCE_THRESHOLD);
+    expect(isBalanced).toBe(true);
 
     const html = await buildReportHtml(createReportPayload(traits));
 

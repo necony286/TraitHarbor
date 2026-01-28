@@ -207,6 +207,12 @@ h2 {
   color: #344054;
 }
 
+.resource-url {
+  font-size: 12px;
+  color: #667085;
+  word-break: break-word;
+}
+
 @media print {
   .avoid-break {
     break-inside: avoid;

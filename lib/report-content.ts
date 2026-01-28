@@ -394,9 +394,9 @@ export const getTraitMeaning = (trait: string, score: number): string => {
     case 'High':
       return `${base} This trait shows up often and likely shapes how ${voice.subjectPronoun} think, feel, and act.`;
     case 'Medium':
-      return `${base} ${voice.subjectPronoun} can flex this trait depending on the situation, balancing it with other strengths.`;
+      return `${base} ${voice.subject} can flex this trait depending on the situation, balancing it with other strengths.`;
     case 'Low':
-      return `${base} ${voice.subjectPronoun} rely on this trait less, leaning on other qualities in most situations.`;
+      return `${base} ${voice.subject} rely on this trait less, leaning on other qualities in most situations.`;
     default:
       return base;
   }

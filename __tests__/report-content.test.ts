@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { getPersonalDevelopmentRoadmap, withPrefix } from '../lib/report-content';
+import { getPersonalDevelopmentRoadmap, getTraitMeaning, withPrefix } from '../lib/report-content';
 
 describe('withPrefix', () => {
   it.each([
@@ -44,5 +44,29 @@ describe('getPersonalDevelopmentRoadmap', () => {
 
     expect(result[0]?.items[0]).toBe('You absorb new ideas quickly and enjoy exploring novel perspectives.');
     expect(result[1]?.items[0]).toBe("You stay alert to risks so issues don't go unnoticed.");
+  });
+});
+
+describe('getTraitMeaning', () => {
+  it.each([
+    {
+      trait: 'openness',
+      score: 85,
+      expected:
+        'Your Openness score is high. This trait shows up often and likely shapes how you think, feel, and act.'
+    },
+    {
+      trait: 'Openness',
+      score: 55,
+      expected:
+        'Your Openness score is medium. You can flex this trait depending on the situation, balancing it with other strengths.'
+    },
+    {
+      trait: 'Openness',
+      score: 20,
+      expected: 'Your Openness score is low. You rely on this trait less, leaning on other qualities in most situations.'
+    }
+  ])('returns the expected narrative for $trait at $score', ({ trait, score, expected }) => {
+    expect(getTraitMeaning(trait, score)).toBe(expected);
   });
 });

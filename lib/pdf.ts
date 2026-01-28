@@ -211,10 +211,12 @@ const buildResourceGroups = () =>
       }
       const links = safeResources
         .map(
-          ({ label, url }) =>
-            `          <li><a href="${escapeHtml(url)}">${escapeHtml(label)}</a> — <span class="resource-url">${escapeHtml(
-              url
-            )}</span></li>`
+          ({ label, url }) => {
+            const escapedUrl = escapeHtml(url);
+            return `          <li><a href="${escapedUrl}">${escapeHtml(
+              label
+            )}</a> — <span class="resource-url">${escapedUrl}</span></li>`;
+          }
         )
         .join('\n');
       return `        <div class="resource-group">

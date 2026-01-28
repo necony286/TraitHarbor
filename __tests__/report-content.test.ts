@@ -59,12 +59,12 @@ describe('getTraitMeaning', () => {
       trait: 'Openness',
       score: 55,
       expected:
-        'Your Openness score is medium. you can flex this trait depending on the situation, balancing it with other strengths.'
+        'Your Openness score is medium. You can flex this trait depending on the situation, balancing it with other strengths.'
     },
     {
       trait: 'Openness',
       score: 20,
-      expected: 'Your Openness score is low. you rely on this trait less, leaning on other qualities in most situations.'
+      expected: 'Your Openness score is low. You rely on this trait less, leaning on other qualities in most situations.'
     }
   ])('returns the expected narrative for $trait at $score', ({ trait, score, expected }) => {
     expect(getTraitMeaning(trait, score)).toBe(expected);

@@ -128,7 +128,7 @@ ${facets
     ({ facetName, score }) => `          <div class="facet-row">
             <span class="facet-label">${escapeHtml(facetName)}</span>
             <div class="facet-bar"><span style="width:${clampScore(score)}%"></span></div>
-            <span class="facet-value">${clampScore(score)}</span>
+            <span class="facet-value">${clampScore(score)}/100</span>
           </div>`
   )
   .join('\n')}

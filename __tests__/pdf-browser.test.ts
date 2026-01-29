@@ -113,4 +113,50 @@ describe('getBrowser', () => {
     await expect(getBrowser()).rejects.toBeInstanceOf(BrowserlessConnectError);
     expect(mockedPuppeteer.launch).not.toHaveBeenCalled();
   });
+
+  it('retries browserless connection once before succeeding', async () => {
+    process.env.BROWSERLESS_WS_ENDPOINT = 'ws://browserless.example.com/';
+    const browser = createBrowser();
+    mockedPuppeteer.connect
+      .mockRejectedValueOnce(new Error('connection failed'))
+      .mockResolvedValueOnce(browser);
+
+    vi.useFakeTimers();
+    const randomSpy = vi.spyOn(Math, 'random').mockReturnValue(0);
+
+    try {
+      const handlePromise = getBrowser();
+      await vi.runAllTimersAsync();
+      const handle = await handlePromise;
+
+      expect(mockedPuppeteer.connect).toHaveBeenCalledTimes(2);
+
+      await handle.cleanup();
+      expect(browser.disconnect).toHaveBeenCalledTimes(1);
+    } finally {
+      randomSpy.mockRestore();
+      vi.useRealTimers();
+    }
+  });
+
+  it('throws a browserless connect error after two failed attempts', async () => {
+    process.env.BROWSERLESS_WS_ENDPOINT = 'ws://browserless.example.com/';
+    mockedPuppeteer.connect
+      .mockRejectedValueOnce(new Error('connection failed'))
+      .mockRejectedValueOnce(new Error('connection failed again'));
+
+    vi.useFakeTimers();
+    const randomSpy = vi.spyOn(Math, 'random').mockReturnValue(0);
+
+    try {
+      const handlePromise = getBrowser();
+      await vi.runAllTimersAsync();
+
+      await expect(handlePromise).rejects.toBeInstanceOf(BrowserlessConnectError);
+      expect(mockedPuppeteer.connect).toHaveBeenCalledTimes(2);
+    } finally {
+      randomSpy.mockRestore();
+      vi.useRealTimers();
+    }
+  });
 });

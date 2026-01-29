@@ -118,6 +118,6 @@ describe('/api/report', () => {
     );
 
     expect(response.status).toBe(429);
-    expect(response.headers.get('Retry-After')).toBe('15');
+    expect(response.headers.get('Retry-After')).toBe(String(PDF_RENDER_CONCURRENCY_RETRY_SECONDS));
   });
 });

@@ -82,7 +82,10 @@ export async function POST(request: Request) {
     return NextResponse.json({ url, cached });
   } catch (error) {
     if (error instanceof PdfRenderConcurrencyError) {
-      return NextResponse.json({ error: 'Report generation busy. Try again shortly.' }, { status: 429 });
+      return NextResponse.json(
+        { error: 'Report generation busy. Try again shortly.' },
+        { status: 429, headers: { 'Retry-After': '15' } }
+      );
     }
 
     if (error instanceof ReportGenerationError && error.code === 'RESULT_NOT_FOUND') {

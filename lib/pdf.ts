@@ -523,6 +523,9 @@ export const getBrowser = async (): Promise<BrowserHandle> => {
       return await launchLocalBrowser();
     } catch (error) {
       localLaunchError = error;
+      console.warn('Preferred local browser launch failed, falling back to Browserless.', {
+        error
+      });
     }
   }
   let wsUrl: string;
@@ -544,7 +547,7 @@ export const getBrowser = async (): Promise<BrowserHandle> => {
   } catch (error) {
     if (localFallbackAvailable) {
       if (preferLocal && localLaunchError) {
-        throw error;
+        throw localLaunchError;
       }
       return await launchLocalBrowser();
     }

@@ -66,6 +66,7 @@ Create a `.env.local` file for local development (start from `.env.example`). Cu
 - `NEXT_PUBLIC_PLAUSIBLE_DOMAIN` (optional)
 - `NEXT_PUBLIC_SITE_URL` (optional; falls back to `VERCEL_URL` or `http://localhost:3000`)
 - `ALLOW_WEBHOOK_TEST_BYPASS=1` (optional, development-only Paddle webhook bypass)
+- `REPORT_TEMPLATE_VERSION` (optional; defaults to `v1`)
 
 **Payments (Paddle — pending enablement)**
 - `PADDLE_ENV`

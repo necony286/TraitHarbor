@@ -60,6 +60,7 @@ type SectionDefinition = {
 const MAX_PDF_BYTES = 700 * 1024;
 const MAX_CONCURRENT_PDF = 2;
 const PDF_TIMEOUT_MS = 60_000;
+const FONT_LOAD_TIMEOUT_MS = 5_000;
 const BROWSERLESS_CONNECT_MAX_ATTEMPTS = 2;
 const BROWSERLESS_CONNECT_MIN_BACKOFF_MS = 300;
 const BROWSERLESS_CONNECT_MAX_BACKOFF_MS = 800;
@@ -450,12 +451,12 @@ const connectBrowserless = async (wsUrl: string) => {
 
   let lastError: unknown;
 
-  for (let attempt = 1; attempt <= BROWSERLESS_CONNECT_RETRIES; attempt += 1) {
+  for (let attempt = 1; attempt <= BROWSERLESS_CONNECT_MAX_ATTEMPTS; attempt += 1) {
     try {
       return await attemptConnection();
     } catch (error) {
       lastError = error;
-      if (attempt < BROWSERLESS_CONNECT_RETRIES) {
+      if (attempt < BROWSERLESS_CONNECT_MAX_ATTEMPTS) {
         const backoffRange = BROWSERLESS_CONNECT_MAX_BACKOFF_MS - BROWSERLESS_CONNECT_MIN_BACKOFF_MS;
         const backoffMs =
           BROWSERLESS_CONNECT_MIN_BACKOFF_MS + Math.floor(Math.random() * (backoffRange + 1));
@@ -603,22 +604,23 @@ export async function generateReportPdf(payload: ReportPayload) {
       await page.setContent(html, { waitUntil: 'load', timeout: PDF_TIMEOUT_MS });
       await page.emulateMediaType('print');
       try {
-        await page.evaluate(async () => {
+        await page.evaluate(async (fontLoadTimeoutMs) => {
           if ('fonts' in document && document.fonts?.ready) {
-            const FONT_LOAD_TIMEOUT = 5000;
             await Promise.race([
               document.fonts.ready,
               new Promise((_, reject) =>
-                setTimeout(() => reject(new Error('Timed out waiting for fonts to load.')), FONT_LOAD_TIMEOUT)
+                setTimeout(
+                  () => reject(new Error('Timed out waiting for fonts to load.')),
+                  fontLoadTimeoutMs
+                )
               )
             ]);
           }
-        });
+        }, FONT_LOAD_TIMEOUT_MS);
       } catch (error) {
         // Ignore font readiness failures so PDF generation can continue, but log the error for debugging.
         const errorMessage = error instanceof Error ? error.message : String(error);
         console.warn('Failed to wait for font readiness.', errorMessage);
-      }
       }
       await new Promise((resolve) => setTimeout(resolve, 50));
 

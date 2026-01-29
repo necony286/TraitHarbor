@@ -152,16 +152,16 @@ const buildTraitIntroSection = (
           <p>${meaningContent}</p>
         </div>`;
 
+const buildAvoidBreakSection = (title: string, content: string) => `        <div class="avoid-break">
+          <h3>${escapeHtml(title)}</h3>
+          <p>${content}</p>
+        </div>`;
+
 const buildTraitSections = (
   scores: Record<typeof traitSectionOrder[number]['scoreKey'], number>,
   traitPercentages: Record<string, number>,
   facetScores?: Record<string, Record<string, number>>
 ) => {
-  const buildAvoidBreakSection = (title: string, content: string) => `        <div class="avoid-break">
-          <h3>${title}</h3>
-          <p>${content}</p>
-        </div>`;
-
   return traitSectionOrder
     .map(({ name, scoreKey }) => {
       const score = scores[scoreKey];

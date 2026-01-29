@@ -72,14 +72,14 @@ describe('getTraitMeaning', () => {
 });
 
 describe('getFacetSummary', () => {
+  const strongestFacetName = 'Imagination';
+  const strongestFacetScore = 82;
+  const lowestFacetName = 'Adventurousness';
+
   it.each([
     { score: 60, label: 'least strong facet', description: 'meets the threshold' },
     { score: 59, label: 'weakest facet', description: 'falls below the threshold' }
   ])('uses $label when the lowest score $description ($score)', ({ score, label }) => {
-    const strongestFacetName = 'Imagination';
-    const strongestFacetScore = 82;
-    const lowestFacetName = 'Adventurousness';
-
     const summary = getFacetSummary('Openness', {
       Openness: {
         [strongestFacetName]: strongestFacetScore,

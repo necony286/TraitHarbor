@@ -471,7 +471,8 @@ export const getFacetSummary = (
   }
   const lowestFacet = facets[facets.length - 1];
   if (lowestFacet && lowestFacet.facetName !== topFacet.facetName) {
-    callouts.push(`Your weakest facet: ${lowestFacet.facetName} (${lowestFacet.score}/100).`);
+    const lowestFacetLabel = lowestFacet.score >= 60 ? 'least strong facet' : 'weakest facet';
+    callouts.push(`Your ${lowestFacetLabel}: ${lowestFacet.facetName} (${lowestFacet.score}/100).`);
   }
 
   return { facets, callouts };

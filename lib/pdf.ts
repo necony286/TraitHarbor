@@ -146,6 +146,16 @@ const buildTraitSections = (
   traitPercentages: Record<string, number>,
   facetScores?: Record<string, Record<string, number>>
 ) => {
+  const buildTraitIntroSection = (
+    name: string,
+    band: string,
+    scoreValue: number,
+    meaningContent: string
+  ) => `        <div class="avoid-break">
+          <h2>${name} — ${band} (${scoreValue}/100)</h2>
+          <h3>What it means for you</h3>
+          <p>${meaningContent}</p>
+        </div>`;
   const buildAvoidBreakSection = (title: string, content: string) => `        <div class="avoid-break">
           <h3>${title}</h3>
           <p>${content}</p>
@@ -188,11 +198,7 @@ const buildTraitSections = (
       ];
       const meaningContent = facetCallouts || escapeHtml(meaning);
       const sections = [
-        `        <div class="avoid-break">
-          <h2>${name} — ${band} (${scoreValue}/100)</h2>
-          <h3>What it means for you</h3>
-          <p>${meaningContent}</p>
-        </div>`,
+        buildTraitIntroSection(name, band, scoreValue, meaningContent),
         facetBars ? `<div class="avoid-break">${facetBars}</div>` : '',
         ...sectionDefinitions.map(({ title, content, fallback }) =>
           buildAvoidBreakSection(title, content || fallback)

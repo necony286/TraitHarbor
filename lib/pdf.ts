@@ -616,7 +616,9 @@ export async function generateReportPdf(payload: ReportPayload) {
         });
       } catch (error) {
         // Ignore font readiness failures so PDF generation can continue, but log the error for debugging.
-        console.warn('Failed to wait for font readiness.', error);
+        const errorMessage = error instanceof Error ? error.message : String(error);
+        console.warn('Failed to wait for font readiness.', errorMessage);
+      }
       }
       await new Promise((resolve) => setTimeout(resolve, 50));
 

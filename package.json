@@ -8,7 +8,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "pdf:fixture-check": "tsx scripts/pdf-fixture-check.ts",
+    "pdf:fixture-check": "tsx scripts/pdf-fixture-check",
     "test": "pnpm test:unit",
     "test:unit": "vitest run",
     "test:e2e": "pnpm exec playwright install --with-deps && playwright test"

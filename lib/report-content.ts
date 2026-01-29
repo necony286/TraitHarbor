@@ -437,6 +437,8 @@ export type FacetSummary = {
   callouts: string[];
 };
 
+const LEAST_STRONG_FACET_SCORE_THRESHOLD = 60;
+
 export const getFacetSummary = (
   trait: string,
   facetScores?: Record<string, Record<string, number>>
@@ -471,7 +473,8 @@ export const getFacetSummary = (
   }
   const lowestFacet = facets[facets.length - 1];
   if (lowestFacet && lowestFacet.facetName !== topFacet.facetName) {
-    const lowestFacetLabel = lowestFacet.score >= 60 ? 'least strong facet' : 'weakest facet';
+    const lowestFacetLabel =
+      lowestFacet.score >= LEAST_STRONG_FACET_SCORE_THRESHOLD ? 'least strong facet' : 'weakest facet';
     callouts.push(`Your ${lowestFacetLabel}: ${lowestFacet.facetName} (${lowestFacet.score}/100).`);
   }
 

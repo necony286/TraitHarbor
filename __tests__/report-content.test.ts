@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { getPersonalDevelopmentRoadmap, getTraitMeaning, withPrefix } from '../lib/report-content';
+import { getFacetSummary, getPersonalDevelopmentRoadmap, getTraitMeaning, withPrefix } from '../lib/report-content';
 
 describe('withPrefix', () => {
   it.each([
@@ -68,5 +68,35 @@ describe('getTraitMeaning', () => {
     }
   ])('returns the expected narrative for $trait at $score', ({ trait, score, expected }) => {
     expect(getTraitMeaning(trait, score)).toBe(expected);
+  });
+});
+
+describe('getFacetSummary', () => {
+  it('uses least strong facet when the lowest score meets the threshold', () => {
+    const summary = getFacetSummary('Openness', {
+      Openness: {
+        Imagination: 82,
+        Adventurousness: 60
+      }
+    });
+
+    expect(summary?.callouts).toEqual([
+      'Your strongest facet: Imagination (82/100).',
+      'Your least strong facet: Adventurousness (60/100).'
+    ]);
+  });
+
+  it('uses weakest facet when the lowest score falls below the threshold', () => {
+    const summary = getFacetSummary('Openness', {
+      Openness: {
+        Imagination: 82,
+        Adventurousness: 59
+      }
+    });
+
+    expect(summary?.callouts).toEqual([
+      'Your strongest facet: Imagination (82/100).',
+      'Your weakest facet: Adventurousness (59/100).'
+    ]);
   });
 });

@@ -3,6 +3,7 @@ import ipipFixture from '../src/data/ipip120.fixture.json';
 import facetMapping from '../src/data/ipip120.facets.json';
 
 type Trait = 'O' | 'C' | 'E' | 'A' | 'N';
+const traits: Trait[] = ['O', 'C', 'E', 'A', 'N'];
 
 export type QuizItem = {
   id: string;
@@ -30,15 +31,21 @@ const attachFacets = (quizItems: QuizItem[]) => {
       const sampleIds = missing.slice(0, 5).map((item) => item.id);
       const missingByTrait = missing.reduce(
         (acc, item) => {
-          acc[item.trait] += 1;
+          acc[item.trait] = (acc[item.trait] ?? 0) + 1;
           return acc;
         },
-        { O: 0, C: 0, E: 0, A: 0, N: 0 } as Record<Trait, number>
+        traits.reduce(
+          (acc, trait) => {
+            acc[trait] = 0;
+            return acc;
+          },
+          {} as Record<Trait, number>
+        )
       );
       console.warn(
-        `[ipip] Missing facet mappings for ${missing.length} quiz items. ` +
-          `Sample IDs: ${sampleIds.join(', ') || 'n/a'}. ` +
-          `Missing by trait: ${JSON.stringify(missingByTrait)}.`
+        `[ipip] Missing facet mappings for ${missing.length} quiz items. Sample IDs: ${sampleIds.join(
+          ', '
+        )}. Missing by trait: ${JSON.stringify(missingByTrait)}.`
       );
       if (
         process.env.NODE_ENV === 'test' ||

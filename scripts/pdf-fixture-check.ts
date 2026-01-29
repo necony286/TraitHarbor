@@ -31,26 +31,26 @@ const payload: ReportPayload = {
   traitRankOrder
 };
 
-const run = async () => {
-  const html = await buildReportHtml(payload);
+(async () => {
+  try {
+    const html = await buildReportHtml(payload);
 
-  const requiredStrings = [
-    'Your Personality Profile',
-    'Big Five snapshot',
-    'Resources + methodology'
-  ];
+    const requiredStrings = [
+      'Your Personality Profile',
+      'Big Five snapshot',
+      'Resources + methodology'
+    ];
 
-  for (const text of requiredStrings) {
-    assert.ok(html.includes(text), `Expected report HTML to include "${text}"`);
+    for (const text of requiredStrings) {
+      assert.ok(html.includes(text), `Expected report HTML to include "${text}"`);
+    }
+
+    assert.ok(!/{{|}}/.test(html), 'Expected report HTML to have no raw template tokens');
+
+    console.log('PDF fixture check passed.');
+  } catch (error) {
+    console.error('PDF fixture check failed.');
+    console.error(error);
+    process.exitCode = 1;
   }
-
-  assert.ok(!/{{|}}/.test(html), 'Expected report HTML to have no raw template tokens');
-
-  console.log('PDF fixture check passed.');
-};
-
-run().catch((error) => {
-  console.error('PDF fixture check failed.');
-  console.error(error);
-  process.exitCode = 1;
-});
+})();

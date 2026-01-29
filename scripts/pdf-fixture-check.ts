@@ -51,6 +51,6 @@ const payload: ReportPayload = {
   } catch (error) {
     console.error('PDF fixture check failed.');
     console.error(error);
-    process.exitCode = 1;
+    process.exit(1);
   }
 })();

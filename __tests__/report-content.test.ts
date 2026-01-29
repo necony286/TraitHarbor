@@ -72,31 +72,20 @@ describe('getTraitMeaning', () => {
 });
 
 describe('getFacetSummary', () => {
-  it('uses least strong facet when the lowest score meets the threshold', () => {
+  it.each([
+    { score: 60, label: 'least strong facet', description: 'meets the threshold' },
+    { score: 59, label: 'weakest facet', description: 'falls below the threshold' }
+  ])('uses $label when the lowest score $description ($score)', ({ score, label }) => {
     const summary = getFacetSummary('Openness', {
       Openness: {
         Imagination: 82,
-        Adventurousness: 60
+        Adventurousness: score
       }
     });
 
     expect(summary?.callouts).toEqual([
       'Your strongest facet: Imagination (82/100).',
-      'Your least strong facet: Adventurousness (60/100).'
-    ]);
-  });
-
-  it('uses weakest facet when the lowest score falls below the threshold', () => {
-    const summary = getFacetSummary('Openness', {
-      Openness: {
-        Imagination: 82,
-        Adventurousness: 59
-      }
-    });
-
-    expect(summary?.callouts).toEqual([
-      'Your strongest facet: Imagination (82/100).',
-      'Your weakest facet: Adventurousness (59/100).'
+      `Your ${label}: Adventurousness (${score}/100).`
     ]);
   });
 });

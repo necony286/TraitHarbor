@@ -500,18 +500,15 @@ export const getBrowser = async (): Promise<BrowserHandle> => {
 };
 
 export async function buildReportHtml(payload: ReportPayload) {
-  const [template, styles] = await Promise.all([
-    cachedTemplate ?? readFile(templatePath('report.html'), 'utf8'),
-    cachedCss ?? readFile(templatePath('report.css'), 'utf8')
-  ]);
-
   if (!cachedTemplate) {
-    cachedTemplate = template;
+    cachedTemplate = readFile(templatePath('report.html'), 'utf8');
   }
 
   if (!cachedCss) {
-    cachedCss = styles;
+    cachedCss = readFile(templatePath('report.css'), 'utf8');
   }
+
+  const [template, styles] = await Promise.all([cachedTemplate, cachedCss]);
 
   const clampedTraitPercentages = Object.fromEntries(
     Object.entries(payload.traitPercentages).map(([trait, value]) => [

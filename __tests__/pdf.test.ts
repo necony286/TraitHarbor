@@ -207,4 +207,58 @@ describe('report template', () => {
     expect(html).not.toContain(unsafeResource.url);
     expect(html).not.toContain(unsafeResource.label + '</a>');
   });
+
+  it('caches template and css file reads across concurrent builds', async () => {
+    vi.resetModules();
+    const readFile = vi.fn(async (filePath: string) => {
+      if (filePath.endsWith('report.css')) {
+        return 'body { color: #111; }';
+      }
+
+      return '<html><head>{{styles}}</head><body>{{trait_sections}}{{overview_chart}}{{highest_lowest_callout}}{{comparison_section}}</body></html>';
+    });
+
+    vi.doMock('fs/promises', async (importOriginal) => {
+      const actual = await importOriginal<typeof import('fs/promises')>();
+
+      return {
+        ...actual,
+        access: vi.fn(),
+        readFile,
+        default: {
+          ...actual,
+          access: vi.fn(),
+          readFile
+        }
+      };
+    });
+
+    const { buildReportHtml, traitSectionOrder } = await import('../lib/pdf');
+    const traits: ReportTraits = {
+      O: 60,
+      C: 50,
+      E: 40,
+      A: 30,
+      N: 20
+    };
+    const traitPercentages = Object.fromEntries(
+      traitSectionOrder.map(({ name, scoreKey }) => [name, traits[scoreKey]])
+    );
+    const traitRankOrder = traitSectionOrder.map(({ name }) => name);
+
+    const payload: ReportPayload = {
+      date: new Date(Date.UTC(2024, 0, 2, 12, 0, 0)),
+      traits,
+      traitPercentages,
+      highestTrait: traitRankOrder[0],
+      lowestTrait: traitRankOrder[traitRankOrder.length - 1],
+      traitRankOrder
+    };
+
+    await Promise.all([buildReportHtml(payload), buildReportHtml(payload)]);
+
+    const filesRead = readFile.mock.calls.map(([filePath]) => filePath as string);
+    expect(filesRead.filter((filePath) => filePath.endsWith('report.html'))).toHaveLength(1);
+    expect(filesRead.filter((filePath) => filePath.endsWith('report.css'))).toHaveLength(1);
+  });
 });

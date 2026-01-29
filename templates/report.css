@@ -224,11 +224,6 @@ h2 {
     page-break-after: avoid;
   }
 
-  .report__trait {
-    break-inside: avoid;
-    page-break-inside: avoid;
-  }
-
   .report__cover {
     break-inside: avoid;
     page-break-inside: avoid;

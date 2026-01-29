@@ -60,6 +60,9 @@ type SectionDefinition = {
 const MAX_PDF_BYTES = 700 * 1024;
 const MAX_CONCURRENT_PDF = 2;
 const PDF_TIMEOUT_MS = 60_000;
+const BROWSERLESS_CONNECT_RETRIES = 2;
+const BROWSERLESS_CONNECT_MIN_BACKOFF_MS = 300;
+const BROWSERLESS_CONNECT_MAX_BACKOFF_MS = 800;
 let cachedTemplate: Promise<string> | null = null;
 let cachedCss: Promise<string> | null = null;
 
@@ -445,25 +448,30 @@ const connectBrowserless = async (wsUrl: string) => {
     };
   };
 
-  let firstError: unknown;
+  let lastError: unknown;
 
-  for (let attempt = 1; attempt <= 2; attempt += 1) {
+  for (let attempt = 1; attempt <= BROWSERLESS_CONNECT_RETRIES; attempt += 1) {
     try {
       return await attemptConnection();
     } catch (error) {
-      if (attempt === 1) {
-        firstError = error;
-        const backoffMs = Math.floor(300 + Math.random() * 501);
+      lastError = error;
+      if (attempt < BROWSERLESS_CONNECT_RETRIES) {
+        const backoffRange = BROWSERLESS_CONNECT_MAX_BACKOFF_MS - BROWSERLESS_CONNECT_MIN_BACKOFF_MS;
+        const backoffMs =
+          BROWSERLESS_CONNECT_MIN_BACKOFF_MS + Math.floor(Math.random() * (backoffRange + 1));
         console.warn(
           `Browserless connect attempt ${attempt} failed. Retrying in ${backoffMs}ms...`
         );
         await new Promise((resolve) => setTimeout(resolve, backoffMs));
-        continue;
       }
     }
   }
 
-  throw firstError;
+  const message =
+    lastError instanceof Error
+      ? `Failed to connect to Browserless: ${lastError.message}`
+      : 'Failed to connect to Browserless.';
+  throw new BrowserlessConnectError(message);
 };
 
 const launchLocalBrowser = async () => {

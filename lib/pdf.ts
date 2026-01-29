@@ -153,7 +153,7 @@ const buildTraitIntroSection = (
         </div>`;
 
 const buildAvoidBreakSection = (title: string, content: string) => `        <div class="avoid-break">
-          <h3>${title}</h3>
+          <h3>${escapeHtml(title)}</h3>
           <p>${content}</p>
         </div>`;
 

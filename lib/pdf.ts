@@ -430,7 +430,7 @@ const canUseLocalFallback = async () => {
 
 const connectBrowserless = async (wsUrl: string) => {
   const puppeteer = await loadPuppeteer();
-  try {
+  const attemptConnection = async () => {
     const browser = await puppeteer.connect({ browserWSEndpoint: wsUrl });
     return {
       browser,
@@ -443,11 +443,27 @@ const connectBrowserless = async (wsUrl: string) => {
         }
       }
     };
-  } catch (error) {
-    throw new BrowserlessConnectError(
-      error instanceof Error ? error.message : 'Failed to connect to Browserless.'
-    );
+  };
+
+  let firstError: unknown;
+
+  for (let attempt = 1; attempt <= 2; attempt += 1) {
+    try {
+      return await attemptConnection();
+    } catch (error) {
+      if (attempt === 1) {
+        firstError = error;
+        const backoffMs = Math.floor(300 + Math.random() * 501);
+        console.warn(
+          `Browserless connect attempt ${attempt} failed. Retrying in ${backoffMs}ms...`
+        );
+        await new Promise((resolve) => setTimeout(resolve, backoffMs));
+        continue;
+      }
+    }
   }
+
+  throw firstError;
 };
 
 const launchLocalBrowser = async () => {

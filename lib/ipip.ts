@@ -34,18 +34,13 @@ const attachFacets = (quizItems: QuizItem[]) => {
           acc[item.trait] = (acc[item.trait] ?? 0) + 1;
           return acc;
         },
-        traits.reduce(
-          (acc, trait) => {
-            acc[trait] = 0;
-            return acc;
-          },
-          {} as Record<Trait, number>
-        )
+        Object.fromEntries(traits.map((trait) => [trait, 0])) as Record<
+          Trait,
+          number
+        >
       );
       console.warn(
-        `[ipip] Missing facet mappings for ${missing.length} quiz items. Sample IDs: ${sampleIds.join(
-          ', '
-        )}. Missing by trait: ${JSON.stringify(missingByTrait)}.`
+        `[ipip] Missing facet mappings for ${missing.length} quiz items. Sample IDs: ${sampleIds.join(', ')}. Missing by trait: ${JSON.stringify(missingByTrait)}.`
       );
       if (
         process.env.NODE_ENV === 'test' ||

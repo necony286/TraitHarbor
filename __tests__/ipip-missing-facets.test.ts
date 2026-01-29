@@ -1,14 +1,12 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 describe('ipip facet mapping guardrails', () => {
-  const originalEnv = process.env.NODE_ENV;
-
   beforeEach(() => {
-    process.env.NODE_ENV = 'test';
+    vi.stubEnv('NODE_ENV', 'test');
   });
 
   afterEach(() => {
-    process.env.NODE_ENV = originalEnv;
+    vi.unstubAllEnvs();
     vi.resetModules();
     vi.clearAllMocks();
   });

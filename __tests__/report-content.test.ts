@@ -76,16 +76,20 @@ describe('getFacetSummary', () => {
     { score: 60, label: 'least strong facet', description: 'meets the threshold' },
     { score: 59, label: 'weakest facet', description: 'falls below the threshold' }
   ])('uses $label when the lowest score $description ($score)', ({ score, label }) => {
+    const strongestFacetName = 'Imagination';
+    const strongestFacetScore = 82;
+    const lowestFacetName = 'Adventurousness';
+
     const summary = getFacetSummary('Openness', {
       Openness: {
-        Imagination: 82,
-        Adventurousness: score
+        [strongestFacetName]: strongestFacetScore,
+        [lowestFacetName]: score
       }
     });
 
     expect(summary?.callouts).toEqual([
-      'Your strongest facet: Imagination (82/100).',
-      `Your ${label}: Adventurousness (${score}/100).`
+      `Your strongest facet: ${strongestFacetName} (${strongestFacetScore}/100).`,
+      `Your ${label}: ${lowestFacetName} (${score}/100).`
     ]);
   });
 });

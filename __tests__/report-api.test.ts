@@ -39,7 +39,7 @@ const setupSuccessfulOrderMock = () => {
       amount_cents: ORDER_AMOUNT_CENTS,
       response_id: null,
       paddle_order_id: null,
-      created_at: new Date().toISOString(),
+      created_at: '2024-01-01T00:00:00.000Z',
       user_id: USER_ID
     },
     error: null

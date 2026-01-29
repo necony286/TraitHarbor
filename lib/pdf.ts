@@ -186,8 +186,13 @@ const buildTraitSections = (
           fallback: 'Notice how this trait shapes how you connect with others.'
         }
       ];
+      const meaningContent = facetCallouts || escapeHtml(meaning);
       const sections = [
-        buildAvoidBreakSection('What it means for you', facetCallouts || escapeHtml(meaning)),
+        `        <div class="avoid-break">
+          <h2>${name} — ${band} (${scoreValue}/100)</h2>
+          <h3>What it means for you</h3>
+          <p>${meaningContent}</p>
+        </div>`,
         facetBars ? `<div class="avoid-break">${facetBars}</div>` : '',
         ...sectionDefinitions.map(({ title, content, fallback }) =>
           buildAvoidBreakSection(title, content || fallback)
@@ -197,7 +202,6 @@ const buildTraitSections = (
         .join('\n');
 
       return `      <section class="report__trait">
-        <h2>${name} — ${band} (${scoreValue}/100)</h2>
 ${sections}
       </section>`;
     })

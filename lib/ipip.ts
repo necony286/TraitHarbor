@@ -16,14 +16,42 @@ const items = (ipipItems as QuizItem[]) ?? [];
 const fixtureItems = (ipipFixture as QuizItem[]) ?? [];
 const facetLookup = (facetMapping as Record<string, string>) ?? {};
 
-const attachFacets = (quizItems: QuizItem[]) =>
-  quizItems.map((item) => {
+const attachFacets = (quizItems: QuizItem[]) => {
+  const withFacets = quizItems.map((item) => {
     const facet = facetLookup[item.id];
     if (!facet) {
       return item;
     }
     return { ...item, facet };
   });
+  if (process.env.NODE_ENV !== 'production') {
+    const missing = withFacets.filter((item) => !item.facet);
+    if (missing.length > 0) {
+      const sampleIds = missing.slice(0, 5).map((item) => item.id);
+      const missingByTrait = missing.reduce(
+        (acc, item) => {
+          acc[item.trait] += 1;
+          return acc;
+        },
+        { O: 0, C: 0, E: 0, A: 0, N: 0 } as Record<Trait, number>
+      );
+      console.warn(
+        `[ipip] Missing facet mappings for ${missing.length} quiz items. ` +
+          `Sample IDs: ${sampleIds.join(', ') || 'n/a'}. ` +
+          `Missing by trait: ${JSON.stringify(missingByTrait)}.`
+      );
+      if (
+        process.env.NODE_ENV === 'test' ||
+        process.env.NODE_ENV === 'development'
+      ) {
+        throw new Error(
+          `Missing facet mappings for ${missing.length} quiz items.`
+        );
+      }
+    }
+  }
+  return withFacets;
+};
 
 export function loadQuizItems(): QuizItem[] {
   const useFixture = process.env.NEXT_PUBLIC_QUIZ_FIXTURE_MODE === '1';

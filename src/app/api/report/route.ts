@@ -19,7 +19,7 @@ const requestSchema = z
   .strict();
 
 export const runtime = 'nodejs';
-export const PDF_RENDER_CONCURRENCY_RETRY_SECONDS = 15;
+const PDF_RENDER_CONCURRENCY_RETRY_SECONDS = 15;
 
 export async function POST(request: Request) {
   const rateLimitResponse = await enforceRateLimit({

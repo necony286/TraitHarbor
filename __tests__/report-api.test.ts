@@ -27,6 +27,7 @@ vi.mock('../lib/report-download', () => ({
   ReportGenerationError: class ReportGenerationError extends Error {}
 }));
 
+import { PdfRenderConcurrencyError } from '../lib/report-download';
 import { POST } from '../src/app/api/report/route';
 
 describe('/api/report', () => {
@@ -90,5 +91,33 @@ describe('/api/report', () => {
 
     expect(response.status).toBe(200);
     await expect(response.json()).resolves.toMatchObject({ url: 'https://example.com/report.pdf' });
+  });
+
+  it('returns 429 with retry-after when report generation is busy', async () => {
+    getOrderByIdMock.mockResolvedValue({
+      data: {
+        id: ORDER_ID,
+        status: 'paid',
+        amount_cents: 5000,
+        response_id: null,
+        paddle_order_id: null,
+        created_at: new Date().toISOString(),
+        user_id: USER_ID
+      },
+      error: null
+    });
+
+    getOrCreateReportDownloadUrlMock.mockRejectedValue(new PdfRenderConcurrencyError('Busy'));
+
+    const response = await POST(
+      new Request('http://localhost/api/report', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'x-user-id': USER_ID },
+        body: JSON.stringify({ orderId: ORDER_ID })
+      })
+    );
+
+    expect(response.status).toBe(429);
+    expect(response.headers.get('Retry-After')).toBe(String(PDF_RENDER_CONCURRENCY_RETRY_SECONDS));
   });
 });

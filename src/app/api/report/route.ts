@@ -19,6 +19,7 @@ const requestSchema = z
   .strict();
 
 export const runtime = 'nodejs';
+export const PDF_RENDER_CONCURRENCY_RETRY_SECONDS = 15;
 
 export async function POST(request: Request) {
   const rateLimitResponse = await enforceRateLimit({
@@ -84,7 +85,7 @@ export async function POST(request: Request) {
     if (error instanceof PdfRenderConcurrencyError) {
       return NextResponse.json(
         { error: 'Report generation busy. Try again shortly.' },
-        { status: 429, headers: { 'Retry-After': '15' } }
+        { status: 429, headers: { 'Retry-After': String(PDF_RENDER_CONCURRENCY_RETRY_SECONDS) } }
       );
     }
 

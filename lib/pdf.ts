@@ -60,6 +60,8 @@ type SectionDefinition = {
 const MAX_PDF_BYTES = 700 * 1024;
 const MAX_CONCURRENT_PDF = 2;
 const PDF_TIMEOUT_MS = 60_000;
+let cachedTemplate: Promise<string> | null = null;
+let cachedCss: Promise<string> | null = null;
 
 export class PdfRenderConcurrencyError extends Error {
   constructor() {
@@ -499,9 +501,17 @@ export const getBrowser = async (): Promise<BrowserHandle> => {
 
 export async function buildReportHtml(payload: ReportPayload) {
   const [template, styles] = await Promise.all([
-    readFile(templatePath('report.html'), 'utf8'),
-    readFile(templatePath('report.css'), 'utf8')
+    cachedTemplate ?? readFile(templatePath('report.html'), 'utf8'),
+    cachedCss ?? readFile(templatePath('report.css'), 'utf8')
   ]);
+
+  if (!cachedTemplate) {
+    cachedTemplate = template;
+  }
+
+  if (!cachedCss) {
+    cachedCss = styles;
+  }
 
   const clampedTraitPercentages = Object.fromEntries(
     Object.entries(payload.traitPercentages).map(([trait, value]) => [

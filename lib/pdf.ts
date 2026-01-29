@@ -60,8 +60,8 @@ type SectionDefinition = {
 const MAX_PDF_BYTES = 700 * 1024;
 const MAX_CONCURRENT_PDF = 2;
 const PDF_TIMEOUT_MS = 60_000;
-let cachedTemplate: string | null = null;
-let cachedCss: string | null = null;
+let cachedTemplate: Promise<string> | null = null;
+let cachedCss: Promise<string> | null = null;
 
 export class PdfRenderConcurrencyError extends Error {
   constructor() {

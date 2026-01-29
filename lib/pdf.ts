@@ -605,11 +605,20 @@ export async function generateReportPdf(payload: ReportPayload) {
       try {
         await page.evaluate(async () => {
           if ('fonts' in document && document.fonts?.ready) {
-            await document.fonts.ready;
+            const FONT_LOAD_TIMEOUT = 5000;
+            await Promise.race([
+              document.fonts.ready,
+              new Promise((_, reject) =>
+                setTimeout(() => reject(new Error('Timed out waiting for fonts to load.')), FONT_LOAD_TIMEOUT)
+              )
+            ]);
           }
         });
-      } catch {
-        // Ignore font readiness failures so PDF generation can continue.
+      } catch (error) {
+        // Ignore font readiness failures so PDF generation can continue, but log the error for debugging.
+        const errorMessage = error instanceof Error ? error.message : String(error);
+        console.warn('Failed to wait for font readiness.', errorMessage);
+      }
       }
       await new Promise((resolve) => setTimeout(resolve, 50));
 

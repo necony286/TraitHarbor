@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, mocked, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import {
   getFacetScoresByResultId,
@@ -45,13 +45,13 @@ describe('getOrCreateReportDownloadUrl', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-    mocked(getReportPath).mockReturnValue(reportPath);
-    mocked(getLegacyReportPath).mockReturnValue(legacyPath);
-    mocked(getReportAsset).mockResolvedValue({ data: null, error: null });
+    vi.mocked(getReportPath).mockReturnValue(reportPath);
+    vi.mocked(getLegacyReportPath).mockReturnValue(legacyPath);
+    vi.mocked(getReportAsset).mockResolvedValue({ data: null, error: null });
   });
 
   it('deduplicates paths and returns a cached URL', async () => {
-    mocked(getReportSignedUrlForPath).mockResolvedValueOnce('https://example.com/report.pdf');
+    vi.mocked(getReportSignedUrlForPath).mockResolvedValueOnce('https://example.com/report.pdf');
 
     const result = await getOrCreateReportDownloadUrl({
       order: {
@@ -74,7 +74,7 @@ describe('getOrCreateReportDownloadUrl', () => {
   });
 
   it('tries legacy paths and updates the report file key when needed', async () => {
-    mocked(getReportSignedUrlForPath).mockImplementation(async (path: string) =>
+    vi.mocked(getReportSignedUrlForPath).mockImplementation(async (path: string) =>
       path === legacyPath ? 'https://example.com/legacy.pdf' : null
     );
 
@@ -93,7 +93,7 @@ describe('getOrCreateReportDownloadUrl', () => {
       cached: true,
       reportFileKey: legacyPath
     });
-    expect(mocked(getReportSignedUrlForPath).mock.calls.map(([path]) => path)).toEqual([
+    expect(vi.mocked(getReportSignedUrlForPath).mock.calls.map(([path]) => path)).toEqual([
       reportPath,
       'reports/old.pdf',
       legacyPath
@@ -105,14 +105,14 @@ describe('getOrCreateReportDownloadUrl', () => {
   });
 
   it('generates and uploads a report when no cached URL exists', async () => {
-    mocked(getReportSignedUrlForPath).mockResolvedValue(null);
-    mocked(getScoresByResultId).mockResolvedValue({
+    vi.mocked(getReportSignedUrlForPath).mockResolvedValue(null);
+    vi.mocked(getScoresByResultId).mockResolvedValue({
       data: { O: 10, C: 20, E: 30, A: 40, N: 50 },
       error: null
     });
-    mocked(getFacetScoresByResultId).mockResolvedValue({ data: null, error: null });
-    mocked(generateReportPdf).mockResolvedValue(Buffer.from('pdf'));
-    mocked(getReportSignedUrl).mockResolvedValue('https://example.com/new.pdf');
+    vi.mocked(getFacetScoresByResultId).mockResolvedValue({ data: null, error: null });
+    vi.mocked(generateReportPdf).mockResolvedValue(Buffer.from('pdf'));
+    vi.mocked(getReportSignedUrl).mockResolvedValue('https://example.com/new.pdf');
 
     const result = await getOrCreateReportDownloadUrl({
       order: {

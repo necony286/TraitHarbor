@@ -8,6 +8,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
+    "gen:fixtures": "tsx scripts/generate-report-fixtures.ts",
     "pdf:fixture-check": "tsx scripts/pdf-fixture-check",
     "test": "pnpm test:unit",
     "test:unit": "vitest run",

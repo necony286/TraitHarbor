@@ -514,12 +514,26 @@ type BrowserHandle = {
 export const getBrowser = async (): Promise<BrowserHandle> => {
   logBrowserFactoryState();
   const localFallbackAvailable = await canUseLocalFallback();
+  const preferLocal =
+    localFallbackAvailable && isLocalFallbackEnabled() && !isVercelRuntime();
+  let localLaunchError: unknown;
+
+  if (preferLocal) {
+    try {
+      return await launchLocalBrowser();
+    } catch (error) {
+      localLaunchError = error;
+    }
+  }
   let wsUrl: string;
 
   try {
     wsUrl = resolveBrowserlessWsUrl();
   } catch (error) {
     if (error instanceof BrowserlessConfigError && localFallbackAvailable) {
+      if (localLaunchError) {
+        throw localLaunchError;
+      }
       return await launchLocalBrowser();
     }
     throw error;
@@ -529,6 +543,9 @@ export const getBrowser = async (): Promise<BrowserHandle> => {
     return await connectBrowserless(wsUrl);
   } catch (error) {
     if (localFallbackAvailable) {
+      if (preferLocal && localLaunchError) {
+        throw error;
+      }
       return await launchLocalBrowser();
     }
     throw error;

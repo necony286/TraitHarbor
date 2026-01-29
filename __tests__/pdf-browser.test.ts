@@ -150,9 +150,9 @@ describe('getBrowser', () => {
 
     try {
       const handlePromise = getBrowser();
+      const rejection = expect(handlePromise).rejects.toBeInstanceOf(BrowserlessConnectError);
       await vi.runAllTimersAsync();
-
-      await expect(handlePromise).rejects.toBeInstanceOf(BrowserlessConnectError);
+      await rejection;
       expect(mockedPuppeteer.connect).toHaveBeenCalledTimes(2);
     } finally {
       randomSpy.mockRestore();

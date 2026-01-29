@@ -602,6 +602,15 @@ export async function generateReportPdf(payload: ReportPayload) {
       page.setDefaultNavigationTimeout(PDF_TIMEOUT_MS);
       await page.setContent(html, { waitUntil: 'load', timeout: PDF_TIMEOUT_MS });
       await page.emulateMediaType('print');
+      try {
+        await page.evaluate(async () => {
+          if ('fonts' in document && document.fonts?.ready) {
+            await document.fonts.ready;
+          }
+        });
+      } catch {
+        // Ignore font readiness failures so PDF generation can continue.
+      }
       await new Promise((resolve) => setTimeout(resolve, 50));
 
       const pdf = await page.pdf({

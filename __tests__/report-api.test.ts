@@ -22,14 +22,18 @@ vi.mock('../lib/db', () => ({
 
 const getOrCreateReportDownloadUrlMock = vi.fn();
 
-vi.mock('../lib/report-download', () => ({
-  getOrCreateReportDownloadUrl: (...args: unknown[]) => getOrCreateReportDownloadUrlMock(...args),
-  PdfRenderConcurrencyError: class PdfRenderConcurrencyError extends Error {},
-  ReportGenerationError: class ReportGenerationError extends Error {}
-}));
+vi.mock('../lib/report-download', async () => {
+  const actual = await vi.importActual<typeof import('../lib/report-download')>('../lib/report-download');
+  return {
+    ...actual,
+    getOrCreateReportDownloadUrl: (...args: unknown[]) => getOrCreateReportDownloadUrlMock(...args),
+    PdfRenderConcurrencyError: class PdfRenderConcurrencyError extends Error {},
+    ReportGenerationError: class ReportGenerationError extends Error {}
+  };
+});
 
-import { PdfRenderConcurrencyError } from '../lib/report-download';
-import { PDF_RENDER_CONCURRENCY_RETRY_SECONDS, POST } from '../src/app/api/report/route';
+import { PDF_RENDER_CONCURRENCY_RETRY_SECONDS, PdfRenderConcurrencyError } from '../lib/report-download';
+import { POST } from '../src/app/api/report/route';
 
 const setupSuccessfulOrderMock = () => {
   getOrderByIdMock.mockResolvedValue({

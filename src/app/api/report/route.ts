@@ -7,6 +7,7 @@ import { isAuthorizedForOrder } from '../../../../lib/report-authorization';
 import {
   BrowserlessConfigError,
   getOrCreateReportDownloadUrl,
+  PDF_RENDER_CONCURRENCY_RETRY_SECONDS,
   PdfRenderConcurrencyError,
   ReportGenerationError
 } from '../../../../lib/report-download';
@@ -19,7 +20,6 @@ const requestSchema = z
   .strict();
 
 export const runtime = 'nodejs';
-const PDF_RENDER_CONCURRENCY_RETRY_SECONDS = 15;
 
 export async function POST(request: Request) {
   const rateLimitResponse = await enforceRateLimit({

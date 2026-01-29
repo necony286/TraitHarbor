@@ -30,6 +30,8 @@ export class ReportGenerationError extends Error {
   }
 }
 
+export const PDF_RENDER_CONCURRENCY_RETRY_SECONDS = 15;
+
 const traitsSchema = z.object({
   O: z.number(),
   C: z.number(),

@@ -2,6 +2,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 const ORDER_ID = '22222222-2222-2222-2222-222222222222';
 const USER_ID = 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa';
+const ORDER_AMOUNT_CENTS = 5000;
 
 vi.mock('next/headers', () => ({
   cookies: vi.fn().mockResolvedValue({ get: () => undefined })
@@ -28,12 +29,28 @@ vi.mock('../lib/report-download', () => ({
 }));
 
 import { PdfRenderConcurrencyError } from '../lib/report-download';
-import { POST } from '../src/app/api/report/route';
+import { PDF_RENDER_CONCURRENCY_RETRY_SECONDS, POST } from '../src/app/api/report/route';
+
+const setupSuccessfulOrderMock = () => {
+  getOrderByIdMock.mockResolvedValue({
+    data: {
+      id: ORDER_ID,
+      status: 'paid',
+      amount_cents: ORDER_AMOUNT_CENTS,
+      response_id: null,
+      paddle_order_id: null,
+      created_at: new Date().toISOString(),
+      user_id: USER_ID
+    },
+    error: null
+  });
+};
 
 describe('/api/report', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     vi.stubEnv('NODE_ENV', 'development');
+    setupSuccessfulOrderMock();
   });
 
   afterEach(() => {
@@ -41,19 +58,6 @@ describe('/api/report', () => {
   });
 
   it('requires authorization', async () => {
-    getOrderByIdMock.mockResolvedValue({
-      data: {
-        id: ORDER_ID,
-        status: 'paid',
-        amount_cents: 5000,
-        response_id: null,
-        paddle_order_id: null,
-        created_at: new Date().toISOString(),
-        user_id: USER_ID
-      },
-      error: null
-    });
-
     const response = await POST(
       new Request('http://localhost/api/report', {
         method: 'POST',
@@ -66,19 +70,6 @@ describe('/api/report', () => {
   });
 
   it('returns a signed URL for authorized requests', async () => {
-    getOrderByIdMock.mockResolvedValue({
-      data: {
-        id: ORDER_ID,
-        status: 'paid',
-        amount_cents: 5000,
-        response_id: null,
-        paddle_order_id: null,
-        created_at: new Date().toISOString(),
-        user_id: USER_ID
-      },
-      error: null
-    });
-
     getOrCreateReportDownloadUrlMock.mockResolvedValue({ url: 'https://example.com/report.pdf', cached: true });
 
     const response = await POST(
@@ -94,19 +85,6 @@ describe('/api/report', () => {
   });
 
   it('returns 429 with retry-after when report generation is busy', async () => {
-    getOrderByIdMock.mockResolvedValue({
-      data: {
-        id: ORDER_ID,
-        status: 'paid',
-        amount_cents: 5000,
-        response_id: null,
-        paddle_order_id: null,
-        created_at: new Date().toISOString(),
-        user_id: USER_ID
-      },
-      error: null
-    });
-
     getOrCreateReportDownloadUrlMock.mockRejectedValue(new PdfRenderConcurrencyError('Busy'));
 
     const response = await POST(

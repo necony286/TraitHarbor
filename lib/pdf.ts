@@ -445,14 +445,14 @@ const connectBrowserless = async (wsUrl: string) => {
     };
   };
 
-  let lastError: unknown;
+  let firstError: unknown;
 
   for (let attempt = 1; attempt <= 2; attempt += 1) {
     try {
       return await attemptConnection();
     } catch (error) {
-      lastError = error;
       if (attempt === 1) {
+        firstError = error;
         const backoffMs = Math.floor(300 + Math.random() * 501);
         console.warn(
           `Browserless connect attempt ${attempt} failed. Retrying in ${backoffMs}ms...`
@@ -463,7 +463,7 @@ const connectBrowserless = async (wsUrl: string) => {
     }
   }
 
-  throw lastError;
+  throw firstError;
 };
 
 const launchLocalBrowser = async () => {

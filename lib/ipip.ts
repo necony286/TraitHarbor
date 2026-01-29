@@ -40,7 +40,11 @@ const attachFacets = (quizItems: QuizItem[]) => {
         >
       );
       console.warn(
-        `[ipip] Missing facet mappings for ${missing.length} quiz items. Sample IDs: ${sampleIds.join(', ')}. Missing by trait: ${JSON.stringify(missingByTrait)}.`
+        [
+          `[ipip] Missing facet mappings for ${missing.length} quiz items.`,
+          `Sample IDs: ${sampleIds.join(', ')}.`,
+          `Missing by trait: ${JSON.stringify(missingByTrait)}.`,
+        ].join(' ')
       );
       if (
         process.env.NODE_ENV === 'test' ||

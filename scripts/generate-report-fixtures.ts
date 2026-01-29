@@ -15,14 +15,16 @@ const OUTPUT_DIR = path.join(process.cwd(), 'fixtures', 'reports');
 
 const ensureFullQuizItems = () => {
   const previousFixtureMode = process.env.NEXT_PUBLIC_QUIZ_FIXTURE_MODE;
-  if (previousFixtureMode !== undefined) {
-    delete process.env.NEXT_PUBLIC_QUIZ_FIXTURE_MODE;
+  try {
+    if (previousFixtureMode !== undefined) {
+      delete process.env.NEXT_PUBLIC_QUIZ_FIXTURE_MODE;
+    }
+    return loadQuizItems();
+  } finally {
+    if (previousFixtureMode !== undefined) {
+      process.env.NEXT_PUBLIC_QUIZ_FIXTURE_MODE = previousFixtureMode;
+    }
   }
-  const items = loadQuizItems();
-  if (previousFixtureMode !== undefined) {
-    process.env.NEXT_PUBLIC_QUIZ_FIXTURE_MODE = previousFixtureMode;
-  }
-  return items;
 };
 
 const buildRandomAnswers = (itemIds: string[]): AnswerMap =>

@@ -7,7 +7,14 @@ import { mkdir, writeFile } from 'fs/promises';
 import path from 'path';
 
 import { loadQuizItems } from '../lib/ipip';
-import { buildReportHtml, generateReportPdf, isLocalFallbackEnabled, traitSectionOrder, type ReportPayload } from '../lib/pdf';
+import {
+  buildReportHtml,
+  generateReportPdf,
+  isLocalFallbackEnabled,
+  MAX_CONCURRENT_PDF,
+  traitSectionOrder,
+  type ReportPayload
+} from '../lib/pdf';
 import { scoreAnswers, type AnswerMap } from '../lib/scoring';
 
 const FIXTURE_COUNT = 3;
@@ -93,24 +100,28 @@ export const run = async () => {
   const items = ensureFullQuizItems();
   const itemIds = items.map((item) => item.id);
 
-  await Promise.all(
-    Array.from({ length: FIXTURE_COUNT }, (_, index) => {
-      const fixtureIndex = index + 1;
-      const answers = buildRandomAnswers(itemIds);
-      const { traits, facetScores } = scoreAnswers(answers, items);
-      const { traitPercentages, traitRankOrder, highestTrait, lowestTrait } =
-        computeTraitSummary(traits);
-      const payload: ReportPayload = {
-        date: new Date(),
-        traits,
-        traitPercentages,
-        traitRankOrder,
-        highestTrait,
-        lowestTrait,
-        facetScores
-      };
+  const fixtureIndexes = Array.from({ length: FIXTURE_COUNT }, (_, index) => index + 1);
 
-      return writeFixtureFiles(fixtureIndex, payload);
-    })
-  );
+  for (let i = 0; i < fixtureIndexes.length; i += MAX_CONCURRENT_PDF) {
+    const chunk = fixtureIndexes.slice(i, i + MAX_CONCURRENT_PDF);
+    await Promise.all(
+      chunk.map((fixtureIndex) => {
+        const answers = buildRandomAnswers(itemIds);
+        const { traits, facetScores } = scoreAnswers(answers, items);
+        const { traitPercentages, traitRankOrder, highestTrait, lowestTrait } =
+          computeTraitSummary(traits);
+        const payload: ReportPayload = {
+          date: new Date(),
+          traits,
+          traitPercentages,
+          traitRankOrder,
+          highestTrait,
+          lowestTrait,
+          facetScores
+        };
+
+        return writeFixtureFiles(fixtureIndex, payload);
+      })
+    );
+  }
 };

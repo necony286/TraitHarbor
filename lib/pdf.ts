@@ -58,7 +58,7 @@ type SectionDefinition = {
 };
 
 const MAX_PDF_BYTES = 700 * 1024;
-const MAX_CONCURRENT_PDF = 2;
+export const MAX_CONCURRENT_PDF = 2;
 const PDF_TIMEOUT_MS = 60_000;
 const FONT_LOAD_TIMEOUT_MS = 5_000;
 const BROWSERLESS_CONNECT_MAX_ATTEMPTS = 2;

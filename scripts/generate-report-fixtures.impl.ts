@@ -99,29 +99,28 @@ export const run = async () => {
   await mkdir(OUTPUT_DIR, { recursive: true });
   const items = ensureFullQuizItems();
   const itemIds = items.map((item) => item.id);
+  const generateAndWriteFixture = async (fixtureIndex: number) => {
+    const answers = buildRandomAnswers(itemIds);
+    const { traits, facetScores } = scoreAnswers(answers, items);
+    const { traitPercentages, traitRankOrder, highestTrait, lowestTrait } =
+      computeTraitSummary(traits);
+    const payload: ReportPayload = {
+      date: new Date(),
+      traits,
+      traitPercentages,
+      traitRankOrder,
+      highestTrait,
+      lowestTrait,
+      facetScores
+    };
+
+    await writeFixtureFiles(fixtureIndex, payload);
+  };
 
   const fixtureIndexes = Array.from({ length: FIXTURE_COUNT }, (_, index) => index + 1);
 
   for (let i = 0; i < fixtureIndexes.length; i += MAX_CONCURRENT_PDF) {
     const chunk = fixtureIndexes.slice(i, i + MAX_CONCURRENT_PDF);
-    await Promise.all(
-      chunk.map((fixtureIndex) => {
-        const answers = buildRandomAnswers(itemIds);
-        const { traits, facetScores } = scoreAnswers(answers, items);
-        const { traitPercentages, traitRankOrder, highestTrait, lowestTrait } =
-          computeTraitSummary(traits);
-        const payload: ReportPayload = {
-          date: new Date(),
-          traits,
-          traitPercentages,
-          traitRankOrder,
-          highestTrait,
-          lowestTrait,
-          facetScores
-        };
-
-        return writeFixtureFiles(fixtureIndex, payload);
-      })
-    );
+    await Promise.all(chunk.map(generateAndWriteFixture));
   }
 };

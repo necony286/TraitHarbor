@@ -21,6 +21,20 @@ const getScoreBand = (score: number): ScoreBand => {
 
 const normalizeTrait = (trait: string) => trait.trim().toLowerCase();
 
+export const formatFacetLabel = (raw: string): string => {
+  const withoutPrefix = raw.replace(/^[OCEAN][1-6]_/, '');
+  const withSpaces = withoutPrefix
+    .replace(/_/g, ' ')
+    .replace(/([a-z0-9])([A-Z])/g, '$1 $2')
+    .replace(/([A-Z]+)([A-Z][a-z])/g, '$1 $2');
+  const collapsed = withSpaces.replace(/\s+/g, ' ').trim();
+  if (!collapsed) {
+    return '';
+  }
+  const lower = collapsed.toLowerCase();
+  return `${lower.charAt(0).toUpperCase()}${lower.slice(1)}`;
+};
+
 type TraitName = 'Openness' | 'Conscientiousness' | 'Extraversion' | 'Agreeableness' | 'Neuroticism';
 
 const traitKeyMap: Record<string, TraitName> = {
@@ -459,7 +473,7 @@ export const getFacetSummary = (
   const [, scores] = entry;
   const facets = Object.entries(scores)
     .filter(([, value]) => Number.isFinite(value))
-    .map(([facetName, score]) => ({ facetName, score: Math.round(score) }))
+    .map(([facetName, score]) => ({ facetName: formatFacetLabel(facetName), score: Math.round(score) }))
     .sort((a, b) => b.score - a.score);
 
   if (!facets.length) {

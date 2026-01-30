@@ -25,7 +25,7 @@ export const formatFacetLabel = (raw: string): string => {
   const withoutPrefix = raw.replace(/^[OCEAN][1-6]_/, '');
   const withSpaces = withoutPrefix
     .replace(/_/g, ' ')
-    .replace(/([a-z0-9])([A-Z])/g, '$1 $2')
+    .replace(/([a-z0-9])([A-Z][a-z])/g, '$1 $2')
     .replace(/([A-Z]+)([A-Z][a-z])/g, '$1 $2');
   const collapsed = withSpaces.replace(/\s+/g, ' ').trim();
   if (!collapsed) {

@@ -5,6 +5,7 @@ import { z } from 'zod';
 import { buildReportHtml, type ReportPayload } from '../lib/pdf';
 
 const FIXTURE_DIR = path.join(process.cwd(), 'fixtures', 'reports');
+const FIXTURE_FILENAME_PATTERN = /^fixture-(\d+)\.payload\.json$/;
 
 const reportPayloadSchema = z.object({
   date: z
@@ -37,14 +38,12 @@ const writeHtml = async (htmlPath: string, html: string) => {
 
 const run = async () => {
   const files = await readdir(FIXTURE_DIR);
-  const fixturePayloads = files.filter((file) =>
-    /^fixture-\d+\.payload\.json$/.test(file)
-  );
+  const fixturePayloads = files.filter((file) => FIXTURE_FILENAME_PATTERN.test(file));
 
   console.log(`Found ${fixturePayloads.length} fixtures to regenerate.`);
 
   const tasks = fixturePayloads.map(async (file) => {
-    const indexMatch = file.match(/fixture-(\d+)\.payload\.json$/);
+    const indexMatch = file.match(FIXTURE_FILENAME_PATTERN);
     if (!indexMatch) {
       throw new Error(
         `Unable to parse fixture index from ${file}. Expected format: fixture-*.payload.json`

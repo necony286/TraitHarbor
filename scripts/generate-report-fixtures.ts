@@ -13,6 +13,28 @@ import { scoreAnswers, type AnswerMap } from '../lib/scoring';
 const FIXTURE_COUNT = 3;
 const OUTPUT_DIR = path.join(process.cwd(), 'fixtures', 'reports');
 
+const isLocalFallbackEnabled = () => process.env.REPORT_LOCAL_FALLBACK === '1';
+
+const ensurePdfEnvReady = () => {
+  const wsEndpoint = process.env.BROWSERLESS_WS_ENDPOINT?.trim();
+  const localFallbackEnabled = isLocalFallbackEnabled();
+  const chromePath = process.env.CHROME_EXECUTABLE_PATH?.trim();
+
+  if (!wsEndpoint && !localFallbackEnabled) {
+    console.error(
+      'Missing PDF configuration. Set BROWSERLESS_WS_ENDPOINT (and optional BROWSERLESS_TOKEN) for Browserless, or set REPORT_LOCAL_FALLBACK=1 and CHROME_EXECUTABLE_PATH for local rendering.'
+    );
+    process.exit(1);
+  }
+
+  if (localFallbackEnabled && !chromePath) {
+    console.error(
+      'REPORT_LOCAL_FALLBACK=1 requires CHROME_EXECUTABLE_PATH. Example on Windows: "C:\\\\Program Files\\\\Google\\\\Chrome\\\\Application\\\\chrome.exe".'
+    );
+    process.exit(1);
+  }
+};
+
 const ensureFullQuizItems = () => {
   const previousFixtureMode = process.env.NEXT_PUBLIC_QUIZ_FIXTURE_MODE;
   try {
@@ -66,6 +88,7 @@ const writeFixtureFiles = async (index: number, payload: ReportPayload) => {
 };
 
 const run = async () => {
+  ensurePdfEnvReady();
   await mkdir(OUTPUT_DIR, { recursive: true });
   const items = ensureFullQuizItems();
   const itemIds = items.map((item) => item.id);

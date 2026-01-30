@@ -82,7 +82,7 @@ Create a `.env.local` file for local development (start from `.env.example`). Cu
 - `pnpm test` — Vitest test suite
 - `pnpm test:unit` — Vitest (alias)
 - `pnpm test:e2e` — Playwright tests
-- `pnpm gen:fixtures` — Generate local report fixtures (set `REPORT_LOCAL_FALLBACK=1` and `CHROME_EXECUTABLE_PATH` in `.env.local`)
+- `pnpm gen:fixtures` — Generate local report fixtures (loads `.env`/`.env.local`; set `REPORT_LOCAL_FALLBACK=1` and `CHROME_EXECUTABLE_PATH` for local PDF rendering)
 
 For Vitest filtering, use `pnpm test:unit -- -t "pattern"` or `pnpm test:unit -- <test-file-path>`.
 For Playwright UI mode, use `pnpm test:e2e -- --ui`.

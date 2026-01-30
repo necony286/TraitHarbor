@@ -382,13 +382,16 @@ const isLocalFallbackEnabled = () => process.env.REPORT_LOCAL_FALLBACK === '1';
 const resolveBrowserlessWsUrl = () => {
   const wsEndpoint = process.env.BROWSERLESS_WS_ENDPOINT?.trim();
   if (!wsEndpoint) {
-    if (!isLocalFallbackEnabled()) {
-      throw new BrowserlessConfigError('BROWSERLESS_WS_ENDPOINT is required.');
+    const localFallbackEnabled = isLocalFallbackEnabled();
+    if (!localFallbackEnabled) {
+      throw new BrowserlessConfigError(
+        'Browserless is not configured. Set REPORT_LOCAL_FALLBACK=1 and CHROME_EXECUTABLE_PATH=... for local rendering, or set BROWSERLESS_WS_ENDPOINT (and optional BROWSERLESS_TOKEN) for Browserless.'
+      );
     }
 
     if (!process.env.CHROME_EXECUTABLE_PATH?.trim()) {
       throw new BrowserlessConfigError(
-        'REPORT_LOCAL_FALLBACK=1 requires CHROME_EXECUTABLE_PATH when BROWSERLESS_WS_ENDPOINT is not configured.'
+        'REPORT_LOCAL_FALLBACK=1 requires CHROME_EXECUTABLE_PATH. Set CHROME_EXECUTABLE_PATH=... for local rendering, or set BROWSERLESS_WS_ENDPOINT (and optional BROWSERLESS_TOKEN) for Browserless.'
       );
     }
 

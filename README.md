@@ -67,6 +67,8 @@ Create a `.env.local` file for local development (start from `.env.example`). Cu
 - `NEXT_PUBLIC_SITE_URL` (optional; falls back to `VERCEL_URL` or `http://localhost:3000`)
 - `ALLOW_WEBHOOK_TEST_BYPASS=1` (optional, development-only Paddle webhook bypass)
 - `REPORT_TEMPLATE_VERSION` (optional; defaults to `v1`)
+- `REPORT_LOCAL_FALLBACK=1` (optional; required for local fixture PDF rendering)
+- `CHROME_EXECUTABLE_PATH` (optional; required for local fixture PDF rendering, e.g. `/Applications/Google Chrome.app/Contents/MacOS/Google Chrome`)
 
 **Payments (Paddle — pending enablement)**
 - `PADDLE_ENV`
@@ -80,6 +82,7 @@ Create a `.env.local` file for local development (start from `.env.example`). Cu
 - `pnpm test` — Vitest test suite
 - `pnpm test:unit` — Vitest (alias)
 - `pnpm test:e2e` — Playwright tests
+- `pnpm gen:fixtures` — Generate local report fixtures (set `REPORT_LOCAL_FALLBACK=1` and `CHROME_EXECUTABLE_PATH` in `.env.local`)
 
 For Vitest filtering, use `pnpm test:unit -- -t "pattern"` or `pnpm test:unit -- <test-file-path>`.
 For Playwright UI mode, use `pnpm test:e2e -- --ui`.

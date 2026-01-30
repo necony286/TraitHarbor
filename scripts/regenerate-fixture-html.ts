@@ -7,7 +7,10 @@ import { buildReportHtml, type ReportPayload } from '../lib/pdf';
 const FIXTURE_DIR = path.join(process.cwd(), 'fixtures', 'reports');
 
 const reportPayloadSchema = z.object({
-  date: z.string(),
+  date: z
+    .string()
+    .datetime({ message: 'Invalid ISO 8601 date string' })
+    .transform((date) => new Date(date)),
   traits: z.object({
     O: z.number(),
     C: z.number(),
@@ -25,12 +28,7 @@ const reportPayloadSchema = z.object({
 
 const loadPayload = async (payloadPath: string): Promise<ReportPayload> => {
   const raw = await readFile(payloadPath, 'utf8');
-  const parsedPayload = reportPayloadSchema.parse(JSON.parse(raw));
-
-  return {
-    ...parsedPayload,
-    date: new Date(parsedPayload.date)
-  };
+  return reportPayloadSchema.parse(JSON.parse(raw));
 };
 
 const writeHtml = async (htmlPath: string, html: string) => {
@@ -46,9 +44,11 @@ const run = async () => {
   console.log(`Found ${fixturePayloads.length} fixtures to regenerate.`);
 
   const tasks = fixturePayloads.map(async (file) => {
-    const indexMatch = file.match(/(\d+)/);
+    const indexMatch = file.match(/fixture-(\d+)\.payload\.json$/);
     if (!indexMatch) {
-      throw new Error(`Unable to parse fixture index from ${file}`);
+      throw new Error(
+        `Unable to parse fixture index from ${file}. Expected format: fixture-*.payload.json`
+      );
     }
     const index = parseInt(indexMatch[1], 10);
     const payloadPath = path.join(FIXTURE_DIR, file);

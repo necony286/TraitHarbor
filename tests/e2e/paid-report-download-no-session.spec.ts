@@ -225,14 +225,19 @@ test('paid report download works without session storage', async ({ page, browse
   );
 
   const page2 = await context2.newPage();
+  const myReportsResponsePromise = page2.waitForResponse((response) => response.url().includes('/api/my-reports'));
   await page2.goto(reportAccessUrl, { waitUntil: 'domcontentloaded' });
+  await myReportsResponsePromise;
 
   await expect(page2.getByRole('heading', { name: 'Your paid TraitHarbor reports' })).toBeVisible();
 
+  const downloadButton = page2.getByRole('button', { name: 'Download report' });
+  await expect(downloadButton).toBeEnabled();
+  await downloadButton.scrollIntoViewIfNeeded();
   const downloadUrlResponsePromise = page2.waitForResponse((response) =>
     response.url().includes(`/api/reports/${ORDER_ID}/download-url`)
   );
-  await page2.getByRole('button', { name: 'Download report' }).click();
+  await downloadButton.click();
   const downloadUrlResponse = await downloadUrlResponsePromise;
 
   expect(downloadUrlResponse.status()).toBe(200);

@@ -92,4 +92,18 @@ describe('getFacetSummary', () => {
       `Your ${label}: ${lowestFacetName} (${score}/100).`
     ]);
   });
+
+  it('formats coded facet labels for callouts', () => {
+    const summary = getFacetSummary('Openness', {
+      Openness: {
+        O1_Imagination: 82,
+        O4_Adventurousness: 59
+      }
+    });
+
+    expect(summary?.callouts).toEqual([
+      'Your strongest facet: Imagination (82/100).',
+      'Your weakest facet: Adventurousness (59/100).'
+    ]);
+  });
 });

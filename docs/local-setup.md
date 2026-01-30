@@ -54,7 +54,7 @@ Fill in the variables you need:
 **App behavior (optional)**
 - `NEXT_PUBLIC_QUIZ_FIXTURE_MODE=1`
 - `REPORT_LOCAL_FALLBACK=1` (required for local report fixtures)
-- `CHROME_EXECUTABLE_PATH` (required for local report fixtures, e.g. `/Applications/Google Chrome.app/Contents/MacOS/Google Chrome` on macOS)
+- `CHROME_EXECUTABLE_PATH` (required for local report fixtures; set to your Chrome/Chromium binary path, e.g. `/Applications/Google Chrome.app/Contents/MacOS/Google Chrome` on macOS, `C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe` on Windows, or `/usr/bin/google-chrome` on Linux)
 
 **Payments (Paddle — pending enablement)**
 - `PADDLE_ENV=sandbox`
@@ -112,7 +112,7 @@ The Playwright config will start the dev server automatically for E2E runs.
 Report fixtures include HTML, JSON payloads, and PDFs. Ensure these environment variables are set in `.env.local`:
 
 - `REPORT_LOCAL_FALLBACK=1`
-- `CHROME_EXECUTABLE_PATH` (path to your local Chrome/Chromium binary)
+CHROME_EXECUTABLE_PATH (path to your local Chrome/Chromium binary; set to your Chrome/Chromium binary path, e.g. `/Applications/Google Chrome.app/Contents/MacOS/Google Chrome` on macOS, `C:\Program Files\Google\Chrome\Application\chrome.exe` on Windows, or `/usr/bin/google-chrome` on Linux)
 
 Then run:
 

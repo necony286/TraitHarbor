@@ -382,17 +382,19 @@ const isLocalFallbackEnabled = () => process.env.REPORT_LOCAL_FALLBACK === '1';
 const resolveBrowserlessWsUrl = () => {
   const wsEndpoint = process.env.BROWSERLESS_WS_ENDPOINT?.trim();
   if (!wsEndpoint) {
-    if (isLocalFallbackEnabled()) {
-      if (!process.env.CHROME_EXECUTABLE_PATH?.trim()) {
-        throw new BrowserlessConfigError(
-          'REPORT_LOCAL_FALLBACK=1 requires CHROME_EXECUTABLE_PATH when BROWSERLESS_WS_ENDPOINT is not configured.'
-        );
-      }
+    if (!isLocalFallbackEnabled()) {
+      throw new BrowserlessConfigError('BROWSERLESS_WS_ENDPOINT is required.');
+    }
+
+    if (!process.env.CHROME_EXECUTABLE_PATH?.trim()) {
       throw new BrowserlessConfigError(
-        'BROWSERLESS_WS_ENDPOINT is required unless REPORT_LOCAL_FALLBACK=1 and CHROME_EXECUTABLE_PATH is set.'
+        'REPORT_LOCAL_FALLBACK=1 requires CHROME_EXECUTABLE_PATH when BROWSERLESS_WS_ENDPOINT is not configured.'
       );
     }
-    throw new BrowserlessConfigError('BROWSERLESS_WS_ENDPOINT is required.');
+
+    throw new BrowserlessConfigError(
+      'BROWSERLESS_WS_ENDPOINT is required unless REPORT_LOCAL_FALLBACK=1 and CHROME_EXECUTABLE_PATH is set.'
+    );
   }
 
   let url: URL;

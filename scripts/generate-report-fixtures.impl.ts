@@ -99,7 +99,7 @@ export const run = async () => {
   await mkdir(OUTPUT_DIR, { recursive: true });
   const items = ensureFullQuizItems();
   const itemIds = items.map((item) => item.id);
-  const generateAndWriteFixture = (fixtureIndex: number) => {
+  const generateAndWriteFixture = async (fixtureIndex: number) => {
     const answers = buildRandomAnswers(itemIds);
     const { traits, facetScores } = scoreAnswers(answers, items);
     const { traitPercentages, traitRankOrder, highestTrait, lowestTrait } =
@@ -114,7 +114,7 @@ export const run = async () => {
       facetScores
     };
 
-    return writeFixtureFiles(fixtureIndex, payload);
+    await writeFixtureFiles(fixtureIndex, payload);
   };
 
   const fixtureIndexes = Array.from({ length: FIXTURE_COUNT }, (_, index) => index + 1);

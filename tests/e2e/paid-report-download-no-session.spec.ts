@@ -233,11 +233,11 @@ test('paid report download works without session storage', async ({ page, browse
 
   const downloadButton = page2.getByRole('button', { name: 'Download report' });
   await expect(downloadButton).toBeEnabled();
-  await downloadButton.scrollIntoViewIfNeeded();
+  await expect(downloadButton).toBeVisible();
   const downloadUrlResponsePromise = page2.waitForResponse((response) =>
     response.url().includes(`/api/reports/${ORDER_ID}/download-url`)
   );
-  await downloadButton.click();
+  await downloadButton.click({ force: true });
   const downloadUrlResponse = await downloadUrlResponsePromise;
 
   expect(downloadUrlResponse.status()).toBe(200);

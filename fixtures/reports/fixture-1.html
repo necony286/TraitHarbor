@@ -1,0 +1,653 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>TraitHarbor Premium Report</title>
+    <style>
+      :root {
+  color-scheme: light;
+  font-family: 'Inter', 'Helvetica Neue', Arial, sans-serif;
+  font-size: 14px;
+  line-height: 1.6;
+  color: #101828;
+}
+
+body {
+  margin: 0;
+  background: #ffffff;
+}
+
+.report {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.report__cover {
+  padding: 24px;
+  border-radius: 16px;
+  background: linear-gradient(135deg, #f5f5ff, #eef4ff);
+}
+
+.report__cover h1 {
+  margin: 8px 0 4px;
+  font-size: 28px;
+}
+
+.eyebrow {
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  color: #475467;
+}
+
+.muted {
+  color: #475467;
+}
+
+h2 {
+  margin-bottom: 12px;
+  font-size: 18px;
+}
+
+.report__overview {
+  padding: 16px;
+  border-radius: 12px;
+  border: 1px solid #eaecf0;
+  background: #f8fafc;
+}
+
+.overview__callout {
+  margin: 12px 0 0;
+  padding: 10px 12px;
+  border: 1px solid #eaecf0;
+  border-radius: 12px;
+  background: #ffffff;
+  color: #344054;
+}
+
+.chart {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.chart__row {
+  display: grid;
+  grid-template-columns: 140px 1fr 64px;
+  align-items: center;
+  gap: 12px;
+  padding: 6px 8px;
+  border-radius: 10px;
+}
+
+.chart__bar {
+  position: relative;
+  height: 10px;
+  background: #e4e7ec;
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.chart__bar span {
+  position: absolute;
+  inset: 0;
+  background: #7b5cff;
+  border-radius: 999px;
+}
+
+.chart__value {
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+  color: #475467;
+}
+
+.chart__row--hi {
+  background: #eef4ff;
+}
+
+.chart__row--lo {
+  background: #fef3f2;
+}
+
+.trait-grid {
+  display: grid;
+  gap: 12px;
+}
+
+.trait-grid article {
+  padding: 12px 16px;
+  border: 1px solid #eaecf0;
+  border-radius: 12px;
+  background: #ffffff;
+}
+
+.trait-grid h3 {
+  margin: 0 0 6px;
+  font-size: 15px;
+}
+
+.facet-grid {
+  margin: 8px 0 16px;
+  display: grid;
+  gap: 8px;
+}
+
+.facet-row {
+  display: grid;
+  grid-template-columns: 140px 1fr var(--score-column-width, 64px);
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: #475467;
+}
+
+.facet-bar {
+  position: relative;
+  height: 8px;
+  background: #e4e7ec;
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.facet-bar span {
+  position: absolute;
+  inset: 0;
+  background: #7b5cff;
+  border-radius: 999px;
+}
+
+.facet-value {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.report__tips ul {
+  margin: 0;
+  padding-left: 18px;
+  color: #344054;
+}
+
+.roadmap--cards {
+  display: grid;
+  gap: 12px;
+}
+
+.roadmap__block {
+  padding: 12px 16px;
+  border: 1px solid #eaecf0;
+  border-radius: 12px;
+  background: #ffffff;
+}
+
+.roadmap__block h3 {
+  margin: 0 0 6px;
+  font-size: 15px;
+}
+
+.roadmap__block ul {
+  margin: 0;
+  padding-left: 18px;
+  color: #344054;
+}
+
+.report__resources {
+  padding: 16px;
+  border-radius: 12px;
+  background: #f8fafc;
+}
+
+.resource-groups {
+  display: grid;
+  gap: 12px;
+}
+
+.resource-group h3 {
+  margin: 0 0 6px;
+  font-size: 15px;
+}
+
+.resource-group ul {
+  margin: 0;
+  padding-left: 18px;
+  color: #344054;
+}
+
+.resource-url {
+  font-size: 12px;
+  color: #667085;
+  word-break: break-word;
+}
+
+@media print {
+  .avoid-break {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  h3 {
+    break-after: avoid;
+    page-break-after: avoid;
+  }
+
+  .report__cover {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  .report__overview {
+    break-after: always;
+    page-break-after: always;
+  }
+
+  .report__roadmap {
+    break-before: always;
+    page-break-before: always;
+  }
+
+}
+
+    </style>
+  </head>
+  <body>
+    <main class="report">
+      <section class="report__cover">
+        <p class="eyebrow">TraitHarbor Premium Report</p>
+        <h1>Your Personality Profile</h1>
+        <p class="muted">Generated on January 30, 2026</p>
+      </section>
+
+      <section class="report__overview">
+        <h2>Big Five snapshot</h2>
+              <div class="chart">
+        <div class="chart__row chart__row--lo">
+          <div class="chart__label">Openness</div>
+          <div class="chart__bar"><span style="width: 33%;"></span></div>
+          <div class="chart__value">33/100</div>
+        </div>
+        <div class="chart__row">
+          <div class="chart__label">Conscientiousness</div>
+          <div class="chart__bar"><span style="width: 51%;"></span></div>
+          <div class="chart__value">51/100</div>
+        </div>
+        <div class="chart__row">
+          <div class="chart__label">Extraversion</div>
+          <div class="chart__bar"><span style="width: 56%;"></span></div>
+          <div class="chart__value">56/100</div>
+        </div>
+        <div class="chart__row chart__row--hi">
+          <div class="chart__label">Agreeableness</div>
+          <div class="chart__bar"><span style="width: 66%;"></span></div>
+          <div class="chart__value">66/100</div>
+        </div>
+        <div class="chart__row">
+          <div class="chart__label">Neuroticism</div>
+          <div class="chart__bar"><span style="width: 51%;"></span></div>
+          <div class="chart__value">51/100</div>
+        </div>
+      </div>
+              <div class="avoid-break">
+        <p class="overview__callout">Highest trait: <strong>Agreeableness</strong>. Lowest trait: <strong>Openness</strong>.</p>
+      </div>
+      </section>
+
+      
+
+            <section class="report__trait">
+        <div class="avoid-break">
+          <h2>Openness — Low (33/100)</h2>
+          <h3>What it means for you</h3>
+          <p>Your strongest facet: O1_Imagination (44/100). Your weakest facet: O6_Liberalism (19/100).</p>
+        </div>
+<div class="avoid-break"><div class="facet-grid">
+          <div class="facet-row">
+            <span class="facet-label">O1_Imagination</span>
+            <div class="facet-bar"><span style="width:44%"></span></div>
+            <span class="facet-value">44/100</span>
+          </div>
+          <div class="facet-row">
+            <span class="facet-label">O2_ArtisticInterests</span>
+            <div class="facet-bar"><span style="width:38%"></span></div>
+            <span class="facet-value">38/100</span>
+          </div>
+          <div class="facet-row">
+            <span class="facet-label">O4_Adventurousness</span>
+            <div class="facet-bar"><span style="width:38%"></span></div>
+            <span class="facet-value">38/100</span>
+          </div>
+          <div class="facet-row">
+            <span class="facet-label">O5_Intellect</span>
+            <div class="facet-bar"><span style="width:38%"></span></div>
+            <span class="facet-value">38/100</span>
+          </div>
+          <div class="facet-row">
+            <span class="facet-label">O3_Emotionality</span>
+            <div class="facet-bar"><span style="width:25%"></span></div>
+            <span class="facet-value">25/100</span>
+          </div>
+          <div class="facet-row">
+            <span class="facet-label">O6_Liberalism</span>
+            <div class="facet-bar"><span style="width:19%"></span></div>
+            <span class="facet-value">19/100</span>
+          </div>
+        </div></div>
+        <div class="avoid-break">
+          <h3>Strengths</h3>
+          <p>You value proven methods and keep your focus on what works. Your practical thinking helps you stay grounded.</p>
+        </div>
+        <div class="avoid-break">
+          <h3>Watch-outs</h3>
+          <p>You try small experiments to expand your comfort zone. You invite fresh perspectives to avoid blind spots.</p>
+        </div>
+        <div class="avoid-break">
+          <h3>Career tip</h3>
+          <p>You excel in environments with clear expectations and structure. Your consistency and reliability are strengths you bring to teams.</p>
+        </div>
+        <div class="avoid-break">
+          <h3>Relationship tip</h3>
+          <p>You offer steadiness and dependability to others. You occasionally explore new experiences together to add variety.</p>
+        </div>
+      </section>
+
+      <section class="report__trait">
+        <div class="avoid-break">
+          <h2>Conscientiousness — Medium (51/100)</h2>
+          <h3>What it means for you</h3>
+          <p>Your strongest facet: C5_SelfDiscipline (75/100). Your weakest facet: C2_Orderliness (25/100).</p>
+        </div>
+<div class="avoid-break"><div class="facet-grid">
+          <div class="facet-row">
+            <span class="facet-label">C5_SelfDiscipline</span>
+            <div class="facet-bar"><span style="width:75%"></span></div>
+            <span class="facet-value">75/100</span>
+          </div>
+          <div class="facet-row">
+            <span class="facet-label">C4_AchievementStriving</span>
+            <div class="facet-bar"><span style="width:69%"></span></div>
+            <span class="facet-value">69/100</span>
+          </div>
+          <div class="facet-row">
+            <span class="facet-label">C6_Cautiousness</span>
+            <div class="facet-bar"><span style="width:56%"></span></div>
+            <span class="facet-value">56/100</span>
+          </div>
+          <div class="facet-row">
+            <span class="facet-label">C1_SelfEfficacy</span>
+            <div class="facet-bar"><span style="width:50%"></span></div>
+            <span class="facet-value">50/100</span>
+          </div>
+          <div class="facet-row">
+            <span class="facet-label">C3_Dutifulness</span>
+            <div class="facet-bar"><span style="width:31%"></span></div>
+            <span class="facet-value">31/100</span>
+          </div>
+          <div class="facet-row">
+            <span class="facet-label">C2_Orderliness</span>
+            <div class="facet-bar"><span style="width:25%"></span></div>
+            <span class="facet-value">25/100</span>
+          </div>
+        </div></div>
+        <div class="avoid-break">
+          <h3>Strengths</h3>
+          <p>You balance structure with adaptability in your approach. You can plan ahead while staying open to change.</p>
+        </div>
+        <div class="avoid-break">
+          <h3>Watch-outs</h3>
+          <p>You build simple routines to support your goals. You clarify priorities to avoid unnecessary stress.</p>
+        </div>
+        <div class="avoid-break">
+          <h3>Career tip</h3>
+          <p>You work well in environments that offer guidance with flexibility. You appreciate clear expectations without rigid constraints.</p>
+        </div>
+        <div class="avoid-break">
+          <h3>Relationship tip</h3>
+          <p>You contribute steady support without being overly rigid. Your consistent follow-through strengthens trust.</p>
+        </div>
+      </section>
+
+      <section class="report__trait">
+        <div class="avoid-break">
+          <h2>Extraversion — Medium (56/100)</h2>
+          <h3>What it means for you</h3>
+          <p>Your strongest facet: E6_Cheerfulness (69/100). Your weakest facet: E2_Gregariousness (38/100).</p>
+        </div>
+<div class="avoid-break"><div class="facet-grid">
+          <div class="facet-row">
+            <span class="facet-label">E6_Cheerfulness</span>
+            <div class="facet-bar"><span style="width:69%"></span></div>
+            <span class="facet-value">69/100</span>
+          </div>
+          <div class="facet-row">
+            <span class="facet-label">E1_Friendliness</span>
+            <div class="facet-bar"><span style="width:63%"></span></div>
+            <span class="facet-value">63/100</span>
+          </div>
+          <div class="facet-row">
+            <span class="facet-label">E4_ActivityLevel</span>
+            <div class="facet-bar"><span style="width:63%"></span></div>
+            <span class="facet-value">63/100</span>
+          </div>
+          <div class="facet-row">
+            <span class="facet-label">E5_ExcitementSeeking</span>
+            <div class="facet-bar"><span style="width:63%"></span></div>
+            <span class="facet-value">63/100</span>
+          </div>
+          <div class="facet-row">
+            <span class="facet-label">E3_Assertiveness</span>
+            <div class="facet-bar"><span style="width:44%"></span></div>
+            <span class="facet-value">44/100</span>
+          </div>
+          <div class="facet-row">
+            <span class="facet-label">E2_Gregariousness</span>
+            <div class="facet-bar"><span style="width:38%"></span></div>
+            <span class="facet-value">38/100</span>
+          </div>
+        </div></div>
+        <div class="avoid-break">
+          <h3>Strengths</h3>
+          <p>You can engage socially while still valuing downtime. You adapt to both collaborative and independent work.</p>
+        </div>
+        <div class="avoid-break">
+          <h3>Watch-outs</h3>
+          <p>You notice when you need more stimulation versus quiet focus. You lean into networking when it aligns with your goals.</p>
+        </div>
+        <div class="avoid-break">
+          <h3>Career tip</h3>
+          <p>You work well with a mix of collaboration and solo focus. You stay steady in balanced environments.</p>
+        </div>
+        <div class="avoid-break">
+          <h3>Relationship tip</h3>
+          <p>You can connect easily while respecting others&#39; pace. You mix social time with downtime to stay balanced.</p>
+        </div>
+      </section>
+
+      <section class="report__trait">
+        <div class="avoid-break">
+          <h2>Agreeableness — Medium (66/100)</h2>
+          <h3>What it means for you</h3>
+          <p>Your strongest facet: A3_Altruism (94/100). Your weakest facet: A6_Sympathy (50/100).</p>
+        </div>
+<div class="avoid-break"><div class="facet-grid">
+          <div class="facet-row">
+            <span class="facet-label">A3_Altruism</span>
+            <div class="facet-bar"><span style="width:94%"></span></div>
+            <span class="facet-value">94/100</span>
+          </div>
+          <div class="facet-row">
+            <span class="facet-label">A4_Cooperation</span>
+            <div class="facet-bar"><span style="width:88%"></span></div>
+            <span class="facet-value">88/100</span>
+          </div>
+          <div class="facet-row">
+            <span class="facet-label">A1_Trust</span>
+            <div class="facet-bar"><span style="width:63%"></span></div>
+            <span class="facet-value">63/100</span>
+          </div>
+          <div class="facet-row">
+            <span class="facet-label">A2_Morality</span>
+            <div class="facet-bar"><span style="width:50%"></span></div>
+            <span class="facet-value">50/100</span>
+          </div>
+          <div class="facet-row">
+            <span class="facet-label">A5_Modesty</span>
+            <div class="facet-bar"><span style="width:50%"></span></div>
+            <span class="facet-value">50/100</span>
+          </div>
+          <div class="facet-row">
+            <span class="facet-label">A6_Sympathy</span>
+            <div class="facet-bar"><span style="width:50%"></span></div>
+            <span class="facet-value">50/100</span>
+          </div>
+        </div></div>
+        <div class="avoid-break">
+          <h3>Strengths</h3>
+          <p>You balance empathy with honest feedback. You can collaborate while maintaining your own perspective.</p>
+        </div>
+        <div class="avoid-break">
+          <h3>Watch-outs</h3>
+          <p>You lean into curiosity when conflict arises. You offer appreciation explicitly to reinforce connection.</p>
+        </div>
+        <div class="avoid-break">
+          <h3>Career tip</h3>
+          <p>You can work well in teams while staying objective. You value both harmony and performance.</p>
+        </div>
+        <div class="avoid-break">
+          <h3>Relationship tip</h3>
+          <p>You bring a blend of warmth and clarity to communication. You stay open to compromise to keep relationships steady.</p>
+        </div>
+      </section>
+
+      <section class="report__trait">
+        <div class="avoid-break">
+          <h2>Neuroticism — Medium (51/100)</h2>
+          <h3>What it means for you</h3>
+          <p>Your strongest facet: N5_Immoderation (63/100). Your weakest facet: N4_SelfConsciousness (44/100).</p>
+        </div>
+<div class="avoid-break"><div class="facet-grid">
+          <div class="facet-row">
+            <span class="facet-label">N5_Immoderation</span>
+            <div class="facet-bar"><span style="width:63%"></span></div>
+            <span class="facet-value">63/100</span>
+          </div>
+          <div class="facet-row">
+            <span class="facet-label">N2_Anger</span>
+            <div class="facet-bar"><span style="width:56%"></span></div>
+            <span class="facet-value">56/100</span>
+          </div>
+          <div class="facet-row">
+            <span class="facet-label">N3_Depression</span>
+            <div class="facet-bar"><span style="width:50%"></span></div>
+            <span class="facet-value">50/100</span>
+          </div>
+          <div class="facet-row">
+            <span class="facet-label">N6_Vulnerability</span>
+            <div class="facet-bar"><span style="width:50%"></span></div>
+            <span class="facet-value">50/100</span>
+          </div>
+          <div class="facet-row">
+            <span class="facet-label">N1_Anxiety</span>
+            <div class="facet-bar"><span style="width:44%"></span></div>
+            <span class="facet-value">44/100</span>
+          </div>
+          <div class="facet-row">
+            <span class="facet-label">N4_SelfConsciousness</span>
+            <div class="facet-bar"><span style="width:44%"></span></div>
+            <span class="facet-value">44/100</span>
+          </div>
+        </div></div>
+        <div class="avoid-break">
+          <h3>Strengths</h3>
+          <p>You balance emotional awareness with steady resilience. You can stay calm while still noticing risks.</p>
+        </div>
+        <div class="avoid-break">
+          <h3>Watch-outs</h3>
+          <p>You use grounding routines when stress levels rise. You name emotions early to keep them manageable.</p>
+        </div>
+        <div class="avoid-break">
+          <h3>Career tip</h3>
+          <p>You can handle pressure while keeping a realistic outlook. You stay at your best with a balanced workload.</p>
+        </div>
+        <div class="avoid-break">
+          <h3>Relationship tip</h3>
+          <p>You are attuned to emotional shifts in others. You check in regularly to strengthen trust.</p>
+        </div>
+      </section>
+
+      <section class="report__pattern">
+        <h2>Your pattern</h2>
+        <p>Your top traits are Agreeableness and Extraversion. It suggests you balance empathy with honest feedback. Meanwhile, Extraversion adds another layer: you can engage socially while still valuing downtime.</p>
+      </section>
+
+      <section class="report__roadmap">
+        <h2>Action plan</h2>
+        <div class="roadmap roadmap--cards">      <div class="avoid-break">
+        <div class="roadmap__block">
+          <h3>Do more of… Agreeableness</h3>
+          <ul>
+          <li>You balance empathy with honest feedback.</li>
+          </ul>
+        </div>
+      </div>
+      <div class="avoid-break">
+        <div class="roadmap__block">
+          <h3>Watch out for… Openness</h3>
+          <ul>
+          <li>You try small experiments to expand your comfort zone.</li>
+          </ul>
+        </div>
+      </div>
+      <div class="avoid-break">
+        <div class="roadmap__block">
+          <h3>1-week micro-habit</h3>
+          <ul>
+          <li>You spend 7 days dedicating 10 minutes to an Agreeableness-aligned action each morning, then end the day by naming one Openness-related moment you handled with care.</li>
+          </ul>
+        </div>
+      </div></div>
+      </section>
+
+      <section class="report__resources">
+        <h2>Resources + methodology</h2>
+        <p>Your scores are normalized on a 0–100 scale (not percentiles) based on your responses to the Big Five inventory. This report is for personal insight only and does not diagnose or treat any mental health condition.</p>
+        <div class="resource-groups">
+                  <div class="resource-group">
+          <h3>Openness</h3>
+          <ul>
+          <li><a href="https://en.wikipedia.org/wiki/Openness_to_experience">Openness to experience (overview)</a> — <span class="resource-url">https://en.wikipedia.org/wiki/Openness_to_experience</span></li>
+          <li><a href="https://dictionary.apa.org/openness">Openness (APA Dictionary of Psychology)</a> — <span class="resource-url">https://dictionary.apa.org/openness</span></li>
+          </ul>
+        </div>
+        <div class="resource-group">
+          <h3>Conscientiousness</h3>
+          <ul>
+          <li><a href="https://en.wikipedia.org/wiki/Conscientiousness">Conscientiousness (overview)</a> — <span class="resource-url">https://en.wikipedia.org/wiki/Conscientiousness</span></li>
+          <li><a href="https://dictionary.apa.org/conscientiousness">Conscientiousness (APA Dictionary of Psychology)</a> — <span class="resource-url">https://dictionary.apa.org/conscientiousness</span></li>
+          </ul>
+        </div>
+        <div class="resource-group">
+          <h3>Extraversion</h3>
+          <ul>
+          <li><a href="https://en.wikipedia.org/wiki/Extraversion">Extraversion (overview)</a> — <span class="resource-url">https://en.wikipedia.org/wiki/Extraversion</span></li>
+          <li><a href="https://dictionary.apa.org/extraversion">Extraversion (APA Dictionary of Psychology)</a> — <span class="resource-url">https://dictionary.apa.org/extraversion</span></li>
+          </ul>
+        </div>
+        <div class="resource-group">
+          <h3>Agreeableness</h3>
+          <ul>
+          <li><a href="https://en.wikipedia.org/wiki/Agreeableness">Agreeableness (overview)</a> — <span class="resource-url">https://en.wikipedia.org/wiki/Agreeableness</span></li>
+          <li><a href="https://dictionary.apa.org/agreeableness">Agreeableness (APA Dictionary of Psychology)</a> — <span class="resource-url">https://dictionary.apa.org/agreeableness</span></li>
+          </ul>
+        </div>
+        <div class="resource-group">
+          <h3>Neuroticism</h3>
+          <ul>
+          <li><a href="https://en.wikipedia.org/wiki/Neuroticism">Neuroticism (overview)</a> — <span class="resource-url">https://en.wikipedia.org/wiki/Neuroticism</span></li>
+          <li><a href="https://dictionary.apa.org/neuroticism">Neuroticism (APA Dictionary of Psychology)</a> — <span class="resource-url">https://dictionary.apa.org/neuroticism</span></li>
+          </ul>
+        </div>
+        </div>
+      </section>
+    </main>
+  </body>
+</html>

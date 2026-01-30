@@ -524,6 +524,7 @@ export const getBrowser = async (): Promise<BrowserHandle> => {
     } catch (error) {
       localLaunchError = error;
       console.warn('Preferred local browser launch failed, falling back to Browserless.', {
+        errorMessage: error instanceof Error ? error.message : String(error),
         error
       });
     }

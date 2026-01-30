@@ -86,24 +86,28 @@ describe('getBrowser', () => {
     expect(browser.close).toHaveBeenCalledTimes(1);
   });
 
-  it('falls back to a local browser when browserless connection fails', async () => {
+  it('falls back to browserless when the preferred local launch fails', async () => {
     process.env.BROWSERLESS_WS_ENDPOINT = 'ws://browserless.example.com/';
     process.env.REPORT_LOCAL_FALLBACK = '1';
     tempExecutablePath = await createTempExecutable();
     process.env.CHROME_EXECUTABLE_PATH = tempExecutablePath;
-    mockedPuppeteer.connect.mockRejectedValue(new Error('connection failed'));
+    mockedPuppeteer.launch.mockRejectedValue(new Error('local launch failed'));
     const browser = createBrowser();
-    mockedPuppeteer.launch.mockResolvedValue(browser);
+    mockedPuppeteer.connect.mockResolvedValue(browser);
 
     const handle = await getBrowser();
 
     expect(mockedPuppeteer.connect).toHaveBeenCalledWith({
       browserWSEndpoint: 'ws://browserless.example.com/'
     });
-    expect(mockedPuppeteer.launch).toHaveBeenCalledTimes(1);
+    expect(mockedPuppeteer.launch).toHaveBeenCalledWith({
+      executablePath: tempExecutablePath,
+      args: ['--no-sandbox', '--disable-setuid-sandbox'],
+      headless: true
+    });
 
     await handle.cleanup();
-    expect(browser.close).toHaveBeenCalledTimes(1);
+    expect(browser.disconnect).toHaveBeenCalledTimes(1);
   });
 
   it('throws when browserless connection fails without a fallback', async () => {

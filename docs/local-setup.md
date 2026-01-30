@@ -112,7 +112,7 @@ The Playwright config will start the dev server automatically for E2E runs.
 Report fixtures include HTML, JSON payloads, and PDFs. Ensure these environment variables are set in `.env.local`:
 
 - `REPORT_LOCAL_FALLBACK=1`
-- `CHROME_EXECUTABLE_PATH` (path to your local Chrome/Chromium binary; adjust for macOS/Windows/Linux as needed)
+CHROME_EXECUTABLE_PATH (path to your local Chrome/Chromium binary; set to your Chrome/Chromium binary path, e.g. `/Applications/Google Chrome.app/Contents/MacOS/Google Chrome` on macOS, `C:\Program Files\Google\Chrome\Application\chrome.exe` on Windows, or `/usr/bin/google-chrome` on Linux)
 
 Then run:
 

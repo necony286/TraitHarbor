@@ -109,10 +109,10 @@ The Playwright config will start the dev server automatically for E2E runs.
 
 ## 7) Generate report fixtures (optional)
 
-Report fixtures include HTML, JSON payloads, and PDFs. Ensure these environment variables are set in `.env.local`:
+Report fixtures include HTML, JSON payloads, and PDFs. `pnpm gen:fixtures` loads `.env`/`.env.local` automatically, so set these in `.env.local`:
 
 - `REPORT_LOCAL_FALLBACK=1`
-CHROME_EXECUTABLE_PATH (path to your local Chrome/Chromium binary; set to your Chrome/Chromium binary path, e.g. `/Applications/Google Chrome.app/Contents/MacOS/Google Chrome` on macOS, `C:\Program Files\Google\Chrome\Application\chrome.exe` on Windows, or `/usr/bin/google-chrome` on Linux)
+- `CHROME_EXECUTABLE_PATH` (path to your local Chrome/Chromium binary; set to your Chrome/Chromium binary path, e.g. `/Applications/Google Chrome.app/Contents/MacOS/Google Chrome` on macOS, `C:\Program Files\Google\Chrome\Application\chrome.exe` on Windows, or `/usr/bin/google-chrome` on Linux)
 
 Then run:
 

@@ -377,7 +377,7 @@ const withPdfConcurrencyGuard = async <T>(task: () => Promise<T>) => {
 };
 
 const isVercelRuntime = () => Boolean(process.env.VERCEL);
-const isLocalFallbackEnabled = () => process.env.REPORT_LOCAL_FALLBACK === '1';
+export const isLocalFallbackEnabled = () => process.env.REPORT_LOCAL_FALLBACK === '1';
 
 const resolveBrowserlessWsUrl = () => {
   const wsEndpoint = process.env.BROWSERLESS_WS_ENDPOINT?.trim();

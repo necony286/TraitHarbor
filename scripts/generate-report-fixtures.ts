@@ -7,13 +7,11 @@ import { mkdir, writeFile } from 'fs/promises';
 import path from 'path';
 
 import { loadQuizItems } from '../lib/ipip';
-import { buildReportHtml, generateReportPdf, traitSectionOrder, type ReportPayload } from '../lib/pdf';
+import { buildReportHtml, generateReportPdf, isLocalFallbackEnabled, traitSectionOrder, type ReportPayload } from '../lib/pdf';
 import { scoreAnswers, type AnswerMap } from '../lib/scoring';
 
 const FIXTURE_COUNT = 3;
 const OUTPUT_DIR = path.join(process.cwd(), 'fixtures', 'reports');
-
-const isLocalFallbackEnabled = () => process.env.REPORT_LOCAL_FALLBACK === '1';
 
 const ensurePdfEnvReady = () => {
   const wsEndpoint = process.env.BROWSERLESS_WS_ENDPOINT?.trim();

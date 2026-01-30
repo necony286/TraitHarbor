@@ -54,7 +54,7 @@ Fill in the variables you need:
 **App behavior (optional)**
 - `NEXT_PUBLIC_QUIZ_FIXTURE_MODE=1`
 - `REPORT_LOCAL_FALLBACK=1` (required for local report fixtures)
-- `CHROME_EXECUTABLE_PATH` (required for local report fixtures, e.g. `/Applications/Google Chrome.app/Contents/MacOS/Google Chrome`)
+- `CHROME_EXECUTABLE_PATH` (required for local report fixtures, e.g. `/Applications/Google Chrome.app/Contents/MacOS/Google Chrome` on macOS)
 
 **Payments (Paddle — pending enablement)**
 - `PADDLE_ENV=sandbox`

@@ -1,6 +1,12 @@
 import { describe, expect, it } from 'vitest';
 
-import { getFacetSummary, getPersonalDevelopmentRoadmap, getTraitMeaning, withPrefix } from '../lib/report-content';
+import {
+  formatFacetLabel,
+  getFacetSummary,
+  getPersonalDevelopmentRoadmap,
+  getTraitMeaning,
+  withPrefix
+} from '../lib/report-content';
 
 describe('withPrefix', () => {
   it.each([
@@ -68,6 +74,21 @@ describe('getTraitMeaning', () => {
     }
   ])('returns the expected narrative for $trait at $score', ({ trait, score, expected }) => {
     expect(getTraitMeaning(trait, score)).toBe(expected);
+  });
+});
+
+describe('formatFacetLabel', () => {
+  it.each([
+    { raw: 'O1_Imagination', expected: 'Imagination' },
+    { raw: 'O4_Adventurousness', expected: 'Adventurousness' },
+    { raw: 'C6_achievemenT_Striving', expected: 'Achievement striving' },
+    { raw: 'Agreeableness', expected: 'Agreeableness' },
+    { raw: 'Warmth', expected: 'Warmth' },
+    { raw: 'SelfConsciousness', expected: 'Self consciousness' },
+    { raw: 'self-consciousness', expected: 'Self-consciousness' },
+    { raw: '  ', expected: '' }
+  ])('formats "$raw" into "$expected"', ({ raw, expected }) => {
+    expect(formatFacetLabel(raw)).toBe(expected);
   });
 });
 

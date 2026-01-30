@@ -80,9 +80,11 @@ const writeFixtureFiles = async (index: number, payload: ReportPayload) => {
   const html = await buildReportHtml(payload);
   const pdf = await generateReportPdf(payload);
 
-  await writeFile(payloadPath, JSON.stringify(payload, null, 2), 'utf8');
-  await writeFile(htmlPath, html, 'utf8');
-  await writeFile(pdfPath, pdf);
+  await Promise.all([
+    writeFile(payloadPath, JSON.stringify(payload, null, 2), 'utf8'),
+    writeFile(htmlPath, html, 'utf8'),
+    writeFile(pdfPath, pdf)
+  ]);
 };
 
 export const run = async () => {
@@ -91,21 +93,24 @@ export const run = async () => {
   const items = ensureFullQuizItems();
   const itemIds = items.map((item) => item.id);
 
-  for (let index = 1; index <= FIXTURE_COUNT; index += 1) {
-    const answers = buildRandomAnswers(itemIds);
-    const { traits, facetScores } = scoreAnswers(answers, items);
-    const { traitPercentages, traitRankOrder, highestTrait, lowestTrait } =
-      computeTraitSummary(traits);
-    const payload: ReportPayload = {
-      date: new Date(),
-      traits,
-      traitPercentages,
-      traitRankOrder,
-      highestTrait,
-      lowestTrait,
-      facetScores
-    };
+  await Promise.all(
+    Array.from({ length: FIXTURE_COUNT }, (_, index) => {
+      const fixtureIndex = index + 1;
+      const answers = buildRandomAnswers(itemIds);
+      const { traits, facetScores } = scoreAnswers(answers, items);
+      const { traitPercentages, traitRankOrder, highestTrait, lowestTrait } =
+        computeTraitSummary(traits);
+      const payload: ReportPayload = {
+        date: new Date(),
+        traits,
+        traitPercentages,
+        traitRankOrder,
+        highestTrait,
+        lowestTrait,
+        facetScores
+      };
 
-    await writeFixtureFiles(index, payload);
-  }
+      return writeFixtureFiles(fixtureIndex, payload);
+    })
+  );
 };

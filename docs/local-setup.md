@@ -53,6 +53,8 @@ Fill in the variables you need:
 
 **App behavior (optional)**
 - `NEXT_PUBLIC_QUIZ_FIXTURE_MODE=1`
+- `REPORT_LOCAL_FALLBACK=1` (required for local report fixtures)
+- `CHROME_EXECUTABLE_PATH` (required for local report fixtures, e.g. `/Applications/Google Chrome.app/Contents/MacOS/Google Chrome` on macOS)
 
 **Payments (Paddle — pending enablement)**
 - `PADDLE_ENV=sandbox`
@@ -104,3 +106,16 @@ pnpm test:e2e
 ```
 
 The Playwright config will start the dev server automatically for E2E runs.
+
+## 7) Generate report fixtures (optional)
+
+Report fixtures include HTML, JSON payloads, and PDFs. Ensure these environment variables are set in `.env.local`:
+
+- `REPORT_LOCAL_FALLBACK=1`
+- `CHROME_EXECUTABLE_PATH` (path to your local Chrome/Chromium binary)
+
+Then run:
+
+```bash
+pnpm gen:fixtures
+```

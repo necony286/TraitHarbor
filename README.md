@@ -68,7 +68,7 @@ Create a `.env.local` file for local development (start from `.env.example`). Cu
 - `ALLOW_WEBHOOK_TEST_BYPASS=1` (optional, development-only Paddle webhook bypass)
 - `REPORT_TEMPLATE_VERSION` (optional; defaults to `v1`)
 - `REPORT_LOCAL_FALLBACK=1` (optional; required for local fixture PDF rendering)
-- `CHROME_EXECUTABLE_PATH` (optional; required for local fixture PDF rendering, e.g. `/Applications/Google Chrome.app/Contents/MacOS/Google Chrome`)
+- `CHROME_EXECUTABLE_PATH` (optional; required for local fixture PDF rendering, e.g. `/Applications/Google Chrome.app/Contents/MacOS/Google Chrome` on macOS)
 
 **Payments (Paddle — pending enablement)**
 - `PADDLE_ENV`

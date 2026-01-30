@@ -23,11 +23,23 @@ const writeHtml = async (index: number, html: string) => {
 };
 
 const run = async () => {
-  for (let index = 1; index <= FIXTURE_COUNT; index += 1) {
+  const files = await readdir(FIXTURE_DIR);
+  const fixturePayloads = files.filter((file) =>
+    /^fixture-\d+\.payload\.json$/.test(file)
+  );
+
+  console.log(`Found ${fixturePayloads.length} fixtures to regenerate.`);
+
+  const tasks = fixturePayloads.map(async (file) => {
+    const index = parseInt(file.match(/(\d+)/)[1], 10);
     const payload = await loadPayload(index);
     const html = await buildReportHtml(payload);
     await writeHtml(index, html);
-  }
+    console.log(`- Regenerated fixture-${index}.html`);
+  });
+
+  await Promise.all(tasks);
+  console.log('All fixtures regenerated successfully.');
 };
 
 run().catch((error) => {

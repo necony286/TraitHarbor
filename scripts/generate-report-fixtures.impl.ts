@@ -104,7 +104,7 @@ export const run = async () => {
     const { traits, facetScores } = scoreAnswers(answers, items);
     const { traitPercentages, traitRankOrder, highestTrait, lowestTrait } =
       computeTraitSummary(traits);
-    const traitPercentiles = { ...traitPercentages };
+    const traitPercentiles = { ...traitPercentages }; // TODO: Replace with actual percentile data. Mirrored for now to enable percentile-dependent UI sections.
     const payload: ReportPayload = {
       date: new Date(),
       traits,

@@ -135,22 +135,27 @@ describe('getFacetSpread', () => {
   it.each([
     {
       label: 'Tight spread',
-      scores: { Imagination: 50, Adventurousness: 55, ArtisticInterests: 60 }
+      scores: { Imagination: 50, Adventurousness: 55, ArtisticInterests: 60 },
+      expected: { range: 10, stdev: 4.1 }
     },
     {
       label: 'Moderate spread',
-      scores: { Imagination: 40, Adventurousness: 50, ArtisticInterests: 65 }
+      scores: { Imagination: 40, Adventurousness: 50, ArtisticInterests: 65 },
+      expected: { range: 25, stdev: 10.3 }
     },
     {
       label: 'Wide spread',
-      scores: { Imagination: 30, Adventurousness: 60, ArtisticInterests: 90 }
+      scores: { Imagination: 30, Adventurousness: 60, ArtisticInterests: 90 },
+      expected: { range: 60, stdev: 24.5 }
     }
-  ])('returns $label for the facet score spread', ({ label, scores }) => {
+  ])('returns $label for the facet score spread', ({ label, scores, expected }) => {
     const summary = getFacetSpread('Openness', { Openness: scores });
 
     expect(summary?.label).toBe(label);
-    expect(summary?.description).toContain('Range');
-    expect(summary?.description).toContain('stdev');
+    expect(summary?.range).toBe(expected.range);
+    expect(summary?.stdev).toBe(expected.stdev);
+    expect(summary?.description).toContain(`Range ${expected.range}`);
+    expect(summary?.description).toContain(`stdev ${expected.stdev}`);
   });
 });
 
@@ -174,11 +179,14 @@ describe('getActionPlanSelections', () => {
 
     expect(selections.leanInto).toBe('Openness');
     expect(selections.support).toBe('Openness');
+    expect(selections.stressReset).toBe('Neuroticism');
   });
 
   it('uses the last ranked trait when no percentages are provided', () => {
     const selections = getActionPlanSelections({}, ['Openness', 'Extraversion', 'Agreeableness']);
 
+    expect(selections.leanInto).toBe('Openness');
     expect(selections.support).toBe('Agreeableness');
+    expect(selections.stressReset).toBe('Neuroticism');
   });
 });

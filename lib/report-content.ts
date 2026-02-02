@@ -1,4 +1,5 @@
 type ScoreBand = 'High' | 'Medium' | 'Low';
+export type ScoreBandLabel = 'High' | 'Balanced' | 'Low';
 
 type NarrativeVoice = {
   subject: string;
@@ -20,6 +21,13 @@ const getScoreBand = (score: number): ScoreBand => {
 };
 
 const normalizeTrait = (trait: string) => trait.trim().toLowerCase();
+const escapeHtml = (value: string) =>
+  value
+    .replaceAll('&', '&amp;')
+    .replaceAll('<', '&lt;')
+    .replaceAll('>', '&gt;')
+    .replaceAll('"', '&quot;')
+    .replaceAll("'", '&#39;');
 
 export const formatFacetLabel = (raw: string): string => {
   const withoutPrefix = raw.replace(/^[OCEAN][1-6]_/, '');
@@ -625,4 +633,162 @@ export const getPersonalDevelopmentRoadmap = (
   ];
 };
 
-export const getScoreBandLabel = (score: number) => getScoreBand(score);
+const SCORE_BAND_LABELS: Record<ScoreBand, ScoreBandLabel> = {
+  High: 'High',
+  Medium: 'Balanced',
+  Low: 'Low'
+};
+
+export const getScoreBandLabel = (score: number): ScoreBandLabel => SCORE_BAND_LABELS[getScoreBand(score)];
+
+export type FacetSpread = {
+  range: number;
+  stdev: number;
+  label: string;
+  description: string;
+};
+
+const roundTo = (value: number, digits = 1) => Number(value.toFixed(digits));
+
+const calculateStandardDeviation = (values: number[]) => {
+  if (!values.length) {
+    return 0;
+  }
+  const mean = values.reduce((total, value) => total + value, 0) / values.length;
+  const variance =
+    values.reduce((total, value) => total + (value - mean) ** 2, 0) / values.length;
+  return Math.sqrt(variance);
+};
+
+const getFacetSpreadLabel = (range: number, stdev: number) => {
+  if (range <= 15 && stdev <= 6) {
+    return {
+      label: 'Tight spread',
+      description: 'Facet scores cluster closely, suggesting a consistent expression of this trait.'
+    };
+  }
+  if (range <= 30 && stdev <= 12) {
+    return {
+      label: 'Moderate spread',
+      description: 'Facet scores show some variation, blending consistent and situational expressions.'
+    };
+  }
+  return {
+    label: 'Wide spread',
+    description: 'Facet scores vary widely, highlighting distinct strengths and growth areas within this trait.'
+  };
+};
+
+export const getFacetSpread = (
+  trait: string,
+  facetScores?: Record<string, Record<string, number>>
+): FacetSpread | null => {
+  const summary = getFacetSummary(trait, facetScores);
+  if (!summary || summary.facets.length < 2) {
+    return null;
+  }
+  const scores = summary.facets.map((facet) => facet.score);
+  const min = Math.min(...scores);
+  const max = Math.max(...scores);
+  const range = max - min;
+  const stdev = calculateStandardDeviation(scores);
+  const { label, description } = getFacetSpreadLabel(range, stdev);
+  const roundedRange = roundTo(range, 0);
+  const roundedStdev = roundTo(stdev, 1);
+  const detailedDescription = `${description} (Range ${roundedRange}, stdev ${roundedStdev}).`;
+
+  return {
+    range: roundedRange,
+    stdev: roundedStdev,
+    label: escapeHtml(label),
+    description: escapeHtml(detailedDescription)
+  };
+};
+
+export const getTraitSummary = (
+  trait: string,
+  score: number,
+  facetScores?: Record<string, Record<string, number>>
+): string => {
+  const traitName = resolveTraitName(trait);
+  const bandLabel = getScoreBandLabel(score).toLowerCase();
+  const summary = getFacetSummary(trait, facetScores);
+  if (summary && summary.facets.length > 0) {
+    const { facets } = summary;
+    const topFacet = facets[0];
+
+    if (facets.length > 1) {
+      const bottomFacet = facets[facets.length - 1];
+      const bottomLabel =
+        bottomFacet.score >= LEAST_STRONG_FACET_SCORE_THRESHOLD ? 'least strong facet' : 'weakest facet';
+      return escapeHtml(
+        `${traitName} shows its strongest facet in ${topFacet.facetName}, while your ${bottomLabel} is ${bottomFacet.facetName}. Overall, your ${traitName} is ${bandLabel}.`
+      );
+    }
+
+    return escapeHtml(
+      `${traitName} shows its strongest facet in ${topFacet.facetName}. Overall, your ${traitName} is ${bandLabel}.`
+    );
+  }
+  return escapeHtml(`Overall, your ${traitName} is ${bandLabel}.`);
+};
+
+export type TraitGuidance = {
+  strengths: string[];
+  watchOuts: string[];
+  microAction: string;
+};
+
+const TRAIT_MICRO_ACTIONS: Record<TraitName, string> = {
+  Openness: 'Schedule 10 minutes to explore a new idea, then capture one practical next step.',
+  Conscientiousness: 'Pick one priority and set a 15-minute timer to complete a focused first step.',
+  Extraversion: 'Reach out to one person for a brief check-in and ask a thoughtful question.',
+  Agreeableness: 'Offer one small act of support while stating a clear, respectful boundary.',
+  Neuroticism: 'Take a 2-minute reset: breathe slowly and name the feeling before moving forward.'
+};
+
+export const getTraitGuidance = (trait: string, score: number): TraitGuidance => {
+  const traitName = resolveTraitName(trait);
+  const strengths = getStrengths(traitName, score).map(escapeHtml);
+  const watchOuts = getGrowthTips(traitName, score).map(escapeHtml);
+  const microAction =
+    (TRAIT_MICRO_ACTIONS as Record<string, string>)[traitName] ??
+    `Choose one small action today that supports your ${traitName} balance.`;
+
+  return {
+    strengths,
+    watchOuts,
+    microAction: escapeHtml(microAction)
+  };
+};
+
+export type ActionPlanSelection = {
+  leanInto: string;
+  support: string;
+  stressReset: string;
+};
+
+export const getActionPlanSelections = (
+  traitPercentages: Record<string, number>,
+  traitRankOrder: string[]
+): ActionPlanSelection => {
+  const normalizedRank = traitRankOrder.map(resolveTraitName);
+  const leanIntoRaw =
+    normalizedRank.find((traitName) => normalizeTrait(traitName) !== 'neuroticism') ??
+    normalizedRank[0] ??
+    'Neuroticism';
+
+  const supportRaw = Object.entries(traitPercentages).length
+    ? resolveTraitName(
+        Object.entries(traitPercentages)
+          .filter(([, value]) => Number.isFinite(value))
+          .sort((a, b) => a[1] - b[1])[0]?.[0] ?? leanIntoRaw
+      )
+    : normalizedRank[normalizedRank.length - 1] ?? leanIntoRaw;
+
+  return {
+    leanInto: escapeHtml(leanIntoRaw),
+    support: escapeHtml(supportRaw),
+    stressReset: escapeHtml('Neuroticism')
+  };
+};

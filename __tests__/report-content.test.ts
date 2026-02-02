@@ -154,8 +154,7 @@ describe('getFacetSpread', () => {
     expect(summary?.label).toBe(label);
     expect(summary?.range).toBe(expected.range);
     expect(summary?.stdev).toBe(expected.stdev);
-    expect(summary?.description).toContain(`Range ${expected.range}`);
-    expect(summary?.description).toContain(`stdev ${expected.stdev}`);
+    expect(summary?.description).toContain(`(Range ${expected.range}, stdev ${expected.stdev}).`);
   });
 });
 

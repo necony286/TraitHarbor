@@ -3,6 +3,8 @@ import { describe, expect, it } from 'vitest';
 import {
   formatFacetLabel,
   getFacetSummary,
+  getFacetSpread,
+  getActionPlanSelections,
   getPersonalDevelopmentRoadmap,
   getTraitMeaning,
   withPrefix
@@ -126,5 +128,57 @@ describe('getFacetSummary', () => {
       'Your strongest facet: Imagination (82/100).',
       'Your weakest facet: Adventurousness (59/100).'
     ]);
+  });
+});
+
+describe('getFacetSpread', () => {
+  it.each([
+    {
+      label: 'Tight spread',
+      scores: { Imagination: 50, Adventurousness: 55, ArtisticInterests: 60 }
+    },
+    {
+      label: 'Moderate spread',
+      scores: { Imagination: 40, Adventurousness: 50, ArtisticInterests: 65 }
+    },
+    {
+      label: 'Wide spread',
+      scores: { Imagination: 30, Adventurousness: 60, ArtisticInterests: 90 }
+    }
+  ])('returns $label for the facet score spread', ({ label, scores }) => {
+    const summary = getFacetSpread('Openness', { Openness: scores });
+
+    expect(summary?.label).toBe(label);
+    expect(summary?.description).toContain('Range');
+    expect(summary?.description).toContain('stdev');
+  });
+});
+
+describe('getActionPlanSelections', () => {
+  it('uses the lowest finite trait percentage as support', () => {
+    const selections = getActionPlanSelections(
+      { Openness: 78, Conscientiousness: 22, Extraversion: 35 },
+      ['Openness', 'Conscientiousness', 'Extraversion', 'Neuroticism']
+    );
+
+    expect(selections.leanInto).toBe('Openness');
+    expect(selections.support).toBe('Conscientiousness');
+    expect(selections.stressReset).toBe('Neuroticism');
+  });
+
+  it('falls back to lean-into when no finite trait percentages are available', () => {
+    const selections = getActionPlanSelections(
+      { Openness: Number.NaN, Conscientiousness: Number.POSITIVE_INFINITY },
+      ['Openness', 'Conscientiousness']
+    );
+
+    expect(selections.leanInto).toBe('Openness');
+    expect(selections.support).toBe('Openness');
+  });
+
+  it('uses the last ranked trait when no percentages are provided', () => {
+    const selections = getActionPlanSelections({}, ['Openness', 'Extraversion', 'Agreeableness']);
+
+    expect(selections.support).toBe('Agreeableness');
   });
 });

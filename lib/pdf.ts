@@ -18,15 +18,14 @@ const loadPuppeteer = async (): Promise<PuppeteerModule> => {
 import {
   getComparisonText,
   getFacetSummary,
-  getGrowthTips,
+  getFacetSpread,
+  getActionPlanSelections,
   getPersonalDevelopmentRoadmap,
   getPatternSummary,
-  getRelationshipTips,
   getResourcesMethodologyText,
   getScoreBandLabel,
-  getStrengths,
-  getTraitMeaning,
-  getWorkStyleTips,
+  getTraitGuidance,
+  getTraitSummary,
   RESOURCES_BY_TRAIT
 } from './report-content';
 import { getTraitExtremes } from './trait-extremes';
@@ -49,12 +48,6 @@ export type ReportPayload = {
   lowestTrait: string;
   traitRankOrder: string[];
   facetScores?: Record<string, Record<string, number>>;
-};
-
-type SectionDefinition = {
-  readonly title: string;
-  readonly content: string;
-  readonly fallback: string;
 };
 
 const MAX_PDF_BYTES = 700 * 1024;
@@ -141,22 +134,6 @@ ${facets
         </div>`
     : '';
 
-const buildTraitIntroSection = (
-  name: string,
-  band: string,
-  scoreValue: number,
-  meaningContent: string
-) => `        <div class="avoid-break">
-          <h2>${name} — ${band} (${scoreValue}/100)</h2>
-          <h3>What it means for you</h3>
-          <p>${meaningContent}</p>
-        </div>`;
-
-const buildAvoidBreakSection = (title: string, content: string) => `        <div class="avoid-break">
-          <h3>${escapeHtml(title)}</h3>
-          <p>${content}</p>
-        </div>`;
-
 const buildTraitSections = (
   scores: Record<typeof traitSectionOrder[number]['scoreKey'], number>,
   traitPercentages: Record<string, number>,
@@ -165,50 +142,50 @@ const buildTraitSections = (
   return traitSectionOrder
     .map(({ name, scoreKey }) => {
       const score = scores[scoreKey];
-      const meaning = getTraitMeaning(name, score);
-      const strengths = getStrengths(name, score).map(escapeHtml).join(' ');
-      const growth = getGrowthTips(name, score).map(escapeHtml).join(' ');
-      const workStyle = getWorkStyleTips(name, score).map(escapeHtml).join(' ');
-      const relationships = getRelationshipTips(name, score).map(escapeHtml).join(' ');
+      const guidance = getTraitGuidance(name, score);
+      const strengths = buildEscapedListItems(guidance.strengths);
+      const watchOuts = buildEscapedListItems(guidance.watchOuts);
+      const microAction = guidance.microAction;
       const facetSummary = getFacetSummary(name, facetScores);
-      const facetCallouts = facetSummary?.callouts.map(escapeHtml).join(' ') ?? '';
+      const facetSpread = getFacetSpread(name, facetScores);
       const band = getScoreBandLabel(score);
       const scoreValue = traitPercentages[name] ?? score;
       const facetBars = facetSummary ? buildFacetBars(facetSummary.facets) : '';
-      const sectionDefinitions: SectionDefinition[] = [
-        {
-          title: 'Strengths',
-          content: strengths,
-          fallback: 'Identify the strengths that support your goals.'
-        },
-        {
-          title: 'Watch-outs',
-          content: growth,
-          fallback: 'Focus on one growth habit that keeps you balanced.'
-        },
-        {
-          title: 'Career tip',
-          content: workStyle,
-          fallback: 'Choose environments that align with how you prefer to work.'
-        },
-        {
-          title: 'Relationship tip',
-          content: relationships,
-          fallback: 'Notice how this trait shapes how you connect with others.'
-        }
-      ];
-      const meaningContent = [facetCallouts, escapeHtml(meaning)].filter(Boolean).join('<br>');
-      const sections = [
-        buildTraitIntroSection(name, band, scoreValue, meaningContent),
-        facetBars ? `<div class="avoid-break">${facetBars}</div>` : '',
-        ...sectionDefinitions.map(({ title, content, fallback }) =>
-          buildAvoidBreakSection(title, content || fallback)
-        )
-      ]
-        .filter(Boolean)
-        .join('\n');
+      const summaryContent = getTraitSummary(name, score, facetScores);
+      const facetSpreadContent = facetSpread
+        ? `<p class="trait__facet-spread-label">${facetSpread.label}</p>
+          <p class="trait__facet-spread-description">${facetSpread.description}</p>`
+        : '<p class="muted">Facet spread details are unavailable.</p>';
+      const sections = `
+        <div class="avoid-break">
+          <h2>${escapeHtml(name)} — ${band} (${scoreValue}/100)</h2>
+          <p class="trait__summary">${summaryContent}</p>
+        </div>
+        <div class="avoid-break trait__facet-spread">
+          <h3>Facet spread</h3>
+          ${facetSpreadContent}
+          ${facetBars}
+        </div>
+        <div class="avoid-break trait__guidance">
+          <div>
+            <h3>Strengths</h3>
+            <ul>
+${strengths || '              <li>Identify the strengths that support your goals.</li>'}
+            </ul>
+          </div>
+          <div>
+            <h3>Watch-outs</h3>
+            <ul>
+${watchOuts || '              <li>Focus on one growth habit that keeps you balanced.</li>'}
+            </ul>
+          </div>
+        </div>
+        <div class="avoid-break trait__micro-action">
+          <h3>Micro-action</h3>
+          <p>${microAction || 'Choose one small action today that supports your balance.'}</p>
+        </div>`;
 
-      return `      <section class="report__trait">
+      return `      <section class="report__trait trait-section">
 ${sections}
       </section>`;
     })
@@ -217,6 +194,9 @@ ${sections}
 
 const buildListItems = (items: string[]) =>
   items.length ? items.map((item) => `        <li>${escapeHtml(item)}</li>`).join('\n') : '';
+
+const buildEscapedListItems = (items: string[]) =>
+  items.length ? items.map((item) => `        <li>${item}</li>`).join('\n') : '';
 
 const buildResourceGroups = () =>
   traitSectionOrder
@@ -360,6 +340,116 @@ ${scoreItems}
     })
     .filter(Boolean)
     .join('\n');
+
+const buildSnapshotShape = ({
+  allScoresEqual,
+  highestTraits,
+  lowestTraits,
+  isBalanced
+}: {
+  allScoresEqual: boolean;
+  highestTraits: string[];
+  lowestTraits: string[];
+  isBalanced: boolean;
+}) => {
+  if (allScoresEqual) {
+    return `<div class="snapshot-shape">
+        <p><strong>Snapshot shape:</strong> Your trait scores are evenly distributed, suggesting a steady, consistent profile.</p>
+      </div>`;
+  }
+
+  if (isBalanced) {
+    const traitList = joinWithAnd(highestTraits.map((trait) => escapeHtml(trait)));
+    return `<div class="snapshot-shape">
+        <p><strong>Snapshot shape:</strong> Your scores cluster closely together, with a slight lift in ${traitList}.</p>
+      </div>`;
+  }
+
+  const highest = joinWithAnd(highestTraits.map((trait) => `<strong>${escapeHtml(trait)}</strong>`));
+  const lowest = joinWithAnd(lowestTraits.map((trait) => `<strong>${escapeHtml(trait)}</strong>`));
+  return `<div class="snapshot-shape">
+        <p><strong>Snapshot shape:</strong> You show clear peaks in ${highest}, with quieter zones in ${lowest}.</p>
+      </div>`;
+};
+
+const buildGuardrailsHtml = () => `      <ul>
+        <li>Scores reflect tendencies, not fixed labels or limitations.</li>
+        <li>Traits live on a spectrum—context and goals can shift how they show up.</li>
+        <li>Use the strengths and watch-outs as prompts for action, not judgment.</li>
+        <li>Combine this report with lived experience and feedback from people you trust.</li>
+      </ul>`;
+
+const buildPatternSummaryHtml = (patternSummary: string) => `      <p>${escapeHtml(patternSummary)}</p>`;
+
+const buildActionPlanBlocks = (
+  traitPercentages: Record<string, number>,
+  traitRankOrder: string[]
+) => {
+  const selections = getActionPlanSelections(traitPercentages, traitRankOrder);
+  const getScore = (traitName: string) => traitPercentages[traitName] ?? 0;
+  const leanIntoScore = getScore(selections.leanInto);
+  const supportScore = getScore(selections.support);
+  const stressResetScore = getScore(selections.stressReset);
+  const leanIntoGuidance = getTraitGuidance(selections.leanInto, leanIntoScore);
+  const supportGuidance = getTraitGuidance(selections.support, supportScore);
+  const stressGuidance = getTraitGuidance(selections.stressReset, stressResetScore);
+
+  const blocks = [
+    {
+      title: `Lean into ${selections.leanInto}`,
+      items: leanIntoGuidance.strengths.slice(0, 2)
+    },
+    {
+      title: `Support ${selections.support}`,
+      items: supportGuidance.watchOuts.slice(0, 2)
+    },
+    {
+      title: `Stress reset (${selections.stressReset})`,
+      items: [stressGuidance.microAction]
+    }
+  ];
+
+  return blocks
+    .map(({ title, items }) => {
+      const listItems = items.length
+        ? items.map((item) => `          <li>${item}</li>`).join('\n')
+        : `          <li>${escapeHtml(
+            'Choose one small, repeatable action to build momentum.'
+          )}</li>`;
+      return `      <div class="avoid-break">
+        <div class="roadmap__block">
+          <h3>${escapeHtml(title)}</h3>
+          <ul>
+${listItems}
+          </ul>
+        </div>
+      </div>`;
+    })
+    .join('\n');
+};
+
+const buildMicroHabitHtml = (
+  traitPercentages: Record<string, number>,
+  traitRankOrder: string[]
+) => {
+  const roadmap = getPersonalDevelopmentRoadmap(traitPercentages, traitRankOrder);
+  const microHabit = roadmap.find((item) =>
+    item.recommendationType.toLowerCase().includes('micro-habit')
+  );
+  const microHabitText = microHabit?.items?.[0] ?? '';
+  if (!microHabitText) {
+    return '<p class="muted">Create a 7-day habit that reinforces your growth focus.</p>';
+  }
+  return `<p>${escapeHtml(microHabitText)}</p>`;
+};
+
+const buildResourcesMethodologyHtml = (
+  resourcesMethodology: string,
+  resourcesByTrait: string
+) => `      <p>${escapeHtml(resourcesMethodology)}</p>
+      <div class="resource-groups">
+${resourcesByTrait}
+      </div>`;
 
 let activePdfRenders = 0;
 
@@ -608,8 +698,25 @@ export async function buildReportHtml(payload: ReportPayload) {
     getPersonalDevelopmentRoadmap(clampedTraitPercentages, traitRankOrder)
   );
   const traitRankList = buildListItems(traitRankOrder);
-  const { html: overviewChart, allScoresEqual, highestTraits, lowestTraits, isBalanced } = buildOverviewChart(scores);
-  const highestLowestCallout = allScoresEqual ? '' : buildHighestLowestCallout({ highestTraits, lowestTraits, isBalanced });
+  const { html: overviewChart, allScoresEqual, highestTraits, lowestTraits, isBalanced } =
+    buildOverviewChart(scores);
+  const highestLowestCallout = allScoresEqual
+    ? ''
+    : buildHighestLowestCallout({ highestTraits, lowestTraits, isBalanced });
+  const snapshotShape = buildSnapshotShape({
+    allScoresEqual,
+    highestTraits,
+    lowestTraits,
+    isBalanced
+  });
+  const guardrailsHtml = buildGuardrailsHtml();
+  const patternSummaryHtml = buildPatternSummaryHtml(patternSummary);
+  const actionPlanBlocks = buildActionPlanBlocks(clampedTraitPercentages, traitRankOrder);
+  const microHabitHtml = buildMicroHabitHtml(clampedTraitPercentages, traitRankOrder);
+  const resourcesMethodologyHtml = buildResourcesMethodologyHtml(
+    resourcesMethodology,
+    resourcesByTrait
+  );
   const hasPercentiles =
     payload.traitPercentiles &&
     Object.values(payload.traitPercentiles).some((value) => Number.isFinite(value));
@@ -624,7 +731,9 @@ export async function buildReportHtml(payload: ReportPayload) {
     .replace('{{styles}}', styles)
     .replace('{{trait_sections}}', buildTraitSections(scores, clampedTraitPercentages, payload.facetScores))
     .replace('{{overview_chart}}', overviewChart)
+    .replace('{{snapshot_shape}}', snapshotShape)
     .replace('{{highest_lowest_callout}}', highestLowestCallout)
+    .replace('{{guardrails_html}}', guardrailsHtml)
     .replace('{{comparison_section}}', comparisonSection)
     .replaceAll('{{date}}', escapeHtml(formatDate(payload.date)))
     .replaceAll('{{score_O}}', scores.O.toString())
@@ -637,8 +746,12 @@ export async function buildReportHtml(payload: ReportPayload) {
     .replaceAll('{{trait_rank_order}}', escapeHtml(traitRankOrder.join(', ')))
     .replaceAll('{{trait_rank_list}}', traitRankList)
     .replaceAll('{{pattern_summary}}', escapeHtml(patternSummary))
+    .replace('{{pattern_summary_html}}', patternSummaryHtml)
     .replaceAll('{{roadmap_blocks}}', roadmapBlocks)
+    .replace('{{action_plan_blocks}}', actionPlanBlocks)
+    .replace('{{micro_habit}}', microHabitHtml)
     .replaceAll('{{resources_methodology}}', escapeHtml(resourcesMethodology))
+    .replace('{{resources_methodology_html}}', resourcesMethodologyHtml)
     .replaceAll('{{resources_by_trait}}', resourcesByTrait);
 }
 

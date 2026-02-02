@@ -96,7 +96,7 @@ export class LocalBrowserLaunchError extends Error {
 
 const templatePath = (filename: string) => path.join(process.cwd(), 'templates', filename);
 
-const escapeHtml = (value: string) =>
+export const escapeHtml = (value: string) =>
   value
     .replaceAll('&', '&amp;')
     .replaceAll('<', '&lt;')

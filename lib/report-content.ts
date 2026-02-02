@@ -660,14 +660,19 @@ const calculateStandardDeviation = (values: number[]) => {
   return Math.sqrt(variance);
 };
 
+const TIGHT_SPREAD_RANGE_MAX = 15;
+const TIGHT_SPREAD_STDEV_MAX = 6;
+const MODERATE_SPREAD_RANGE_MAX = 30;
+const MODERATE_SPREAD_STDEV_MAX = 12;
+
 const getFacetSpreadLabel = (range: number, stdev: number) => {
-  if (range <= 15 && stdev <= 6) {
+  if (range <= TIGHT_SPREAD_RANGE_MAX && stdev <= TIGHT_SPREAD_STDEV_MAX) {
     return {
       label: 'Tight spread',
       description: 'Facet scores cluster closely, suggesting a consistent expression of this trait.'
     };
   }
-  if (range <= 30 && stdev <= 12) {
+  if (range <= MODERATE_SPREAD_RANGE_MAX && stdev <= MODERATE_SPREAD_STDEV_MAX) {
     return {
       label: 'Moderate spread',
       description: 'Facet scores show some variation, blending consistent and situational expressions.'
@@ -778,13 +783,17 @@ export const getActionPlanSelections = (
     normalizedRank[0] ??
     'Neuroticism';
 
-  const supportRaw = Object.entries(traitPercentages).length
-    ? resolveTraitName(
-        Object.entries(traitPercentages)
-          .filter(([, value]) => Number.isFinite(value))
-          .sort((a, b) => a[1] - b[1])[0]?.[0] ?? leanIntoRaw
-      )
-    : normalizedRank[normalizedRank.length - 1] ?? leanIntoRaw;
+  let supportRaw: string;
+  const traitEntries = Object.entries(traitPercentages);
+  if (traitEntries.length) {
+    const traitsByScore = traitEntries
+      .filter(([, value]) => Number.isFinite(value))
+      .sort((a, b) => a[1] - b[1]);
+    const lowestTraitName = traitsByScore[0]?.[0];
+    supportRaw = lowestTraitName ? resolveTraitName(lowestTraitName) : leanIntoRaw;
+  } else {
+    supportRaw = normalizedRank[normalizedRank.length - 1] ?? leanIntoRaw;
+  }
 
   return {
     leanInto: escapeHtml(leanIntoRaw),

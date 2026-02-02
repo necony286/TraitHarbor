@@ -790,7 +790,7 @@ export const getActionPlanSelections = (
       .filter(([, value]) => Number.isFinite(value))
       .sort((a, b) => a[1] - b[1]);
     const lowestTraitName = traitsByScore[0]?.[0];
-    supportRaw = resolveTraitName(lowestTraitName ?? leanIntoRaw);
+    supportRaw = lowestTraitName ? resolveTraitName(lowestTraitName) : leanIntoRaw;
   } else {
     supportRaw = normalizedRank[normalizedRank.length - 1] ?? leanIntoRaw;
   }

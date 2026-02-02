@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { getScoreBandLabel, RESOURCES_BY_TRAIT } from '../lib/report-content';
+import { getScoreBandLabel, getTraitMeaning, RESOURCES_BY_TRAIT } from '../lib/report-content';
 import { DEFAULT_BALANCE_THRESHOLD, getTraitExtremes } from '../lib/trait-extremes';
 import { buildReportHtml, traitSectionOrder, type ReportPayload, type ReportTraits } from '../lib/pdf';
 
@@ -51,6 +51,14 @@ const createReportPayload = (
     ...overrides
   };
 };
+
+const escapeHtml = (value: string) =>
+  value
+    .replaceAll('&', '&amp;')
+    .replaceAll('<', '&lt;')
+    .replaceAll('>', '&gt;')
+    .replaceAll('"', '&quot;')
+    .replaceAll("'", '&#39;');
 
 describe('report template', () => {
   it('hydrates report html with trait scores', async () => {
@@ -206,6 +214,29 @@ describe('report template', () => {
     expect(unsafeResource).toBeDefined();
     expect(html).not.toContain(unsafeResource.url);
     expect(html).not.toContain(unsafeResource.label + '</a>');
+  });
+
+  it('renders facet callouts with the trait meaning when facet scores are provided', async () => {
+    const traits: ReportTraits = {
+      O: 82,
+      C: 70,
+      E: 60,
+      A: 55,
+      N: 45
+    };
+    const facetScores = {
+      Openness: {
+        imagination: 82,
+        adventurousness: 35
+      }
+    };
+
+    const html = await buildReportHtml(createReportPayload(traits, { facetScores }));
+    const meaning = getTraitMeaning('Openness', traits.O);
+    const callouts =
+      'Your strongest facet: Imagination (82/100). Your weakest facet: Adventurousness (35/100).';
+
+    expect(html).toContain(`${callouts}<br>${escapeHtml(meaning)}`);
   });
 
   it('caches template and css file reads across concurrent builds', async () => {

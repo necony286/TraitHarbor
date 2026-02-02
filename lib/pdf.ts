@@ -197,7 +197,7 @@ const buildTraitSections = (
           fallback: 'Notice how this trait shapes how you connect with others.'
         }
       ];
-      const meaningContent = facetCallouts || escapeHtml(meaning);
+      const meaningContent = [facetCallouts, escapeHtml(meaning)].filter(Boolean).join('<br>');
       const sections = [
         buildTraitIntroSection(name, band, scoreValue, meaningContent),
         facetBars ? `<div class="avoid-break">${facetBars}</div>` : '',

@@ -418,7 +418,7 @@ const buildActionPlanBlocks = (
           )}</li>`;
       return `      <div class="avoid-break">
         <div class="roadmap__block">
-          <h3>${escapeHtml(title)}</h3>
+          <h3>${title}</h3>
           <ul>
 ${listItems}
           </ul>

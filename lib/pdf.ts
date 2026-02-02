@@ -17,6 +17,7 @@ const loadPuppeteer = async (): Promise<PuppeteerModule> => {
 };
 import {
   getComparisonText,
+  getFacetInsights,
   getFacetSummary,
   getFacetSpread,
   getActionPlanSelections,
@@ -25,6 +26,7 @@ import {
   getResourcesMethodologyText,
   getScoreBandLabel,
   getTraitGuidance,
+  getTraitMeaning,
   getTraitSummary,
   RESOURCES_BY_TRAIT
 } from './report-content';
@@ -313,6 +315,28 @@ const buildHighestLowestCallout = ({
 
   return `      <div class="avoid-break">
         <p class="overview__callout">${calloutText}</p>
+      </div>`;
+};
+
+const buildFacetCallout = (
+  traitName: string,
+  score: number,
+  facetScores?: Record<string, Record<string, number>>
+) => {
+  if (!traitName) {
+    return '';
+  }
+
+  const callouts = getFacetInsights(traitName, facetScores);
+  if (!callouts.length) {
+    return '';
+  }
+
+  const meaning = getTraitMeaning(traitName, score);
+  return `      <div class="avoid-break">
+        <p class="overview__callout">${callouts.map(escapeHtml).join(' ')}<br>${escapeHtml(
+          meaning
+        )}</p>
       </div>`;
 };
 
@@ -689,6 +713,7 @@ export async function buildReportHtml(payload: ReportPayload) {
   const highestTrait = payload.highestTrait.trim() || '';
   const lowestTrait = payload.lowestTrait.trim() || '';
   const traitRankOrder = payload.traitRankOrder.filter(Boolean);
+  const highestTraitScore = clampedTraitPercentages[highestTrait] ?? 0;
 
   const comparisonText = getComparisonText(traitRankOrder);
   const patternSummary = getPatternSummary(clampedTraitPercentages, traitRankOrder);
@@ -703,6 +728,11 @@ export async function buildReportHtml(payload: ReportPayload) {
   const highestLowestCallout = allScoresEqual
     ? ''
     : buildHighestLowestCallout({ highestTraits, lowestTraits, isBalanced });
+  const facetCallout = buildFacetCallout(
+    highestTrait,
+    highestTraitScore,
+    payload.facetScores
+  );
   const snapshotShape = buildSnapshotShape({
     allScoresEqual,
     highestTraits,
@@ -733,6 +763,7 @@ export async function buildReportHtml(payload: ReportPayload) {
     .replace('{{overview_chart}}', overviewChart)
     .replace('{{snapshot_shape}}', snapshotShape)
     .replace('{{highest_lowest_callout}}', highestLowestCallout)
+    .replace('{{facet_callout}}', facetCallout)
     .replace('{{guardrails_html}}', guardrailsHtml)
     .replace('{{comparison_section}}', comparisonSection)
     .replaceAll('{{date}}', escapeHtml(formatDate(payload.date)))

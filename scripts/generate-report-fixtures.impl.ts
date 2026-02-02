@@ -104,10 +104,12 @@ export const run = async () => {
     const { traits, facetScores } = scoreAnswers(answers, items);
     const { traitPercentages, traitRankOrder, highestTrait, lowestTrait } =
       computeTraitSummary(traits);
+    const traitPercentiles = { ...traitPercentages };
     const payload: ReportPayload = {
       date: new Date(),
       traits,
       traitPercentages,
+      traitPercentiles,
       traitRankOrder,
       highestTrait,
       lowestTrait,

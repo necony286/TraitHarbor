@@ -26,6 +26,7 @@ const payload: ReportPayload = {
   date: new Date(Date.UTC(2024, 0, 2, 12, 0, 0)),
   traits,
   traitPercentages,
+  traitPercentiles: { ...traitPercentages },
   highestTrait: traitRankOrder[0],
   lowestTrait: traitRankOrder[traitRankOrder.length - 1],
   traitRankOrder
@@ -36,9 +37,10 @@ const payload: ReportPayload = {
     const html = await buildReportHtml(payload);
 
     const requiredStrings = [
-      'Your Personality Profile',
-      'Big Five snapshot',
-      'Resources + methodology'
+      'How to read this report',
+      '30-day action plan',
+      '1-week micro-habit',
+      'Resources/methodology'
     ];
 
     for (const text of requiredStrings) {

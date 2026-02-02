@@ -323,7 +323,7 @@ const buildFacetCallout = (
   score: number,
   facetScores?: Record<string, Record<string, number>>
 ) => {
-  if (!traitName || !facetScores) {
+  if (!traitName) {
     return '';
   }
 

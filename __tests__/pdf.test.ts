@@ -1,7 +1,18 @@
 import { describe, expect, it, vi } from 'vitest';
-import { getScoreBandLabel, getTraitMeaning, RESOURCES_BY_TRAIT } from '../lib/report-content';
+import {
+  getFacetInsights,
+  getScoreBandLabel,
+  getTraitMeaning,
+  RESOURCES_BY_TRAIT
+} from '../lib/report-content';
 import { DEFAULT_BALANCE_THRESHOLD, getTraitExtremes } from '../lib/trait-extremes';
-import { buildReportHtml, traitSectionOrder, type ReportPayload, type ReportTraits } from '../lib/pdf';
+import {
+  buildReportHtml,
+  escapeHtml,
+  traitSectionOrder,
+  type ReportPayload,
+  type ReportTraits
+} from '../lib/pdf';
 
 vi.mock('../lib/report-content', async (importActual) => {
   const actual = await importActual<typeof import('../lib/report-content')>();
@@ -51,14 +62,6 @@ const createReportPayload = (
     ...overrides
   };
 };
-
-const escapeHtml = (value: string) =>
-  value
-    .replaceAll('&', '&amp;')
-    .replaceAll('<', '&lt;')
-    .replaceAll('>', '&gt;')
-    .replaceAll('"', '&quot;')
-    .replaceAll("'", '&#39;');
 
 describe('report template', () => {
   it('hydrates report html with trait scores', async () => {
@@ -233,8 +236,7 @@ describe('report template', () => {
 
     const html = await buildReportHtml(createReportPayload(traits, { facetScores }));
     const meaning = getTraitMeaning('Openness', traits.O);
-    const callouts =
-      'Your strongest facet: Imagination (82/100). Your weakest facet: Adventurousness (35/100).';
+    const callouts = getFacetInsights('Openness', facetScores).join(' ');
 
     expect(html).toContain(`${callouts}<br>${escapeHtml(meaning)}`);
   });

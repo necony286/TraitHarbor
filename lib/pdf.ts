@@ -195,7 +195,7 @@ ${sections}
 const buildListItems = (items: string[]) =>
   items.length ? items.map((item) => `        <li>${escapeHtml(item)}</li>`).join('\n') : '';
 
-const buildEscapedListItems = (items: string[]) =>
+const buildListItemsFromPreEscaped = (items: string[]) =>
   items.length ? items.map((item) => `        <li>${item}</li>`).join('\n') : '';
 
 const buildResourceGroups = () =>

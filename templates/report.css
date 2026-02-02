@@ -255,9 +255,6 @@ h2 {
   }
 
   .report__overview,
-  .overview__callout,
-  .trait-grid article,
-  .roadmap__block,
   .resource-group,
   .report__resources {
     break-inside: avoid;

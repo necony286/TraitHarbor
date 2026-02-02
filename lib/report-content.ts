@@ -752,7 +752,7 @@ export const getTraitGuidance = (trait: string, score: number): TraitGuidance =>
   const strengths = getStrengths(traitName, score).map(escapeHtml);
   const watchOuts = getGrowthTips(traitName, score).map(escapeHtml);
   const microAction =
-    TRAIT_MICRO_ACTIONS[traitName as TraitName] ??
+    (TRAIT_MICRO_ACTIONS as Record<string, string>)[traitName] ??
     `Choose one small action today that supports your ${traitName} balance.`;
 
   return {

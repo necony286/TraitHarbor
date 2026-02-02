@@ -236,9 +236,8 @@ describe('report template', () => {
 
     const html = await buildReportHtml(createReportPayload(traits, { facetScores }));
     const meaning = getTraitMeaning('Openness', traits.O);
-    const callouts = getFacetInsights('Openness', facetScores).join(' ');
-
-    expect(html).toContain(`${callouts}<br>${escapeHtml(meaning)}`);
+    const callouts = getFacetInsights('Openness', facetScores);
+    expect(html).toContain(`${callouts.map(escapeHtml).join(' ')}<br>${escapeHtml(meaning)}`);
   });
 
   it('caches template and css file reads across concurrent builds', async () => {

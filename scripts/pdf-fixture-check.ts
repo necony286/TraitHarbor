@@ -26,7 +26,7 @@ const payload: ReportPayload = {
   date: new Date(Date.UTC(2024, 0, 2, 12, 0, 0)),
   traits,
   traitPercentages,
-  traitPercentiles: { ...traitPercentages },
+  traitPercentiles: { ...traitPercentages }, // TODO: Replace with actual percentile data. Mirrored for now to enable percentile-dependent UI sections.
   highestTrait: traitRankOrder[0],
   lowestTrait: traitRankOrder[traitRankOrder.length - 1],
   traitRankOrder

@@ -779,7 +779,7 @@ export const getActionPlanSelections = (
 ): ActionPlanSelection => {
   const normalizedRank = traitRankOrder.map(resolveTraitName);
   const rankIndex = new Map(normalizedRank.map((trait, index) => [trait, index]));
-  const toRankIndex = (trait: string) => rankIndex.get(trait) ?? Number.POSITIVE_INFINITY;
+  const toRankIndex = (trait: TraitName) => rankIndex.get(trait) ?? Number.POSITIVE_INFINITY;
   const scoredTraits = Object.entries(traitPercentages)
     .map(([trait, score]) => ({ trait: resolveTraitName(trait), score }))
     .filter(({ score }) => Number.isFinite(score));

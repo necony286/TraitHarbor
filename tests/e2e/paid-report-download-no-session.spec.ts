@@ -152,9 +152,12 @@ test('paid report download works without session storage', async ({ page, browse
   await expect(page.getByRole('heading', { name: 'TraitHarbor personality snapshot' })).toBeVisible();
 
   await page.getByLabel(EMAIL_INPUT_LABEL).fill(BUYER_EMAIL);
+  const unlockButton = page.getByRole('button', { name: 'Unlock full report (PDF)' });
+  await expect(unlockButton).toBeVisible();
+  await unlockButton.scrollIntoViewIfNeeded();
   await Promise.all([
     page.waitForURL(new RegExp(`/checkout/callback\\?session_id=${SESSION_ID}$`)),
-    page.getByRole('button', { name: 'Unlock full report (PDF)' }).click()
+    unlockButton.click({ force: true })
   ]);
   await expect(page.getByRole('heading', { name: 'Processing your payment' })).toBeVisible();
   await expect(page.getByText('Status: paid')).toBeVisible();

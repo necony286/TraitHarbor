@@ -412,7 +412,7 @@ export const getTraitMeaning = (trait: string, score: number): string => {
   const voice = NARRATIVE_VOICE;
   const band = getScoreBand(score);
   const traitName = resolveTraitLabel(trait);
-  const bandLabel = SCORE_BAND_LABELS[band];
+  const bandLabel = getScoreBandLabelForBand(band);
   const base = `${voice.possessiveAdjective} ${traitName} score is ${bandLabel.toLowerCase()}.`;
 
   switch (band) {
@@ -655,7 +655,10 @@ const SCORE_BAND_LABELS: Record<ScoreBand, ScoreBandLabel> = {
   Low: 'Low'
 };
 
-export const getScoreBandLabel = (score: number): ScoreBandLabel => SCORE_BAND_LABELS[getScoreBand(score)];
+const getScoreBandLabelForBand = (band: ScoreBand): ScoreBandLabel => SCORE_BAND_LABELS[band];
+
+export const getScoreBandLabel = (score: number): ScoreBandLabel =>
+  getScoreBandLabelForBand(getScoreBand(score));
 
 export type FacetSpread = {
   range: number;

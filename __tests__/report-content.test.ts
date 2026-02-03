@@ -88,7 +88,7 @@ describe('getTraitMeaning', () => {
       trait: 'Openness',
       score: 55,
       expected:
-        'Your Openness score is medium. You can flex this trait depending on the situation, balancing it with other strengths.'
+        'Your Openness score is balanced. You can flex this trait depending on the situation, balancing it with other strengths.'
     },
     {
       trait: 'Openness',

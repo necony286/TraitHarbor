@@ -680,12 +680,17 @@ const SPIKY_SPREAD_STDEV_MIN = 18;
 const EVEN_SPREAD_RANGE_MAX = 18;
 const EVEN_SPREAD_STDEV_MAX = 7;
 
-const getFacetSpreadLabel = (
-  range: number,
-  stdev: number,
-  roundedRange: number,
-  roundedStdev: number
-) => {
+const getFacetSpreadLabel = ({
+  range,
+  stdev,
+  roundedRange,
+  roundedStdev
+}: {
+  range: number;
+  stdev: number;
+  roundedRange: number;
+  roundedStdev: number;
+}) => {
   const formatMetrics = () =>
     `Range ${roundedRange}${Number.isFinite(roundedStdev) ? `, stdev ${roundedStdev}` : ''}.`;
   if (range >= SPIKY_SPREAD_RANGE_MIN || stdev >= SPIKY_SPREAD_STDEV_MIN) {
@@ -721,7 +726,7 @@ export const getFacetSpread = (
   const stdev = calculateStandardDeviation(scores);
   const roundedRange = roundTo(range, 0);
   const roundedStdev = roundTo(stdev, 1);
-  const { label, description } = getFacetSpreadLabel(range, stdev, roundedRange, roundedStdev);
+  const { label, description } = getFacetSpreadLabel({ range, stdev, roundedRange, roundedStdev });
 
   return {
     range: roundedRange,

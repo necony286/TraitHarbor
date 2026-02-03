@@ -155,17 +155,17 @@ describe('getFacetSummary', () => {
 describe('getFacetSpread', () => {
   it.each([
     {
-      label: 'Tight spread',
+      label: 'Even',
       scores: { Imagination: 50, Adventurousness: 55, ArtisticInterests: 60 },
       expected: { range: 10, stdev: 4.1 }
     },
     {
-      label: 'Moderate spread',
+      label: 'Mixed',
       scores: { Imagination: 40, Adventurousness: 50, ArtisticInterests: 65 },
       expected: { range: 25, stdev: 10.3 }
     },
     {
-      label: 'Wide spread',
+      label: 'Spiky',
       scores: { Imagination: 30, Adventurousness: 60, ArtisticInterests: 90 },
       expected: { range: 60, stdev: 24.5 }
     }
@@ -175,7 +175,7 @@ describe('getFacetSpread', () => {
     expect(summary?.label).toBe(label);
     expect(summary?.range).toBe(expected.range);
     expect(summary?.stdev).toBe(expected.stdev);
-    expect(summary?.description).toContain(`(Range ${expected.range}, stdev ${expected.stdev}).`);
+    expect(summary?.description).toContain(`(Range ${expected.range}, stdev ${expected.stdev}.)`);
   });
 });
 

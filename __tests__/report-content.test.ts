@@ -60,31 +60,34 @@ describe('getPersonalDevelopmentRoadmap', () => {
 });
 
 describe('getMicroHabitRecommendation', () => {
-  const buildExpectedRecommendation = (topTrait: string, bottomTrait: string) => {
-    const article = /^[aeiou]/i.test(topTrait) ? 'an' : 'a';
-
-    return `You spend 7 days dedicating 10 minutes to ${article} ${topTrait}-aligned action each morning, then end the day by naming one ${bottomTrait}-related moment you handled with care.`;
-  };
+  const recommendationTemplate = (article: 'a' | 'an', topTrait: string, bottomTrait: string) =>
+    `You spend 7 days dedicating 10 minutes to ${article} ${topTrait}-aligned action each morning, then end the day by naming one ${bottomTrait}-related moment you handled with care.`;
 
   it('returns an empty string when no traits are ranked', () => {
     expect(getMicroHabitRecommendation([])).toBe('');
   });
 
-  it('builds a recommendation using the top and bottom traits from a two-item list', () => {
+  it('builds a recommendation for a top trait starting with a vowel', () => {
     expect(getMicroHabitRecommendation(['Openness', 'Conscientiousness'])).toBe(
-      buildExpectedRecommendation('Openness', 'Conscientiousness')
+      recommendationTemplate('an', 'Openness', 'Conscientiousness')
+    );
+  });
+
+  it('builds a recommendation for a top trait starting with a consonant', () => {
+    expect(getMicroHabitRecommendation(['Conscientiousness', 'Openness'])).toBe(
+      recommendationTemplate('a', 'Conscientiousness', 'Openness')
     );
   });
 
   it('builds a recommendation using the same trait when only one is provided', () => {
     expect(getMicroHabitRecommendation(['Openness'])).toBe(
-      buildExpectedRecommendation('Openness', 'Openness')
+      recommendationTemplate('an', 'Openness', 'Openness')
     );
   });
 
   it('builds a recommendation using the first and last traits from a longer list', () => {
     expect(getMicroHabitRecommendation(['Agreeableness', 'Conscientiousness', 'Neuroticism'])).toBe(
-      buildExpectedRecommendation('Agreeableness', 'Neuroticism')
+      recommendationTemplate('an', 'Agreeableness', 'Neuroticism')
     );
   });
 });

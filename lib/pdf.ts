@@ -417,6 +417,10 @@ const buildActionPlanBlocks = (
   const leanIntoGuidance = getTraitGuidance(selections.leanInto, leanIntoScore);
   const supportGuidance = getTraitGuidance(selections.support, supportScore);
   const stressGuidance = getTraitGuidance(selections.stressReset, stressResetScore);
+  const stressResetLabel =
+    selections.stressReset.trim().toLowerCase() === 'neuroticism'
+      ? 'stress-response sensitivity'
+      : selections.stressReset;
 
   const blocks = [
     {
@@ -428,7 +432,7 @@ const buildActionPlanBlocks = (
       items: supportGuidance.watchOuts.slice(0, 2)
     },
     {
-      title: `Stress reset (${selections.stressReset})`,
+      title: `Stress reset (${stressResetLabel})`,
       items: [stressGuidance.microAction]
     }
   ];

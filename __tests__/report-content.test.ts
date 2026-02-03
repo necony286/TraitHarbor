@@ -77,8 +77,8 @@ describe('getMicroHabitRecommendation', () => {
   });
 
   it('builds a recommendation using the first and last traits from a longer list', () => {
-    expect(getMicroHabitRecommendation(['Openness', 'Extraversion', 'Conscientiousness'])).toBe(
-      'You spend 7 days dedicating 10 minutes to an Openness-aligned action each morning, then end the day by naming one Conscientiousness-related moment you handled with care.'
+    expect(getMicroHabitRecommendation(['Openness', 'Conscientiousness', 'Extraversion'])).toBe(
+      'You spend 7 days dedicating 10 minutes to an Openness-aligned action each morning, then end the day by naming one Extraversion-related moment you handled with care.'
     );
   });
 });

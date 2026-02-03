@@ -20,6 +20,14 @@ const getScoreBand = (score: number): ScoreBand => {
   return 'Low';
 };
 
+const SCORE_BAND_LABELS: Record<ScoreBand, ScoreBandLabel> = {
+  High: 'High',
+  Medium: 'Balanced',
+  Low: 'Low'
+};
+
+const getScoreBandLabelForBand = (band: ScoreBand): ScoreBandLabel => SCORE_BAND_LABELS[band];
+
 const normalizeTrait = (trait: string) => trait.trim().toLowerCase();
 const escapeHtml = (value: string) =>
   value
@@ -417,13 +425,19 @@ export const getTraitMeaning = (trait: string, score: number): string => {
 
   switch (band) {
     case 'High':
-      return `${base} This trait shows up often and likely shapes how ${voice.subjectPronoun} think, feel, and act.`;
+      return escapeHtml(
+        `${base} This trait shows up often and likely shapes how ${voice.subjectPronoun} think, feel, and act.`
+      );
     case 'Medium':
-      return `${base} ${voice.subject} can flex this trait depending on the situation, balancing it with other strengths.`;
+      return escapeHtml(
+        `${base} ${voice.subject} can flex this trait depending on the situation, balancing it with other strengths.`
+      );
     case 'Low':
-      return `${base} ${voice.subject} rely on this trait less, leaning on other qualities in most situations.`;
+      return escapeHtml(
+        `${base} ${voice.subject} rely on this trait less, leaning on other qualities in most situations.`
+      );
     default:
-      return base;
+      return escapeHtml(base);
   }
 };
 
@@ -648,14 +662,6 @@ export const getMicroHabitRecommendation = (traitRankOrder: string[]): string =>
 
   return `You spend 7 days dedicating 10 minutes to ${articleFor(topTrait)} ${topTrait}-aligned action each morning, then end the day by naming one ${bottomTrait}-related moment you handled with care.`;
 };
-
-const SCORE_BAND_LABELS: Record<ScoreBand, ScoreBandLabel> = {
-  High: 'High',
-  Medium: 'Balanced',
-  Low: 'Low'
-};
-
-const getScoreBandLabelForBand = (band: ScoreBand): ScoreBandLabel => SCORE_BAND_LABELS[band];
 
 export const getScoreBandLabel = (score: number): ScoreBandLabel =>
   getScoreBandLabelForBand(getScoreBand(score));

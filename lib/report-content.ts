@@ -778,19 +778,26 @@ export const getActionPlanSelections = (
   traitRankOrder: string[]
 ): ActionPlanSelection => {
   const normalizedRank = traitRankOrder.map(resolveTraitName);
+  const rankIndex = new Map(normalizedRank.map((trait, index) => [trait, index]));
+  const toRankIndex = (trait: string) => rankIndex.get(trait) ?? Number.POSITIVE_INFINITY;
+  const scoredTraits = Object.entries(traitPercentages)
+    .map(([trait, score]) => ({ trait: resolveTraitName(trait), score }))
+    .filter(({ score }) => Number.isFinite(score));
+  const leanIntoEligible = new Set(['Openness', 'Conscientiousness', 'Extraversion', 'Agreeableness']);
   const leanIntoRaw =
-    normalizedRank.find((traitName) => normalizeTrait(traitName) !== 'neuroticism') ??
-    normalizedRank[0] ??
-    'Neuroticism';
+    scoredTraits
+      .filter(({ trait }) => leanIntoEligible.has(trait))
+      .sort((a, b) => (b.score - a.score) || (toRankIndex(a.trait) - toRankIndex(b.trait)))[0]
+      ?.trait ??
+    normalizedRank.find((trait) => leanIntoEligible.has(trait)) ??
+    'Openness';
 
   let supportRaw: string;
-  const traitEntries = Object.entries(traitPercentages);
-  if (traitEntries.length) {
-    const traitsByScore = traitEntries
-      .filter(([, value]) => Number.isFinite(value))
-      .sort((a, b) => a[1] - b[1]);
-    const lowestTraitName = traitsByScore[0]?.[0];
-    supportRaw = lowestTraitName ? resolveTraitName(lowestTraitName) : leanIntoRaw;
+  if (scoredTraits.length) {
+    const lowestTraitName = scoredTraits.sort(
+      (a, b) => (a.score - b.score) || (toRankIndex(a.trait) - toRankIndex(b.trait))
+    )[0]?.trait;
+    supportRaw = lowestTraitName ?? leanIntoRaw;
   } else {
     supportRaw = normalizedRank[normalizedRank.length - 1] ?? leanIntoRaw;
   }

@@ -21,6 +21,7 @@ import {
   getFacetSummary,
   getFacetSpread,
   getActionPlanSelections,
+  getMicroHabitRecommendation,
   getPersonalDevelopmentRoadmap,
   getPatternSummary,
   getResourcesMethodologyText,
@@ -460,11 +461,7 @@ const buildMicroHabitHtml = (
   traitPercentages: Record<string, number>,
   traitRankOrder: string[]
 ) => {
-  const roadmap = getPersonalDevelopmentRoadmap(traitPercentages, traitRankOrder);
-  const microHabit = roadmap.find((item) =>
-    item.recommendationType.toLowerCase().includes('micro-habit')
-  );
-  const microHabitText = microHabit?.items?.[0] ?? '';
+  const microHabitText = getMicroHabitRecommendation(traitRankOrder);
   if (!microHabitText) {
     return '<p class="muted">Create a 7-day habit that reinforces your growth focus.</p>';
   }

@@ -617,7 +617,6 @@ export const getPersonalDevelopmentRoadmap = (
   const watchOut = growth[0]
     ? withPrefix(growth[0], 'You watch out for this')
     : `You notice when ${bottomTrait} habits create friction, and pause to reset before reacting.`;
-  const microHabit = `You spend 7 days dedicating 10 minutes to ${articleFor(topTrait)} ${topTrait}-aligned action each morning, then end the day by naming one ${bottomTrait}-related moment you handled with care.`;
 
   return [
     {
@@ -627,12 +626,28 @@ export const getPersonalDevelopmentRoadmap = (
     {
       recommendationType: `Watch out for… ${bottomTrait}`,
       items: [watchOut]
-    },
-    {
-      recommendationType: '1-week micro-habit',
-      items: [microHabit]
     }
   ];
+};
+
+export const getMicroHabitRecommendation = (
+  traitPercentages: Record<string, number>,
+  traitRankOrder: string[]
+): string => {
+  if (!traitRankOrder.length) {
+    return '';
+  }
+
+  const [topTrait] = traitRankOrder;
+  const bottomTrait = traitRankOrder[traitRankOrder.length - 1];
+  const topScore = traitPercentages[topTrait] ?? 0;
+  const bottomScore = traitPercentages[bottomTrait] ?? 0;
+
+  if (!Number.isFinite(topScore) || !Number.isFinite(bottomScore)) {
+    return '';
+  }
+
+  return `You spend 7 days dedicating 10 minutes to ${articleFor(topTrait)} ${topTrait}-aligned action each morning, then end the day by naming one ${bottomTrait}-related moment you handled with care.`;
 };
 
 const SCORE_BAND_LABELS: Record<ScoreBand, ScoreBandLabel> = {

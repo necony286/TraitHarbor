@@ -200,6 +200,29 @@ h2 {
   color: #344054;
 }
 
+.microhabit__card {
+  display: flex;
+  gap: 12px;
+  padding: 12px 16px;
+  border: 1px solid #eaecf0;
+  border-radius: 12px;
+  background: #ffffff;
+}
+
+.microhabit__checkbox {
+  width: 18px;
+  height: 18px;
+  border: 2px solid #98a2b3;
+  border-radius: 4px;
+  margin-top: 2px;
+  flex-shrink: 0;
+}
+
+.microhabit__text p {
+  margin: 0;
+  color: #344054;
+}
+
 .report__resources {
   padding: 16px;
   border-radius: 12px;

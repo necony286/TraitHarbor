@@ -806,7 +806,7 @@ export const getActionPlanSelections = (
 
   let supportRaw: TraitName;
   if (scoredTraits.length) {
-    const lowestTraitName = scoredTraits.sort(
+    const lowestTraitName = [...scoredTraits].sort(
       (a, b) => (a.score - b.score) || (toRankIndex(a.trait) - toRankIndex(b.trait))
     )[0]?.trait;
     supportRaw = lowestTraitName ?? leanIntoRaw;

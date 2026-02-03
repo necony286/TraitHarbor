@@ -53,10 +53,12 @@ const traitKeyMap: Record<string, TraitName> = {
   neuroticism: 'Neuroticism'
 };
 
-const resolveTraitName = (trait: string) => {
+const resolveTraitName = (trait: string): TraitName | undefined => {
   const normalized = normalizeTrait(trait);
-  return traitKeyMap[normalized] ?? trait.trim();
+  return traitKeyMap[normalized];
 };
+
+const resolveTraitLabel = (trait: string): string => resolveTraitName(trait) ?? trait.trim();
 
 export const articleFor = (word: string): 'a' | 'an' => {
   // NOTE: This is a simplified check and may not work for all English words (e.g., 'hour', 'user').
@@ -392,10 +394,10 @@ export const RESOURCES_BY_TRAIT: Record<TraitName, TraitResource[]> = {
 
 const getTraitContent = (trait: string, score: number) => {
   const traitName = resolveTraitName(trait);
-  const content = traitContent[traitName];
-  if (!content) {
+  if (!traitName) {
     return null;
   }
+  const content = traitContent[traitName];
   const band = getScoreBand(score);
   return { band, ...content[band] };
 };
@@ -409,7 +411,7 @@ export const getGrowthTips = (trait: string, score: number): string[] =>
 export const getTraitMeaning = (trait: string, score: number): string => {
   const voice = NARRATIVE_VOICE;
   const band = getScoreBand(score);
-  const traitName = resolveTraitName(trait);
+  const traitName = resolveTraitLabel(trait);
   const base = `${voice.possessiveAdjective} ${traitName} score is ${band.toLowerCase()}.`;
 
   switch (band) {
@@ -469,7 +471,7 @@ export const getFacetSummary = (
     return null;
   }
 
-  const traitName = resolveTraitName(trait);
+  const traitName = resolveTraitLabel(trait);
   const entry = Object.entries(facetScores).find(
     ([groupName]) => normalizeTrait(groupName) === normalizeTrait(traitName)
   );
@@ -753,7 +755,7 @@ const TRAIT_MICRO_ACTIONS: Record<TraitName, string> = {
 };
 
 export const getTraitGuidance = (trait: string, score: number): TraitGuidance => {
-  const traitName = resolveTraitName(trait);
+  const traitName = resolveTraitLabel(trait);
   const strengths = getStrengths(traitName, score).map(escapeHtml);
   const watchOuts = getGrowthTips(traitName, score).map(escapeHtml);
   const microAction =
@@ -777,13 +779,23 @@ export const getActionPlanSelections = (
   traitPercentages: Record<string, number>,
   traitRankOrder: string[]
 ): ActionPlanSelection => {
-  const normalizedRank = traitRankOrder.map(resolveTraitName);
+  const normalizedRank = traitRankOrder
+    .map(resolveTraitName)
+    .filter((trait): trait is TraitName => trait !== undefined);
   const rankIndex = new Map(normalizedRank.map((trait, index) => [trait, index]));
   const toRankIndex = (trait: TraitName) => rankIndex.get(trait) ?? Number.POSITIVE_INFINITY;
   const scoredTraits = Object.entries(traitPercentages)
     .map(([trait, score]) => ({ trait: resolveTraitName(trait), score }))
-    .filter(({ score }) => Number.isFinite(score));
-  const leanIntoEligible = new Set(['Openness', 'Conscientiousness', 'Extraversion', 'Agreeableness']);
+    .filter(
+      (entry): entry is { trait: TraitName; score: number } =>
+        Number.isFinite(entry.score) && entry.trait !== undefined
+    );
+  const leanIntoEligible = new Set<TraitName>([
+    'Openness',
+    'Conscientiousness',
+    'Extraversion',
+    'Agreeableness'
+  ]);
   const leanIntoRaw =
     scoredTraits
       .filter(({ trait }) => leanIntoEligible.has(trait))
@@ -792,14 +804,16 @@ export const getActionPlanSelections = (
     normalizedRank.find((trait) => leanIntoEligible.has(trait)) ??
     'Openness';
 
-  let supportRaw: string;
+  let supportRaw: TraitName;
   if (scoredTraits.length) {
     const lowestTraitName = scoredTraits.sort(
       (a, b) => (a.score - b.score) || (toRankIndex(a.trait) - toRankIndex(b.trait))
     )[0]?.trait;
     supportRaw = lowestTraitName ?? leanIntoRaw;
   } else {
-    supportRaw = normalizedRank[normalizedRank.length - 1] ?? leanIntoRaw;
+    supportRaw = Object.keys(traitPercentages).length
+      ? leanIntoRaw
+      : normalizedRank[normalizedRank.length - 1] ?? leanIntoRaw;
   }
 
   return {

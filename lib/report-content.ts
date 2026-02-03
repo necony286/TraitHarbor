@@ -680,17 +680,19 @@ const SPIKY_SPREAD_STDEV_MIN = 18;
 const EVEN_SPREAD_RANGE_MAX = 18;
 const EVEN_SPREAD_STDEV_MAX = 7;
 
+type FacetSpreadLabelOptions = {
+  range: number;
+  stdev: number;
+  roundedRange: number;
+  roundedStdev: number;
+};
+
 const getFacetSpreadLabel = ({
   range,
   stdev,
   roundedRange,
   roundedStdev
-}: {
-  range: number;
-  stdev: number;
-  roundedRange: number;
-  roundedStdev: number;
-}) => {
+}: FacetSpreadLabelOptions) => {
   const formatMetrics = () =>
     `Range ${roundedRange}${Number.isFinite(roundedStdev) ? `, stdev ${roundedStdev}` : ''}.`;
   if (range >= SPIKY_SPREAD_RANGE_MIN || stdev >= SPIKY_SPREAD_STDEV_MIN) {

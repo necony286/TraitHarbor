@@ -157,7 +157,7 @@ test('paid report download works without session storage', async ({ page, browse
   await unlockButton.scrollIntoViewIfNeeded();
   await Promise.all([
     page.waitForURL(new RegExp(`/checkout/callback\\?session_id=${SESSION_ID}$`)),
-    unlockButton.click({ force: true })
+    unlockButton.click()
   ]);
   await expect(page.getByRole('heading', { name: 'Processing your payment' })).toBeVisible();
   await expect(page.getByText('Status: paid')).toBeVisible();

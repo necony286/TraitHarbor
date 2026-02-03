@@ -482,9 +482,15 @@ export const getFacetSummary = (
 
   const [, scores] = entry;
   const facets = Object.entries(scores)
-    .filter(([, value]) => Number.isFinite(value))
-    .map(([facetName, score]) => ({ facetName: formatFacetLabel(facetName), score: Math.round(score) }))
-    .sort((a, b) => b.score - a.score);
+    .map(([facetName, score], index) => ({ facetName, score, index }))
+    .filter((facet) => Number.isFinite(facet.score))
+    .map(({ facetName, score, index }) => ({
+      facetName: formatFacetLabel(facetName),
+      score: Math.round(score),
+      index
+    }))
+    .sort((a, b) => b.score - a.score || a.index - b.index)
+    .map(({ index, ...facet }) => facet);
 
   if (!facets.length) {
     return null;
@@ -668,27 +674,25 @@ const calculateStandardDeviation = (values: number[]) => {
   return Math.sqrt(variance);
 };
 
-const TIGHT_SPREAD_RANGE_MAX = 15;
-const TIGHT_SPREAD_STDEV_MAX = 6;
-const MODERATE_SPREAD_RANGE_MAX = 30;
-const MODERATE_SPREAD_STDEV_MAX = 12;
-
 const getFacetSpreadLabel = (range: number, stdev: number) => {
-  if (range <= TIGHT_SPREAD_RANGE_MAX && stdev <= TIGHT_SPREAD_STDEV_MAX) {
+  const roundedRange = roundTo(range, 0);
+  const roundedStdev = roundTo(stdev, 1);
+  const formatMetrics = () => `Range ${roundedRange}${Number.isFinite(roundedStdev) ? `, stdev ${roundedStdev}` : ''}.`;
+  if (range >= 45 || stdev >= 18) {
     return {
-      label: 'Tight spread',
-      description: 'Facet scores cluster closely, suggesting a consistent expression of this trait.'
+      label: 'Spiky',
+      description: `Spiky spread: facet scores swing sharply across this trait, highlighting pronounced highs and lows. (${formatMetrics()})`
     };
   }
-  if (range <= MODERATE_SPREAD_RANGE_MAX && stdev <= MODERATE_SPREAD_STDEV_MAX) {
+  if (range <= 18 && stdev <= 7) {
     return {
-      label: 'Moderate spread',
-      description: 'Facet scores show some variation, blending consistent and situational expressions.'
+      label: 'Even',
+      description: `Even spread: facet scores sit close together, suggesting a steady expression of this trait. (${formatMetrics()})`
     };
   }
   return {
-    label: 'Wide spread',
-    description: 'Facet scores vary widely, highlighting distinct strengths and growth areas within this trait.'
+    label: 'Mixed',
+    description: `Mixed spread: facet scores show a blend of steadier areas and sharper contrasts within this trait. (${formatMetrics()})`
   };
 };
 
@@ -708,13 +712,12 @@ export const getFacetSpread = (
   const { label, description } = getFacetSpreadLabel(range, stdev);
   const roundedRange = roundTo(range, 0);
   const roundedStdev = roundTo(stdev, 1);
-  const detailedDescription = `${description} (Range ${roundedRange}, stdev ${roundedStdev}).`;
 
   return {
     range: roundedRange,
     stdev: roundedStdev,
     label: escapeHtml(label),
-    description: escapeHtml(detailedDescription)
+    description: escapeHtml(description)
   };
 };
 

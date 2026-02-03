@@ -60,20 +60,18 @@ describe('getPersonalDevelopmentRoadmap', () => {
 });
 
 describe('getMicroHabitRecommendation', () => {
-  const recommendationTemplate = (article: 'a' | 'an', topTrait: string, bottomTrait: string) =>
-    `You spend 7 days dedicating 10 minutes to ${article} ${topTrait}-aligned action each morning, then end the day by naming one ${bottomTrait}-related moment you handled with care.`;
-
   it('returns an empty string when no traits are ranked', () => {
     expect(getMicroHabitRecommendation([])).toBe('');
   });
 
   it.each`
-    name                                                                            | rankedTraits                                              | expected
-    ${'builds a recommendation for a top trait starting with a vowel'}              | ${['Openness', 'Conscientiousness']}                      | ${recommendationTemplate('an', 'Openness', 'Conscientiousness')}
-    ${'builds a recommendation for a top trait starting with a consonant'}          | ${['Conscientiousness', 'Openness']}                      | ${recommendationTemplate('a', 'Conscientiousness', 'Openness')}
-    ${'builds a recommendation using the same trait when only one is provided'}     | ${['Openness']}                                           | ${recommendationTemplate('an', 'Openness', 'Openness')}
-    ${'builds a recommendation using the first and last traits from a longer list'} | ${['Agreeableness', 'Conscientiousness', 'Neuroticism']}   | ${recommendationTemplate('an', 'Agreeableness', 'Neuroticism')}
-  `('$name', ({ rankedTraits, expected }) => {
+    name                                                                            | rankedTraits                                              | article | topTrait             | bottomTrait
+    ${'builds a recommendation for a top trait starting with a vowel'}              | ${['Openness', 'Conscientiousness']}                      | ${'an'} | ${'Openness'}        | ${'Conscientiousness'}
+    ${'builds a recommendation for a top trait starting with a consonant'}          | ${['Conscientiousness', 'Openness']}                      | ${'a'}  | ${'Conscientiousness'} | ${'Openness'}
+    ${'builds a recommendation using the same trait when only one is provided'}     | ${['Openness']}                                           | ${'an'} | ${'Openness'}        | ${'Openness'}
+    ${'builds a recommendation using the first and last traits from a longer list'} | ${['Agreeableness', 'Conscientiousness', 'Neuroticism']}   | ${'an'} | ${'Agreeableness'}   | ${'Neuroticism'}
+  `('$name', ({ rankedTraits, article, topTrait, bottomTrait }) => {
+    const expected = `You spend 7 days dedicating 10 minutes to ${article} ${topTrait}-aligned action each morning, then end the day by naming one ${bottomTrait}-related moment you handled with care.`;
     expect(getMicroHabitRecommendation(rankedTraits)).toBe(expected);
   });
 });

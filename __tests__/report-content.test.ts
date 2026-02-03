@@ -67,28 +67,29 @@ describe('getMicroHabitRecommendation', () => {
     expect(getMicroHabitRecommendation([])).toBe('');
   });
 
-  it('builds a recommendation for a top trait starting with a vowel', () => {
-    expect(getMicroHabitRecommendation(['Openness', 'Conscientiousness'])).toBe(
-      recommendationTemplate('an', 'Openness', 'Conscientiousness')
-    );
-  });
-
-  it('builds a recommendation for a top trait starting with a consonant', () => {
-    expect(getMicroHabitRecommendation(['Conscientiousness', 'Openness'])).toBe(
-      recommendationTemplate('a', 'Conscientiousness', 'Openness')
-    );
-  });
-
-  it('builds a recommendation using the same trait when only one is provided', () => {
-    expect(getMicroHabitRecommendation(['Openness'])).toBe(
-      recommendationTemplate('an', 'Openness', 'Openness')
-    );
-  });
-
-  it('builds a recommendation using the first and last traits from a longer list', () => {
-    expect(getMicroHabitRecommendation(['Agreeableness', 'Conscientiousness', 'Neuroticism'])).toBe(
-      recommendationTemplate('an', 'Agreeableness', 'Neuroticism')
-    );
+  it.each([
+    {
+      name: 'builds a recommendation for a top trait starting with a vowel',
+      rankedTraits: ['Openness', 'Conscientiousness'],
+      expected: recommendationTemplate('an', 'Openness', 'Conscientiousness')
+    },
+    {
+      name: 'builds a recommendation for a top trait starting with a consonant',
+      rankedTraits: ['Conscientiousness', 'Openness'],
+      expected: recommendationTemplate('a', 'Conscientiousness', 'Openness')
+    },
+    {
+      name: 'builds a recommendation using the same trait when only one is provided',
+      rankedTraits: ['Openness'],
+      expected: recommendationTemplate('an', 'Openness', 'Openness')
+    },
+    {
+      name: 'builds a recommendation using the first and last traits from a longer list',
+      rankedTraits: ['Agreeableness', 'Conscientiousness', 'Neuroticism'],
+      expected: recommendationTemplate('an', 'Agreeableness', 'Neuroticism')
+    }
+  ])('$name', ({ rankedTraits, expected }) => {
+    expect(getMicroHabitRecommendation(rankedTraits)).toBe(expected);
   });
 });
 

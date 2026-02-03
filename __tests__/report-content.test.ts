@@ -64,9 +64,21 @@ describe('getMicroHabitRecommendation', () => {
     expect(getMicroHabitRecommendation([])).toBe('');
   });
 
-  it('builds a recommendation using the top and bottom traits', () => {
+  it('builds a recommendation using the top and bottom traits from a two-item list', () => {
     expect(getMicroHabitRecommendation(['Openness', 'Conscientiousness'])).toBe(
       'You spend 7 days dedicating 10 minutes to an Openness-aligned action each morning, then end the day by naming one Conscientiousness-related moment you handled with care.'
+    );
+  });
+
+  it('builds a recommendation using the same trait when only one is provided', () => {
+    expect(getMicroHabitRecommendation(['Openness'])).toBe(
+      'You spend 7 days dedicating 10 minutes to an Openness-aligned action each morning, then end the day by naming one Openness-related moment you handled with care.'
+    );
+  });
+
+  it('builds a recommendation using the first and last traits from a longer list', () => {
+    expect(getMicroHabitRecommendation(['Openness', 'Conscientiousness', 'Extraversion'])).toBe(
+      'You spend 7 days dedicating 10 minutes to an Openness-aligned action each morning, then end the day by naming one Extraversion-related moment you handled with care.'
     );
   });
 });

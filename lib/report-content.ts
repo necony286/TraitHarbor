@@ -813,8 +813,8 @@ export const getActionPlanSelections = (
   } else {
     // If scores exist but none are finite, fall back to the lean-into choice.
     // Otherwise, if no percentages are provided, use the last ranked trait.
-    const hasOnlyNonFiniteScores = Object.keys(traitPercentages).length > 0;
-    supportRaw = hasOnlyNonFiniteScores
+    const hasProvidedPercentages = Object.keys(traitPercentages).length > 0;
+    supportRaw = hasProvidedPercentages
       ? leanIntoRaw
       : normalizedRank[normalizedRank.length - 1] ?? leanIntoRaw;
   }

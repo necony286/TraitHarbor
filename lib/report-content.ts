@@ -482,13 +482,14 @@ export const getFacetSummary = (
 
   const [, scores] = entry;
   const facets = Object.entries(scores)
-    .map(([facetName, score], index) => ({ facetName, score, index }))
-    .filter((facet) => Number.isFinite(facet.score))
-    .map(({ facetName, score, index }) => ({
-      facetName: formatFacetLabel(facetName),
-      score: Math.round(score),
-      index
-    }))
+    .flatMap(([facetName, score], index) => {
+      if (!Number.isFinite(score)) return [];
+      return [{
+        facetName: formatFacetLabel(facetName),
+        score: Math.round(score),
+        index
+      }];
+    })
     .sort((a, b) => b.score - a.score || a.index - b.index)
     .map(({ index, ...facet }) => facet);
 

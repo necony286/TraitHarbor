@@ -412,7 +412,7 @@ export const getTraitMeaning = (trait: string, score: number): string => {
   const voice = NARRATIVE_VOICE;
   const band = getScoreBand(score);
   const traitName = resolveTraitLabel(trait);
-  const bandLabel = getScoreBandLabel(score);
+  const bandLabel = SCORE_BAND_LABELS[band];
   const base = `${voice.possessiveAdjective} ${traitName} score is ${bandLabel.toLowerCase()}.`;
 
   switch (band) {

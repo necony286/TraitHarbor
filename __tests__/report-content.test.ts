@@ -5,6 +5,7 @@ import {
   getFacetSummary,
   getFacetSpread,
   getActionPlanSelections,
+  getMicroHabitRecommendation,
   getPersonalDevelopmentRoadmap,
   getTraitMeaning,
   withPrefix
@@ -52,6 +53,21 @@ describe('getPersonalDevelopmentRoadmap', () => {
 
     expect(result[0]?.items[0]).toBe('You absorb new ideas quickly and enjoy exploring novel perspectives.');
     expect(result[1]?.items[0]).toBe("You stay alert to risks so issues don't go unnoticed.");
+    expect(result.flatMap((block) => block.items).join(' ')).not.toContain(
+      'You spend 7 days dedicating 10 minutes'
+    );
+  });
+});
+
+describe('getMicroHabitRecommendation', () => {
+  it('returns an empty string when no traits are ranked', () => {
+    expect(getMicroHabitRecommendation([])).toBe('');
+  });
+
+  it('builds a recommendation using the top and bottom traits', () => {
+    expect(getMicroHabitRecommendation(['Openness', 'Conscientiousness'])).toBe(
+      'You spend 7 days dedicating 10 minutes to an Openness-aligned action each morning, then end the day by naming one Conscientiousness-related moment you handled with care.'
+    );
   });
 });
 

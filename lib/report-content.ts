@@ -811,7 +811,10 @@ export const getActionPlanSelections = (
     )[0]?.trait;
     supportRaw = lowestTraitName ?? leanIntoRaw;
   } else {
-    supportRaw = Object.keys(traitPercentages).length
+    // If scores exist but none are finite, fall back to the lean-into choice.
+    // Otherwise, if no percentages are provided, use the last ranked trait.
+    const hasProvidedPercentages = Object.keys(traitPercentages).length > 0;
+    supportRaw = hasProvidedPercentages
       ? leanIntoRaw
       : normalizedRank[normalizedRank.length - 1] ?? leanIntoRaw;
   }

@@ -675,17 +675,26 @@ const calculateStandardDeviation = (values: number[]) => {
   return Math.sqrt(variance);
 };
 
-const getFacetSpreadLabel = (range: number, stdev: number) => {
-  const roundedRange = roundTo(range, 0);
-  const roundedStdev = roundTo(stdev, 1);
-  const formatMetrics = () => `Range ${roundedRange}${Number.isFinite(roundedStdev) ? `, stdev ${roundedStdev}` : ''}.`;
-  if (range >= 45 || stdev >= 18) {
+const SPIKY_SPREAD_RANGE_MIN = 45;
+const SPIKY_SPREAD_STDEV_MIN = 18;
+const EVEN_SPREAD_RANGE_MAX = 18;
+const EVEN_SPREAD_STDEV_MAX = 7;
+
+const getFacetSpreadLabel = (
+  range: number,
+  stdev: number,
+  roundedRange: number,
+  roundedStdev: number
+) => {
+  const formatMetrics = () =>
+    `Range ${roundedRange}${Number.isFinite(roundedStdev) ? `, stdev ${roundedStdev}` : ''}.`;
+  if (range >= SPIKY_SPREAD_RANGE_MIN || stdev >= SPIKY_SPREAD_STDEV_MIN) {
     return {
       label: 'Spiky',
       description: `Spiky spread: facet scores swing sharply across this trait, highlighting pronounced highs and lows. (${formatMetrics()})`
     };
   }
-  if (range <= 18 && stdev <= 7) {
+  if (range <= EVEN_SPREAD_RANGE_MAX && stdev <= EVEN_SPREAD_STDEV_MAX) {
     return {
       label: 'Even',
       description: `Even spread: facet scores sit close together, suggesting a steady expression of this trait. (${formatMetrics()})`
@@ -710,9 +719,9 @@ export const getFacetSpread = (
   const max = Math.max(...scores);
   const range = max - min;
   const stdev = calculateStandardDeviation(scores);
-  const { label, description } = getFacetSpreadLabel(range, stdev);
   const roundedRange = roundTo(range, 0);
   const roundedStdev = roundTo(stdev, 1);
+  const { label, description } = getFacetSpreadLabel(range, stdev, roundedRange, roundedStdev);
 
   return {
     range: roundedRange,

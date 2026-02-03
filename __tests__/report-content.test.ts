@@ -67,28 +67,13 @@ describe('getMicroHabitRecommendation', () => {
     expect(getMicroHabitRecommendation([])).toBe('');
   });
 
-  it.each([
-    {
-      name: 'builds a recommendation for a top trait starting with a vowel',
-      rankedTraits: ['Openness', 'Conscientiousness'],
-      expected: recommendationTemplate('an', 'Openness', 'Conscientiousness')
-    },
-    {
-      name: 'builds a recommendation for a top trait starting with a consonant',
-      rankedTraits: ['Conscientiousness', 'Openness'],
-      expected: recommendationTemplate('a', 'Conscientiousness', 'Openness')
-    },
-    {
-      name: 'builds a recommendation using the same trait when only one is provided',
-      rankedTraits: ['Openness'],
-      expected: recommendationTemplate('an', 'Openness', 'Openness')
-    },
-    {
-      name: 'builds a recommendation using the first and last traits from a longer list',
-      rankedTraits: ['Agreeableness', 'Conscientiousness', 'Neuroticism'],
-      expected: recommendationTemplate('an', 'Agreeableness', 'Neuroticism')
-    }
-  ])('$name', ({ rankedTraits, expected }) => {
+  it.each`
+    name                                                                            | rankedTraits                                              | expected
+    ${'builds a recommendation for a top trait starting with a vowel'}              | ${['Openness', 'Conscientiousness']}                      | ${recommendationTemplate('an', 'Openness', 'Conscientiousness')}
+    ${'builds a recommendation for a top trait starting with a consonant'}          | ${['Conscientiousness', 'Openness']}                      | ${recommendationTemplate('a', 'Conscientiousness', 'Openness')}
+    ${'builds a recommendation using the same trait when only one is provided'}     | ${['Openness']}                                           | ${recommendationTemplate('an', 'Openness', 'Openness')}
+    ${'builds a recommendation using the first and last traits from a longer list'} | ${['Agreeableness', 'Conscientiousness', 'Neuroticism']}   | ${recommendationTemplate('an', 'Agreeableness', 'Neuroticism')}
+  `('$name', ({ rankedTraits, expected }) => {
     expect(getMicroHabitRecommendation(rankedTraits)).toBe(expected);
   });
 });

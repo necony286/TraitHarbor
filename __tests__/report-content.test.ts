@@ -60,25 +60,31 @@ describe('getPersonalDevelopmentRoadmap', () => {
 });
 
 describe('getMicroHabitRecommendation', () => {
+  const buildExpectedRecommendation = (topTrait: string, bottomTrait: string) => {
+    const article = /^[aeiou]/i.test(topTrait) ? 'an' : 'a';
+
+    return `You spend 7 days dedicating 10 minutes to ${article} ${topTrait}-aligned action each morning, then end the day by naming one ${bottomTrait}-related moment you handled with care.`;
+  };
+
   it('returns an empty string when no traits are ranked', () => {
     expect(getMicroHabitRecommendation([])).toBe('');
   });
 
   it('builds a recommendation using the top and bottom traits from a two-item list', () => {
     expect(getMicroHabitRecommendation(['Openness', 'Conscientiousness'])).toBe(
-      'You spend 7 days dedicating 10 minutes to an Openness-aligned action each morning, then end the day by naming one Conscientiousness-related moment you handled with care.'
+      buildExpectedRecommendation('Openness', 'Conscientiousness')
     );
   });
 
   it('builds a recommendation using the same trait when only one is provided', () => {
     expect(getMicroHabitRecommendation(['Openness'])).toBe(
-      'You spend 7 days dedicating 10 minutes to an Openness-aligned action each morning, then end the day by naming one Openness-related moment you handled with care.'
+      buildExpectedRecommendation('Openness', 'Openness')
     );
   });
 
   it('builds a recommendation using the first and last traits from a longer list', () => {
-    expect(getMicroHabitRecommendation(['Openness', 'Conscientiousness', 'Extraversion'])).toBe(
-      'You spend 7 days dedicating 10 minutes to an Openness-aligned action each morning, then end the day by naming one Extraversion-related moment you handled with care.'
+    expect(getMicroHabitRecommendation(['Agreeableness', 'Conscientiousness', 'Neuroticism'])).toBe(
+      buildExpectedRecommendation('Agreeableness', 'Neuroticism')
     );
   });
 });

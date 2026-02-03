@@ -457,10 +457,7 @@ ${listItems}
     .join('\n');
 };
 
-const buildMicroHabitHtml = (
-  traitPercentages: Record<string, number>,
-  traitRankOrder: string[]
-) => {
+const buildMicroHabitHtml = (traitRankOrder: string[]) => {
   const microHabitText = getMicroHabitRecommendation(traitRankOrder);
   if (!microHabitText) {
     return '<p class="muted">Create a 7-day habit that reinforces your growth focus.</p>';
@@ -743,7 +740,7 @@ export async function buildReportHtml(payload: ReportPayload) {
   const guardrailsHtml = buildGuardrailsHtml();
   const patternSummaryHtml = buildPatternSummaryHtml(patternSummary);
   const actionPlanBlocks = buildActionPlanBlocks(clampedTraitPercentages, traitRankOrder);
-  const microHabitHtml = buildMicroHabitHtml(clampedTraitPercentages, traitRankOrder);
+  const microHabitHtml = buildMicroHabitHtml(traitRankOrder);
   const resourcesMethodologyHtml = buildResourcesMethodologyHtml(
     resourcesMethodology,
     resourcesByTrait

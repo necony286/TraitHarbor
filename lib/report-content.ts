@@ -630,22 +630,13 @@ export const getPersonalDevelopmentRoadmap = (
   ];
 };
 
-export const getMicroHabitRecommendation = (
-  traitPercentages: Record<string, number>,
-  traitRankOrder: string[]
-): string => {
+export const getMicroHabitRecommendation = (traitRankOrder: string[]): string => {
   if (!traitRankOrder.length) {
     return '';
   }
 
   const [topTrait] = traitRankOrder;
   const bottomTrait = traitRankOrder[traitRankOrder.length - 1];
-  const topScore = traitPercentages[topTrait] ?? 0;
-  const bottomScore = traitPercentages[bottomTrait] ?? 0;
-
-  if (!Number.isFinite(topScore) || !Number.isFinite(bottomScore)) {
-    return '';
-  }
 
   return `You spend 7 days dedicating 10 minutes to ${articleFor(topTrait)} ${topTrait}-aligned action each morning, then end the day by naming one ${bottomTrait}-related moment you handled with care.`;
 };

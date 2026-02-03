@@ -159,7 +159,7 @@ test('paid report download works without session storage', async ({ page, browse
   await expect(page.getByRole('heading', { name: 'Processing your payment' })).toBeVisible();
   await expect(page.getByText('Status: paid')).toBeVisible();
 
-  const accessLinkButton = page.locator('button', { hasText: 'Email me my access link' });
+  const accessLinkButton = page.getByRole('button', { name: 'Email me my access link' });
   await expect(accessLinkButton).toBeVisible();
   await accessLinkButton.click();
   await expect(page.getByText('We just emailed a secure access link. Check your inbox shortly.')).toBeVisible();

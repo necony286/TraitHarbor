@@ -461,7 +461,7 @@ const buildMicroHabitHtml = (
   traitPercentages: Record<string, number>,
   traitRankOrder: string[]
 ) => {
-  const microHabitText = getMicroHabitRecommendation(traitPercentages, traitRankOrder);
+  const microHabitText = getMicroHabitRecommendation(traitRankOrder);
   if (!microHabitText) {
     return '<p class="muted">Create a 7-day habit that reinforces your growth focus.</p>';
   }

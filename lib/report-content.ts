@@ -83,11 +83,11 @@ const NARRATIVE_VOICE: NarrativeVoice = {
   possessiveName: 'Your'
 };
 
-const TRAIT_MEANING_SUFFIXES: Record<ScoreBand, string> = {
+const TRAIT_MEANING_SUFFIXES = {
   High: ` This trait shows up often and likely shapes how ${NARRATIVE_VOICE.subjectPronoun} think, feel, and act.`,
   Medium: ` ${NARRATIVE_VOICE.subject} can flex this trait depending on the situation, balancing it with other strengths.`,
   Low: ` ${NARRATIVE_VOICE.subject} rely on this trait less, leaning on other qualities in most situations.`
-};
+} as const;
 
 export const withPrefix = (message: string, fallback: string) =>
   /^(you|your)\b(?![-.]\w)/i.test(message) ? message : `${fallback}: ${message}`;

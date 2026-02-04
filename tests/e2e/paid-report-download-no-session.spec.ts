@@ -186,9 +186,10 @@ test('paid report download works without session storage', async ({ page, browse
   ]);
   await context2.route('**/report-access?token=*', (route) =>
     route.fulfill({
-      status: 200,
-      contentType: 'text/html',
-      body: `<html><head><meta http-equiv="refresh" content="0;url=/my-reports" /></head><body></body></html>`
+      status: 302,
+      headers: {
+        Location: '/my-reports'
+      }
     })
   );
 
@@ -232,6 +233,7 @@ test('paid report download works without session storage', async ({ page, browse
   const page2 = await context2.newPage();
   const myReportsResponsePromise = page2.waitForResponse((response) => response.url().includes('/api/my-reports'));
   await page2.goto(reportAccessUrl, { waitUntil: 'domcontentloaded' });
+  await page2.waitForURL('**/my-reports');
   await myReportsResponsePromise;
 
   await expect(page2.getByRole('heading', { name: 'Your paid TraitHarbor reports' })).toBeVisible();

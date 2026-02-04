@@ -397,6 +397,24 @@ const buildSnapshotShape = ({
       </div>`;
 };
 
+const buildProfileShape = (
+  traitScores: Record<typeof traitSectionOrder[number]['scoreKey'], number>
+) => {
+  const scores = Object.values(traitScores);
+  const minScore = Math.min(...scores);
+  const maxScore = Math.max(...scores);
+  const spread = maxScore - minScore;
+
+  let label = 'Mixed';
+  if (spread <= 15) {
+    label = 'Balanced';
+  } else if (spread >= 28) {
+    label = 'Peaky';
+  }
+
+  return `<p class="overview__profile-shape"><strong>Profile shape:</strong> ${label}</p>`;
+};
+
 const buildGuardrailsHtml = () => `      <ul>
         <li>Scores reflect tendencies, not fixed labels or limitations.</li>
         <li>Traits live on a spectrum—context and goals can shift how they show up.</li>
@@ -726,6 +744,7 @@ export async function buildReportHtml(payload: ReportPayload) {
   const highestLowestCallout = allScoresEqual
     ? ''
     : buildHighestLowestCallout({ highestTraits, lowestTraits, isBalanced });
+  const profileShape = buildProfileShape(scores);
   const facetCallout = buildFacetCallout(
     highestTrait,
     highestTraitScore,
@@ -759,6 +778,7 @@ export async function buildReportHtml(payload: ReportPayload) {
     .replace('{{styles}}', styles)
     .replace('{{trait_sections}}', buildTraitSections(scores, clampedTraitPercentages, payload.facetScores))
     .replace('{{overview_chart}}', overviewChart)
+    .replace('{{profile_shape}}', profileShape)
     .replace('{{snapshot_shape}}', snapshotShape)
     .replace('{{highest_lowest_callout}}', highestLowestCallout)
     .replace('{{facet_callout}}', facetCallout)

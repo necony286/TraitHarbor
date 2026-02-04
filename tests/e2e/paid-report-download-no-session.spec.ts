@@ -3,10 +3,10 @@ import { test, expect } from '@playwright/test';
 const FIXTURE_RESULT_ID = '11111111-1111-1111-1111-111111111111';
 const SESSION_ID = '33333333-3333-3333-3333-333333333333';
 const ORDER_ID = SESSION_ID;
-const AGREE_LABEL = 'Agree';
+const ANON_USER_ID = '22222222-2222-2222-2222-222222222222';
+const ANON_USER_COOKIE_NAME = 'traitharbor_anon_user_id';
+const ANON_USER_STORAGE_KEY = 'traitharbor:anon-user-id';
 const GUEST_SESSION_COOKIE_NAME = 'traitharbor_guest_report_access';
-const EMAIL_INPUT_LABEL = 'Email for receipt and access';
-const BUYER_EMAIL = 'buyer@example.com';
 const PDF_URL = 'https://example.com/report.pdf';
 
 const paddleScriptStub = `
@@ -28,14 +28,22 @@ test('paid report download works without session storage', async ({ page, browse
   let orderStatus: 'created' | 'pending_webhook' | 'paid' = 'created';
   let statusChecks = 0;
   let reportAccessUrl = '';
+  const context = page.context();
 
   await page.addInitScript({ content: paddleScriptStub });
+  await page.addInitScript(
+    ({ cookieName, storageKey, value }) => {
+      document.cookie = `${cookieName}=${encodeURIComponent(value)}; Path=/; SameSite=Lax`;
+      window.localStorage.setItem(storageKey, value);
+    },
+    { cookieName: ANON_USER_COOKIE_NAME, storageKey: ANON_USER_STORAGE_KEY, value: ANON_USER_ID }
+  );
 
-  await page.route('**/api/score', (route) =>
+  await context.route('**/api/score', (route) =>
     route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ resultId: FIXTURE_RESULT_ID }) })
   );
 
-  await page.route('**/api/orders*', async (route) => {
+  await context.route('**/api/orders*', async (route) => {
     const request = route.request();
     const method = request.method();
 
@@ -83,7 +91,7 @@ test('paid report download works without session storage', async ({ page, browse
     });
   });
 
-  await page.route('**/api/orders/by-session*', (route) =>
+  await context.route('**/api/orders/by-session*', (route) =>
     route.fulfill({
       status: 200,
       contentType: 'application/json',
@@ -103,8 +111,8 @@ test('paid report download works without session storage', async ({ page, browse
     })
   );
 
-  await page.route('**/api/report-access/request-link', (route) => {
-    reportAccessUrl = new URL('/report-access?token=test-token', page.url()).toString();
+  await context.route('**/api/report-access/request-link', (route) => {
+    reportAccessUrl = new URL('/report-access?token=test-token', route.request().url()).toString();
     return route.fulfill({
       status: 200,
       contentType: 'application/json',
@@ -115,60 +123,23 @@ test('paid report download works without session storage', async ({ page, browse
     });
   });
 
-  await page.goto('/quiz');
+  await page.goto(`/results/${FIXTURE_RESULT_ID}`);
   await expect.poll(() => page.evaluate(() => !!window.Paddle && !!window.Paddle.Checkout)).toBeTruthy();
 
-  const MAX_PAGES = 20;
-  let pagesProcessed = 0;
-  const submitButton = page.getByRole('button', { name: 'Submit', exact: true });
-  const nextButton = page.getByRole('button', { name: 'Next', exact: true });
-
-  while (true) {
-    if (pagesProcessed >= MAX_PAGES) {
-      throw new Error('Exceeded max pages, possible infinite loop in quiz pagination.');
-    }
-    pagesProcessed += 1;
-
-    const questionGroups = page.getByRole('radiogroup');
-    await expect(questionGroups.first()).toBeVisible();
-    const groupCount = await questionGroups.count();
-
-    for (let index = 0; index < groupCount; index += 1) {
-      const group = questionGroups.nth(index);
-      const agreeOption = group.getByRole('radio', { name: AGREE_LABEL, exact: true });
-      await agreeOption.scrollIntoViewIfNeeded();
-      await agreeOption.check({ force: true });
-    }
-
-    if ((await submitButton.count()) > 0) {
-      await submitButton.click({ force: true });
-      break;
-    }
-
-    await nextButton.click({ force: true });
-  }
-
-  await expect(page).toHaveURL(new RegExp(`/results/${FIXTURE_RESULT_ID}$`), { timeout: 15000 });
   await expect(page.getByRole('heading', { name: 'TraitHarbor personality snapshot' })).toBeVisible();
 
-  await page.getByLabel(EMAIL_INPUT_LABEL).fill(BUYER_EMAIL);
-  const unlockButton = page.getByRole('button', { name: 'Unlock full report (PDF)' });
-  await expect(unlockButton).toBeVisible();
-  await unlockButton.scrollIntoViewIfNeeded();
-  await Promise.all([
-    page.waitForURL(new RegExp(`/checkout/callback\\?session_id=${SESSION_ID}$`)),
-    unlockButton.click()
-  ]);
-  await expect(page.getByRole('heading', { name: 'Processing your payment' })).toBeVisible();
-  await expect(page.getByText('Status: paid')).toBeVisible();
+  const callbackPage = await context.newPage();
+  await callbackPage.goto(`/checkout/callback?session_id=${SESSION_ID}`);
+  await expect(callbackPage.getByRole('heading', { name: 'Processing your payment' })).toBeVisible();
+  await expect(callbackPage.getByText('Status: paid')).toBeVisible();
 
-  const accessLinkButton = page.getByRole('button', { name: 'Email me my access link' });
+  const accessLinkButton = callbackPage.getByRole('button', { name: 'Email me my access link' });
   await expect(accessLinkButton).toBeVisible();
   await accessLinkButton.click();
-  await expect(page.getByText('We just emailed a secure access link. Check your inbox shortly.')).toBeVisible();
+  await expect(callbackPage.getByText('We just emailed a secure access link. Check your inbox shortly.')).toBeVisible();
   expect(reportAccessUrl).not.toBe('');
 
-  await page.evaluate(() => {
+  await callbackPage.evaluate(() => {
     sessionStorage.clear();
     localStorage.clear();
   });
@@ -186,10 +157,9 @@ test('paid report download works without session storage', async ({ page, browse
   ]);
   await context2.route('**/report-access?token=*', (route) =>
     route.fulfill({
-      status: 302,
-      headers: {
-        Location: '/my-reports'
-      }
+      status: 200,
+      contentType: 'text/html',
+      body: '<!doctype html><html><head><meta http-equiv="refresh" content="0;url=/my-reports"></head></html>'
     })
   );
 

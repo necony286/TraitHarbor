@@ -423,22 +423,21 @@ export const getTraitMeaning = (trait: string, score: number): string => {
   const bandLabel = getScoreBandLabelForBand(band);
   const base = `${voice.possessiveAdjective} ${traitName} score is ${bandLabel.toLowerCase()}.`;
 
+  let suffix = '';
   switch (band) {
     case 'High':
-      return escapeHtml(
-        `${base} This trait shows up often and likely shapes how ${voice.subjectPronoun} think, feel, and act.`
-      );
+      suffix = ` This trait shows up often and likely shapes how ${voice.subjectPronoun} think, feel, and act.`;
+      break;
     case 'Medium':
-      return escapeHtml(
-        `${base} ${voice.subject} can flex this trait depending on the situation, balancing it with other strengths.`
-      );
+      suffix = ` ${voice.subject} can flex this trait depending on the situation, balancing it with other strengths.`;
+      break;
     case 'Low':
-      return escapeHtml(
-        `${base} ${voice.subject} rely on this trait less, leaning on other qualities in most situations.`
-      );
+      suffix = ` ${voice.subject} rely on this trait less, leaning on other qualities in most situations.`;
+      break;
     default:
-      return escapeHtml(base);
+      break;
   }
+  return escapeHtml(base + suffix);
 };
 
 export const getWorkStyleTips = (trait: string, score: number): string[] =>

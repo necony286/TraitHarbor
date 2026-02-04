@@ -8,6 +8,7 @@ import {
 import { DEFAULT_BALANCE_THRESHOLD, getTraitExtremes } from '../lib/trait-extremes';
 import {
   buildReportHtml,
+  buildProfileShape,
   escapeHtml,
   traitSectionOrder,
   type ReportPayload,
@@ -30,6 +31,52 @@ vi.mock('../lib/report-content', async (importActual) => {
       ]
     }
   };
+});
+
+describe('buildProfileShape', () => {
+  it('returns a balanced label when the spread is small', () => {
+    const html = buildProfileShape({
+      O: 60,
+      C: 62,
+      E: 65,
+      A: 63,
+      N: 61
+    });
+
+    expect(html).toContain('Profile shape:</strong> Balanced');
+  });
+
+  it('returns a mixed label when the spread is moderate', () => {
+    const html = buildProfileShape({
+      O: 40,
+      C: 55,
+      E: 50,
+      A: 60,
+      N: 58
+    });
+
+    expect(html).toContain('Profile shape:</strong> Mixed');
+  });
+
+  it('returns a peaky label when the spread is large', () => {
+    const html = buildProfileShape({
+      O: 20,
+      C: 75,
+      E: 30,
+      A: 65,
+      N: 80
+    });
+
+    expect(html).toContain('Profile shape:</strong> Peaky');
+  });
+
+  it('returns an empty string when there are no scores', () => {
+    const html = buildProfileShape(
+      {} as Record<(typeof traitSectionOrder)[number]['scoreKey'], number>
+    );
+
+    expect(html).toBe('');
+  });
 });
 
 const createReportPayload = (

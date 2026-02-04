@@ -151,6 +151,8 @@ const buildTraitSections = (
       const microAction = guidance.microAction;
       const facetSummary = getFacetSummary(name, facetScores);
       const facetSpread = getFacetSpread(name, facetScores);
+      const meaning = getTraitMeaning(name, score);
+      const facetCallouts = getFacetInsights(name, facetScores);
       const band = getScoreBandLabel(score);
       const scoreValue = traitPercentages[name] ?? score;
       const facetBars = facetSummary ? buildFacetBars(facetSummary.facets) : '';
@@ -158,17 +160,32 @@ const buildTraitSections = (
       const facetSpreadContent = facetSpread
         ? `<p class="trait__facet-spread-label">${facetSpread.label}</p>
           <p class="trait__facet-spread-description">${facetSpread.description}</p>`
-        : '<p class="muted">Facet spread details are unavailable.</p>';
+        : '';
+      const facetCalloutList = facetCallouts.length
+        ? `          <div class="overview__callout trait__callouts">
+            <ul>
+${facetCallouts.map((callout) => `              <li>${escapeHtml(callout)}</li>`).join('\n')}
+            </ul>
+          </div>`
+        : '';
+      const facetSpreadSection = facetSpread
+        ? `        <div class="avoid-break trait__facet-spread">
+          <h3>Facet spread</h3>
+          ${facetSpreadContent}
+          ${facetBars}
+        </div>`
+        : '';
+      const facetMeaningSection = `        <div class="avoid-break trait__insights">
+${facetCalloutList}
+          <p class="trait__meaning">${meaning}</p>
+        </div>`;
       const sections = `
         <div class="avoid-break">
           <h2>${escapeHtml(name)} — ${band} (${scoreValue}/100)</h2>
           <p class="trait__summary">${summaryContent}</p>
         </div>
-        <div class="avoid-break trait__facet-spread">
-          <h3>Facet spread</h3>
-          ${facetSpreadContent}
-          ${facetBars}
-        </div>
+${facetMeaningSection}
+${facetSpreadSection}
         <div class="avoid-break trait__guidance">
           <div>
             <h3>Strengths</h3>
@@ -335,9 +352,7 @@ const buildFacetCallout = (
 
   const meaning = getTraitMeaning(traitName, score);
   return `      <div class="avoid-break">
-        <p class="overview__callout">${callouts.map(escapeHtml).join(' ')}<br>${escapeHtml(
-          meaning
-        )}</p>
+        <p class="overview__callout">${callouts.map(escapeHtml).join(' ')}<br>${meaning}</p>
       </div>`;
 };
 

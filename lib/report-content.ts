@@ -83,6 +83,12 @@ const NARRATIVE_VOICE: NarrativeVoice = {
   possessiveName: 'Your'
 };
 
+const TRAIT_MEANING_SUFFIXES: Record<ScoreBand, string> = {
+  High: ` This trait shows up often and likely shapes how ${NARRATIVE_VOICE.subjectPronoun} think, feel, and act.`,
+  Medium: ` ${NARRATIVE_VOICE.subject} can flex this trait depending on the situation, balancing it with other strengths.`,
+  Low: ` ${NARRATIVE_VOICE.subject} rely on this trait less, leaning on other qualities in most situations.`
+};
+
 export const withPrefix = (message: string, fallback: string) =>
   /^(you|your)\b(?![-.]\w)/i.test(message) ? message : `${fallback}: ${message}`;
 
@@ -422,13 +428,7 @@ export const getTraitMeaning = (trait: string, score: number): string => {
   const traitName = resolveTraitLabel(trait);
   const bandLabel = getScoreBandLabelForBand(band);
   const base = `${voice.possessiveAdjective} ${traitName} score is ${bandLabel.toLowerCase()}.`;
-
-  const suffixMap: Record<ScoreBand, string> = {
-    High: ` This trait shows up often and likely shapes how ${voice.subjectPronoun} think, feel, and act.`,
-    Medium: ` ${voice.subject} can flex this trait depending on the situation, balancing it with other strengths.`,
-    Low: ` ${voice.subject} rely on this trait less, leaning on other qualities in most situations.`
-  };
-  return escapeHtml(base + suffixMap[band]);
+  return escapeHtml(base + TRAIT_MEANING_SUFFIXES[band]);
 };
 
 export const getWorkStyleTips = (trait: string, score: number): string[] =>

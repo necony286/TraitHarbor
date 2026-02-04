@@ -71,9 +71,7 @@ describe('buildProfileShape', () => {
   });
 
   it('returns an empty string when there are no scores', () => {
-    const html = buildProfileShape(
-      {} as Record<(typeof traitSectionOrder)[number]['scoreKey'], number>
-    );
+    const html = buildProfileShape({} as ReportTraits);
 
     expect(html).toBe('');
   });

@@ -397,18 +397,26 @@ const buildSnapshotShape = ({
       </div>`;
 };
 
-const buildProfileShape = (
+const PROFILE_SHAPE_BALANCED_SPREAD_MAX = 15;
+const PROFILE_SHAPE_PEAKY_SPREAD_MIN = 28;
+
+export const buildProfileShape = (
   traitScores: Record<typeof traitSectionOrder[number]['scoreKey'], number>
 ) => {
   const scores = Object.values(traitScores);
+
+  if (!scores.length) {
+    return '';
+  }
+
   const minScore = Math.min(...scores);
   const maxScore = Math.max(...scores);
   const spread = maxScore - minScore;
 
   let label = 'Mixed';
-  if (spread <= 15) {
+  if (spread <= PROFILE_SHAPE_BALANCED_SPREAD_MAX) {
     label = 'Balanced';
-  } else if (spread >= 28) {
+  } else if (spread >= PROFILE_SHAPE_PEAKY_SPREAD_MIN) {
     label = 'Peaky';
   }
 

@@ -168,7 +168,7 @@ ${facetCallouts.map((callout) => `              <li>${escapeHtml(callout)}</li>`
             </ul>
           </div>`
         : '';
-      const facetSpreadSection = facetSummary
+      const facetSpreadSection = facetSpread
         ? `        <div class="avoid-break trait__facet-spread">
           <h3>Facet spread</h3>
           ${facetSpreadContent}

@@ -126,6 +126,12 @@ describe('getTraitSummary', () => {
       trait: ' conscientiousness ',
       score: 20,
       expected: 'Overall, your Conscientiousness is low.'
+    },
+    {
+      description: 'a trait name that matches a built-in property',
+      trait: '__proto__',
+      score: 20,
+      expected: 'Overall, your __proto__ is low.'
     }
   ])('should use the correct trait name for $description', ({ trait, score, expected }) => {
     const summary = getTraitSummary(trait, score);
@@ -133,18 +139,33 @@ describe('getTraitSummary', () => {
     expect(summary).toBe(expected);
   });
 
-  it('should include facet details when available', () => {
-    const facetScores = {
-      Openness: {
-        O1_Imagination: 82,
-        O4_Adventurousness: 59
-      }
-    };
+  it.each([
+    {
+      description: 'weakest facet',
+      facetScores: {
+        Openness: {
+          O1_Imagination: 82,
+          O4_Adventurousness: 59
+        }
+      },
+      expected:
+        'Openness shows its strongest facet in Imagination, while your weakest facet is Adventurousness. Overall, your Openness is high.'
+    },
+    {
+      description: 'least strong facet',
+      facetScores: {
+        Openness: {
+          O1_Imagination: 82,
+          O4_Adventurousness: 61
+        }
+      },
+      expected:
+        'Openness shows its strongest facet in Imagination, while your least strong facet is Adventurousness. Overall, your Openness is high.'
+    }
+  ])('should include facet details with $description label', ({ facetScores, expected }) => {
     const summary = getTraitSummary('openness', 80, facetScores);
 
-    expect(summary).toBe(
-      'Openness shows its strongest facet in Imagination, while your weakest facet is Adventurousness. Overall, your Openness is high.'
-    );
+    expect(summary).toBe(expected);
   });
 });
 

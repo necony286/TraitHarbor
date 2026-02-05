@@ -63,7 +63,10 @@ const traitKeyMap: Record<string, TraitName> = {
 
 const resolveTraitName = (trait: string): TraitName | undefined => {
   const normalized = normalizeTrait(trait);
-  return traitKeyMap[normalized];
+  if (Object.prototype.hasOwnProperty.call(traitKeyMap, normalized)) {
+    return traitKeyMap[normalized];
+  }
+  return undefined;
 };
 
 const resolveTraitLabel = (trait: string): string => resolveTraitName(trait) ?? trait.trim();

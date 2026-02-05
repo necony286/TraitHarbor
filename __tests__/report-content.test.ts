@@ -7,6 +7,7 @@ import {
   getActionPlanSelections,
   getMicroHabitRecommendation,
   getPersonalDevelopmentRoadmap,
+  getTraitSummary,
   getTraitMeaning,
   withPrefix
 } from '../lib/report-content';
@@ -97,6 +98,20 @@ describe('getTraitMeaning', () => {
     }
   ])('returns the expected narrative for $trait at $score', ({ trait, score, expected }) => {
     expect(getTraitMeaning(trait, score)).toBe(expected);
+  });
+});
+
+describe('getTraitSummary', () => {
+  it('should use the raw trait name for an unknown trait', () => {
+    const summary = getTraitSummary('SomeUnknownTrait', 30);
+
+    expect(summary).toBe('Overall, your SomeUnknownTrait is low.');
+  });
+
+  it('should use the canonical trait name for a known trait', () => {
+    const summary = getTraitSummary('openness', 80);
+
+    expect(summary).toBe('Overall, your Openness is high.');
   });
 });
 

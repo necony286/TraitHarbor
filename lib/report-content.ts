@@ -749,18 +749,11 @@ export const getTraitSummary = (
   if (summary && summary.facets.length > 1) {
     const { facets } = summary;
     const topFacet = facets[0];
-
-    if (facets.length > 1) {
-      const bottomFacet = facets[facets.length - 1];
-      const bottomLabel =
-        bottomFacet.score >= LEAST_STRONG_FACET_SCORE_THRESHOLD ? 'least strong facet' : 'weakest facet';
-      return escapeHtml(
-        `${traitName} shows its strongest facet in ${topFacet.facetName}, while your ${bottomLabel} is ${bottomFacet.facetName}. Overall, your ${traitName} is ${bandLabel}.`
-      );
-    }
-
+    const bottomFacet = facets[facets.length - 1];
+    const bottomLabel =
+      bottomFacet.score >= LEAST_STRONG_FACET_SCORE_THRESHOLD ? 'least strong facet' : 'weakest facet';
     return escapeHtml(
-      `${traitName} shows its strongest facet in ${topFacet.facetName}. Overall, your ${traitName} is ${bandLabel}.`
+      `${traitName} shows its strongest facet in ${topFacet.facetName}, while your ${bottomLabel} is ${bottomFacet.facetName}. Overall, your ${traitName} is ${bandLabel}.`
     );
   }
   return escapeHtml(`Overall, your ${traitName} is ${bandLabel}.`);

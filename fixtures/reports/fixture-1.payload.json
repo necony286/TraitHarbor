@@ -1,68 +1,75 @@
 {
-  "date": "2026-01-30T13:37:56.678Z",
+  "date": "2026-02-04T23:40:29.344Z",
   "traits": {
-    "O": 51.04,
-    "C": 42.71,
-    "E": 53.13,
-    "A": 47.92,
-    "N": 56.25
+    "O": 53.13,
+    "C": 56.25,
+    "E": 54.17,
+    "A": 44.79,
+    "N": 53.13
   },
   "traitPercentages": {
-    "Openness": 51.04,
-    "Conscientiousness": 42.71,
-    "Extraversion": 53.13,
-    "Agreeableness": 47.92,
-    "Neuroticism": 56.25
+    "Openness": 53.13,
+    "Conscientiousness": 56.25,
+    "Extraversion": 54.17,
+    "Agreeableness": 44.79,
+    "Neuroticism": 53.13
+  },
+  "traitPercentiles": {
+    "Openness": 53.13,
+    "Conscientiousness": 56.25,
+    "Extraversion": 54.17,
+    "Agreeableness": 44.79,
+    "Neuroticism": 53.13
   },
   "traitRankOrder": [
-    "Neuroticism",
+    "Conscientiousness",
     "Extraversion",
     "Openness",
-    "Agreeableness",
-    "Conscientiousness"
+    "Neuroticism",
+    "Agreeableness"
   ],
-  "highestTrait": "Neuroticism",
-  "lowestTrait": "Conscientiousness",
+  "highestTrait": "Conscientiousness",
+  "lowestTrait": "Agreeableness",
   "facetScores": {
     "Neuroticism": {
-      "N1_Anxiety": 68.75,
-      "N2_Anger": 81.25,
-      "N3_Depression": 56.25,
-      "N4_SelfConsciousness": 43.75,
-      "N5_Immoderation": 50,
-      "N6_Vulnerability": 37.5
+      "N1_Anxiety": 50,
+      "N2_Anger": 68.75,
+      "N3_Depression": 43.75,
+      "N4_SelfConsciousness": 25,
+      "N5_Immoderation": 75,
+      "N6_Vulnerability": 56.25
     },
     "Extraversion": {
-      "E1_Friendliness": 56.25,
+      "E1_Friendliness": 68.75,
       "E2_Gregariousness": 43.75,
       "E3_Assertiveness": 50,
-      "E4_ActivityLevel": 81.25,
-      "E5_ExcitementSeeking": 37.5,
-      "E6_Cheerfulness": 50
+      "E4_ActivityLevel": 50,
+      "E5_ExcitementSeeking": 50,
+      "E6_Cheerfulness": 62.5
     },
     "Openness": {
-      "O1_Imagination": 37.5,
-      "O2_ArtisticInterests": 62.5,
-      "O3_Emotionality": 62.5,
+      "O1_Imagination": 68.75,
+      "O2_ArtisticInterests": 56.25,
+      "O3_Emotionality": 18.75,
       "O4_Adventurousness": 43.75,
-      "O5_Intellect": 50,
-      "O6_Liberalism": 50
+      "O5_Intellect": 62.5,
+      "O6_Liberalism": 68.75
     },
     "Agreeableness": {
-      "A1_Trust": 62.5,
+      "A1_Trust": 31.25,
       "A2_Morality": 43.75,
-      "A3_Altruism": 50,
-      "A4_Cooperation": 43.75,
-      "A5_Modesty": 31.25,
-      "A6_Sympathy": 56.25
+      "A3_Altruism": 43.75,
+      "A4_Cooperation": 50,
+      "A5_Modesty": 68.75,
+      "A6_Sympathy": 31.25
     },
     "Conscientiousness": {
-      "C1_SelfEfficacy": 93.75,
-      "C2_Orderliness": 37.5,
-      "C3_Dutifulness": 31.25,
-      "C4_AchievementStriving": 18.75,
-      "C5_SelfDiscipline": 31.25,
-      "C6_Cautiousness": 43.75
+      "C1_SelfEfficacy": 50,
+      "C2_Orderliness": 25,
+      "C3_Dutifulness": 68.75,
+      "C4_AchievementStriving": 68.75,
+      "C5_SelfDiscipline": 56.25,
+      "C6_Cautiousness": 68.75
     }
   }
 }

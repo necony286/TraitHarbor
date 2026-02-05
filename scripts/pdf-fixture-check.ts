@@ -40,6 +40,7 @@ const payload: ReportPayload = {
       'How to read this report',
       '30-day action plan',
       '1-week micro-habit',
+      'Profile shape:',
       'Resources/methodology'
     ];
 
@@ -47,6 +48,17 @@ const payload: ReportPayload = {
       assert.ok(html.includes(text), `Expected report HTML to include "${text}"`);
     }
 
+    assert.ok(!html.includes('Do more of Neuroticism'), 'Expected report HTML to avoid "Do more of Neuroticism"');
+    assert.strictEqual(
+      html.match(/1-week micro-habit/g)?.length ?? 0,
+      1,
+      'Expected report HTML to include one 1-week micro-habit heading'
+    );
+    assert.strictEqual(
+      html.match(/<div class="roadmap__block">/g)?.length ?? 0,
+      3,
+      'Expected report HTML to include three action plan blocks'
+    );
     assert.ok(!/{{|}}/.test(html), 'Expected report HTML to have no raw template tokens');
 
     console.log('PDF fixture check passed.');

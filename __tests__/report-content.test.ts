@@ -102,16 +102,49 @@ describe('getTraitMeaning', () => {
 });
 
 describe('getTraitSummary', () => {
-  it('should use the raw trait name for an unknown trait', () => {
-    const summary = getTraitSummary('SomeUnknownTrait', 30);
+  it.each([
+    {
+      description: 'an unknown trait',
+      trait: 'SomeUnknownTrait',
+      score: 30,
+      expected: 'Overall, your SomeUnknownTrait is low.'
+    },
+    {
+      description: 'a known trait (lowercase)',
+      trait: 'openness',
+      score: 80,
+      expected: 'Overall, your Openness is high.'
+    },
+    {
+      description: 'a known trait (PascalCase)',
+      trait: 'Openness',
+      score: 55,
+      expected: 'Overall, your Openness is balanced.'
+    },
+    {
+      description: 'a known trait with whitespace',
+      trait: ' conscientiousness ',
+      score: 20,
+      expected: 'Overall, your Conscientiousness is low.'
+    }
+  ])('should use the correct trait name for $description', ({ trait, score, expected }) => {
+    const summary = getTraitSummary(trait, score);
 
-    expect(summary).toBe('Overall, your SomeUnknownTrait is low.');
+    expect(summary).toBe(expected);
   });
 
-  it('should use the canonical trait name for a known trait', () => {
-    const summary = getTraitSummary('openness', 80);
+  it('should include facet details when available', () => {
+    const facetScores = {
+      Openness: {
+        O1_Imagination: 82,
+        O4_Adventurousness: 59
+      }
+    };
+    const summary = getTraitSummary('openness', 80, facetScores);
 
-    expect(summary).toBe('Overall, your Openness is high.');
+    expect(summary).toBe(
+      'Openness shows its strongest facet in Imagination, while your weakest facet is Adventurousness. Overall, your Openness is high.'
+    );
   });
 });
 

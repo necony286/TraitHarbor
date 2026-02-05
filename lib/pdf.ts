@@ -464,18 +464,28 @@ const buildActionPlanBlocks = (
       ? 'stress-response sensitivity'
       : selections.stressReset;
 
+  const stressResetItems = [
+    escapeHtml(
+      'Acknowledge your stress-response sensitivity and name the first signal you notice (tension, restlessness, or worry).'
+    ),
+    stressGuidance.microAction,
+    escapeHtml(
+      'Use a quick regulation technique: slow breathing, grounding through the senses, or a brief reset walk.'
+    )
+  ];
+
   const blocks = [
     {
-      title: `Lean into ${selections.leanInto}`,
+      title: `Lean into: ${selections.leanInto}`,
       items: leanIntoGuidance.strengths.slice(0, 2)
     },
     {
-      title: `Support ${selections.support}`,
+      title: `Support: ${selections.support}`,
       items: supportGuidance.watchOuts.slice(0, 2)
     },
     {
-      title: `Stress reset (${stressResetLabel})`,
-      items: [stressGuidance.microAction]
+      title: `Stress reset: ${stressResetLabel}`,
+      items: stressResetItems.slice(0, 2)
     }
   ];
 

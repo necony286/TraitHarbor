@@ -285,6 +285,44 @@ describe('report template', () => {
     expect(html).toContain(`${callouts.map(escapeHtml).join(' ')}<br>${escapeHtml(meaning)}`);
   });
 
+  it('renders three action plan blocks without neuroticism phrasing', async () => {
+    const traits: ReportTraits = {
+      O: 82,
+      C: 50,
+      E: 45,
+      A: 40,
+      N: 78
+    };
+    const html = await buildReportHtml(createReportPayload(traits));
+
+    expect(html).toContain('30-day action plan');
+    expect(html).not.toContain('Do more of Neuroticism');
+    expect(html).toContain('Stress reset: stress-response sensitivity');
+    expect(html.match(/<div class="roadmap__block">/g)?.length ?? 0).toBe(3);
+  });
+
+  it('renders facet callouts and meaning in trait sections when facet scores exist', async () => {
+    const traits: ReportTraits = {
+      O: 82,
+      C: 70,
+      E: 60,
+      A: 55,
+      N: 45
+    };
+    const facetScores = {
+      Openness: {
+        imagination: 82,
+        adventurousness: 35
+      }
+    };
+
+    const html = await buildReportHtml(createReportPayload(traits, { facetScores }));
+    const meaning = getTraitMeaning('Openness', traits.O);
+
+    expect(html).toContain('trait__callouts');
+    expect(html).toContain(`class="trait__meaning">${meaning}</p>`);
+  });
+
   it('caches template and css file reads across concurrent builds', async () => {
     vi.resetModules();
     const readFile = vi.fn(async (filePath: string) => {

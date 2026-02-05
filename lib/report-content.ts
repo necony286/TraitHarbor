@@ -698,18 +698,18 @@ const getFacetSpreadLabel = ({
   if (range >= SPIKY_SPREAD_RANGE_MIN || stdev >= SPIKY_SPREAD_STDEV_MIN) {
     return {
       label: 'Spiky',
-      description: `Spiky spread: facet scores swing sharply across this trait, highlighting pronounced highs and lows. (${formatMetrics()})`
+      description: `Facet scores swing sharply across this trait, highlighting pronounced highs and lows. (${formatMetrics()})`
     };
   }
   if (range <= EVEN_SPREAD_RANGE_MAX && stdev <= EVEN_SPREAD_STDEV_MAX) {
     return {
       label: 'Even',
-      description: `Even spread: facet scores sit close together, suggesting a steady expression of this trait. (${formatMetrics()})`
+      description: `Facet scores sit close together, suggesting a steady expression of this trait. (${formatMetrics()})`
     };
   }
   return {
     label: 'Mixed',
-    description: `Mixed spread: facet scores show a blend of steadier areas and sharper contrasts within this trait. (${formatMetrics()})`
+    description: `Facet scores show a blend of steadier areas and sharper contrasts within this trait. (${formatMetrics()})`
   };
 };
 
@@ -746,7 +746,7 @@ export const getTraitSummary = (
   const traitName = resolveTraitName(trait);
   const bandLabel = getScoreBandLabel(score).toLowerCase();
   const summary = getFacetSummary(trait, facetScores);
-  if (summary && summary.facets.length > 0) {
+  if (summary && summary.facets.length > 1) {
     const { facets } = summary;
     const topFacet = facets[0];
 

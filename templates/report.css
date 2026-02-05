@@ -72,6 +72,11 @@ h2 {
   color: #344054;
 }
 
+.overview__profile-shape {
+  margin: 12px 0 0;
+  color: #344054;
+}
+
 .chart {
   display: flex;
   flex-direction: column;
@@ -168,6 +173,17 @@ h2 {
 .facet-value {
   text-align: right;
   font-variant-numeric: tabular-nums;
+}
+
+.trait__insights {
+  display: grid;
+  gap: 12px;
+}
+
+.trait__callouts ul {
+  margin: 0;
+  padding-left: 18px;
+  color: #344054;
 }
 
 .report__tips ul {
@@ -278,6 +294,15 @@ h2 {
   }
 
   .report__overview,
+  .report__guardrails,
+  .report__roadmap,
+  .report__microhabit,
+  .microhabit__card,
+  .roadmap__block,
+  .trait__insights,
+  .trait__guidance,
+  .trait__micro-action,
+  .trait__facet-spread,
   .resource-group,
   .report__resources {
     break-inside: avoid;

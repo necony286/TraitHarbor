@@ -743,7 +743,7 @@ export const getTraitSummary = (
   score: number,
   facetScores?: Record<string, Record<string, number>>
 ): string => {
-  const traitName = resolveTraitName(trait);
+  const traitName = resolveTraitLabel(trait);
   const bandLabel = getScoreBandLabel(score).toLowerCase();
   const summary = getFacetSummary(trait, facetScores);
   if (summary && summary.facets.length > 1) {

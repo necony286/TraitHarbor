@@ -87,38 +87,36 @@ h2 {
 .chart__row--lo {
   padding: 6px 8px;
   border-radius: 10px;
+  background: var(--row-bg);
 }
 
 .chart__row--hi {
-  background: #eef2ff;
-}
-
-.chart__row--hi .chart__label {
-  color: #3730a3;
-}
-
-.chart__row--hi .chart__bar {
-  background: #c7d2fe;
-}
-
-.chart__row--hi .chart__bar span {
-  background: #4f46e5;
+  --row-bg: #eef2ff;
+  --label-color: #3730a3;
+  --bar-bg: #c7d2fe;
+  --bar-fill: #4f46e5;
 }
 
 .chart__row--lo {
-  background: #fff1f5;
+  --row-bg: #fff1f5;
+  --label-color: #9d174d;
+  --bar-bg: #fbcfe8;
+  --bar-fill: #ec4899;
 }
 
+.chart__row--hi .chart__label,
 .chart__row--lo .chart__label {
-  color: #9d174d;
+  color: var(--label-color);
 }
 
+.chart__row--hi .chart__bar,
 .chart__row--lo .chart__bar {
-  background: #fbcfe8;
+  background: var(--bar-bg);
 }
 
+.chart__row--hi .chart__bar span,
 .chart__row--lo .chart__bar span {
-  background: #ec4899;
+  background: var(--bar-fill);
 }
 
 .chart__bar {

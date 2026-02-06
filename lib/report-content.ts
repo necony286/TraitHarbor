@@ -53,7 +53,7 @@ export const formatFacetLabel = (raw: string): string => {
 
 type TraitName = 'Openness' | 'Conscientiousness' | 'Extraversion' | 'Agreeableness' | 'Neuroticism';
 
-const traitKeyMap = new Map<string, TraitName>([
+const traitKeyMap: ReadonlyMap<string, TraitName> = new Map([
   ['openness', 'Openness'],
   ['conscientiousness', 'Conscientiousness'],
   ['extraversion', 'Extraversion'],

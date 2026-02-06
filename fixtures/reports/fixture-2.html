@@ -79,6 +79,11 @@ h2 {
   color: #344054;
 }
 
+.overview__profile-shape {
+  margin: 12px 0 0;
+  color: #344054;
+}
+
 .chart {
   display: flex;
   flex-direction: column;
@@ -175,6 +180,17 @@ h2 {
 .facet-value {
   text-align: right;
   font-variant-numeric: tabular-nums;
+}
+
+.trait__insights {
+  display: grid;
+  gap: 12px;
+}
+
+.trait__callouts ul {
+  margin: 0;
+  padding-left: 18px;
+  color: #344054;
 }
 
 .report__tips ul {
@@ -285,6 +301,15 @@ h2 {
   }
 
   .report__overview,
+  .report__guardrails,
+  .report__roadmap,
+  .report__microhabit,
+  .microhabit__card,
+  .roadmap__block,
+  .trait__insights,
+  .trait__guidance,
+  .trait__micro-action,
+  .trait__facet-spread,
   .resource-group,
   .report__resources {
     break-inside: avoid;
@@ -305,38 +330,38 @@ h2 {
       <section class="report__overview">
         <h2>Big Five snapshot</h2>
               <div class="chart">
-        <div class="chart__row chart__row--lo">
-          <div class="chart__label">Openness</div>
-          <div class="chart__bar"><span style="width: 48%;"></span></div>
-          <div class="chart__value">48/100</div>
-        </div>
-        <div class="chart__row chart__row--lo">
-          <div class="chart__label">Conscientiousness</div>
-          <div class="chart__bar"><span style="width: 48%;"></span></div>
-          <div class="chart__value">48/100</div>
-        </div>
         <div class="chart__row">
-          <div class="chart__label">Extraversion</div>
+          <div class="chart__label">Openness</div>
           <div class="chart__bar"><span style="width: 51%;"></span></div>
           <div class="chart__value">51/100</div>
         </div>
-        <div class="chart__row chart__row--hi">
-          <div class="chart__label">Agreeableness</div>
-          <div class="chart__bar"><span style="width: 64%;"></span></div>
-          <div class="chart__value">64/100</div>
+        <div class="chart__row">
+          <div class="chart__label">Conscientiousness</div>
+          <div class="chart__bar"><span style="width: 45%;"></span></div>
+          <div class="chart__value">45/100</div>
         </div>
         <div class="chart__row">
+          <div class="chart__label">Extraversion</div>
+          <div class="chart__bar"><span style="width: 48%;"></span></div>
+          <div class="chart__value">48/100</div>
+        </div>
+        <div class="chart__row chart__row--hi">
+          <div class="chart__label">Agreeableness</div>
+          <div class="chart__bar"><span style="width: 61%;"></span></div>
+          <div class="chart__value">61/100</div>
+        </div>
+        <div class="chart__row chart__row--lo">
           <div class="chart__label">Neuroticism</div>
-          <div class="chart__bar"><span style="width: 58%;"></span></div>
-          <div class="chart__value">58/100</div>
+          <div class="chart__bar"><span style="width: 40%;"></span></div>
+          <div class="chart__value">40/100</div>
         </div>
       </div>
         <p class="overview__profile-shape"><strong>Profile shape:</strong> Mixed</p>
               <div class="avoid-break">
-        <p class="overview__callout">Highest trait: <strong>Agreeableness</strong>. Lowest traits: <strong>Openness</strong> and <strong>Conscientiousness</strong> (tied).</p>
+        <p class="overview__callout">Highest trait: <strong>Agreeableness</strong>. Lowest trait: <strong>Neuroticism</strong>.</p>
       </div>
               <div class="avoid-break">
-        <p class="overview__callout">Your strongest facet: Sympathy (88/100). Your weakest facet: Cooperation (50/100).<br>Your Agreeableness score is balanced. You can flex this trait depending on the situation, balancing it with other strengths.</p>
+        <p class="overview__callout">Your strongest facet: Altruism (94/100). Your weakest facet: Modesty (44/100).<br>Your Agreeableness score is balanced. You can flex this trait depending on the situation, balancing it with other strengths.</p>
       </div>
       </section>
 
@@ -352,7 +377,7 @@ h2 {
 
             <section class="report__comparison">
         <h2>How You Compare to Others</h2>
-        <p>Your trait rank order is Agreeableness, Neuroticism, Extraversion, Openness, Conscientiousness.</p>
+        <p>Your trait rank order is Agreeableness, Openness, Extraversion, Conscientiousness, Neuroticism.</p>
       </section>
 
       <div class="page-break-before"></div>
@@ -361,14 +386,14 @@ h2 {
               <section class="report__trait trait-section">
 
         <div class="avoid-break">
-          <h2>Openness — Balanced (48/100)</h2>
-          <p class="trait__summary">Openness shows its strongest facet in Imagination, while your weakest facet is Emotionality. Overall, your Openness is balanced.</p>
+          <h2>Openness — Balanced (51/100)</h2>
+          <p class="trait__summary">Openness shows its strongest facet in Adventurousness, while your weakest facet is Intellect. Overall, your Openness is balanced.</p>
         </div>
         <div class="avoid-break trait__insights">
           <div class="overview__callout trait__callouts">
             <ul>
-              <li>Your strongest facet: Imagination (63/100).</li>
-              <li>Your weakest facet: Emotionality (31/100).</li>
+              <li>Your strongest facet: Adventurousness (75/100).</li>
+              <li>Your weakest facet: Intellect (31/100).</li>
             </ul>
           </div>
           <p class="trait__meaning">Your Openness score is balanced. You can flex this trait depending on the situation, balancing it with other strengths.</p>
@@ -376,35 +401,35 @@ h2 {
         <div class="avoid-break trait__facet-spread">
           <h3>Facet spread</h3>
           <p class="trait__facet-spread-label">Mixed</p>
-          <p class="trait__facet-spread-description">Mixed spread: facet scores show a blend of steadier areas and sharper contrasts within this trait. (Range 32, stdev 12.9.)</p>
+          <p class="trait__facet-spread-description">Facet scores show a blend of steadier areas and sharper contrasts within this trait. (Range 44, stdev 15.9.)</p>
           <div class="facet-grid">
           <div class="facet-row">
+            <span class="facet-label">Adventurousness</span>
+            <div class="facet-bar"><span style="width:75%"></span></div>
+            <span class="facet-value">75/100</span>
+          </div>
+          <div class="facet-row">
             <span class="facet-label">Imagination</span>
-            <div class="facet-bar"><span style="width:63%"></span></div>
-            <span class="facet-value">63/100</span>
-          </div>
-          <div class="facet-row">
-            <span class="facet-label">Intellect</span>
-            <div class="facet-bar"><span style="width:63%"></span></div>
-            <span class="facet-value">63/100</span>
-          </div>
-          <div class="facet-row">
-            <span class="facet-label">Liberalism</span>
-            <div class="facet-bar"><span style="width:56%"></span></div>
-            <span class="facet-value">56/100</span>
+            <div class="facet-bar"><span style="width:69%"></span></div>
+            <span class="facet-value">69/100</span>
           </div>
           <div class="facet-row">
             <span class="facet-label">Artistic interests</span>
-            <div class="facet-bar"><span style="width:38%"></span></div>
-            <span class="facet-value">38/100</span>
-          </div>
-          <div class="facet-row">
-            <span class="facet-label">Adventurousness</span>
-            <div class="facet-bar"><span style="width:38%"></span></div>
-            <span class="facet-value">38/100</span>
+            <div class="facet-bar"><span style="width:50%"></span></div>
+            <span class="facet-value">50/100</span>
           </div>
           <div class="facet-row">
             <span class="facet-label">Emotionality</span>
+            <div class="facet-bar"><span style="width:44%"></span></div>
+            <span class="facet-value">44/100</span>
+          </div>
+          <div class="facet-row">
+            <span class="facet-label">Liberalism</span>
+            <div class="facet-bar"><span style="width:38%"></span></div>
+            <span class="facet-value">38/100</span>
+          </div>
+          <div class="facet-row">
+            <span class="facet-label">Intellect</span>
             <div class="facet-bar"><span style="width:31%"></span></div>
             <span class="facet-value">31/100</span>
           </div>
@@ -435,14 +460,14 @@ h2 {
       <section class="report__trait trait-section">
 
         <div class="avoid-break">
-          <h2>Conscientiousness — Balanced (48/100)</h2>
-          <p class="trait__summary">Conscientiousness shows its strongest facet in Cautiousness, while your weakest facet is Self discipline. Overall, your Conscientiousness is balanced.</p>
+          <h2>Conscientiousness — Balanced (45/100)</h2>
+          <p class="trait__summary">Conscientiousness shows its strongest facet in Self efficacy, while your weakest facet is Achievement striving. Overall, your Conscientiousness is balanced.</p>
         </div>
         <div class="avoid-break trait__insights">
           <div class="overview__callout trait__callouts">
             <ul>
-              <li>Your strongest facet: Cautiousness (75/100).</li>
-              <li>Your weakest facet: Self discipline (38/100).</li>
+              <li>Your strongest facet: Self efficacy (75/100).</li>
+              <li>Your weakest facet: Achievement striving (31/100).</li>
             </ul>
           </div>
           <p class="trait__meaning">Your Conscientiousness score is balanced. You can flex this trait depending on the situation, balancing it with other strengths.</p>
@@ -450,37 +475,37 @@ h2 {
         <div class="avoid-break trait__facet-spread">
           <h3>Facet spread</h3>
           <p class="trait__facet-spread-label">Mixed</p>
-          <p class="trait__facet-spread-description">Mixed spread: facet scores show a blend of steadier areas and sharper contrasts within this trait. (Range 37, stdev 12.7.)</p>
+          <p class="trait__facet-spread-description">Facet scores show a blend of steadier areas and sharper contrasts within this trait. (Range 44, stdev 15.1.)</p>
           <div class="facet-grid">
           <div class="facet-row">
-            <span class="facet-label">Cautiousness</span>
+            <span class="facet-label">Self efficacy</span>
             <div class="facet-bar"><span style="width:75%"></span></div>
             <span class="facet-value">75/100</span>
           </div>
           <div class="facet-row">
-            <span class="facet-label">Dutifulness</span>
+            <span class="facet-label">Self discipline</span>
             <div class="facet-bar"><span style="width:50%"></span></div>
             <span class="facet-value">50/100</span>
           </div>
           <div class="facet-row">
-            <span class="facet-label">Self efficacy</span>
+            <span class="facet-label">Orderliness</span>
             <div class="facet-bar"><span style="width:44%"></span></div>
             <span class="facet-value">44/100</span>
+          </div>
+          <div class="facet-row">
+            <span class="facet-label">Cautiousness</span>
+            <div class="facet-bar"><span style="width:38%"></span></div>
+            <span class="facet-value">38/100</span>
+          </div>
+          <div class="facet-row">
+            <span class="facet-label">Dutifulness</span>
+            <div class="facet-bar"><span style="width:31%"></span></div>
+            <span class="facet-value">31/100</span>
           </div>
           <div class="facet-row">
             <span class="facet-label">Achievement striving</span>
-            <div class="facet-bar"><span style="width:44%"></span></div>
-            <span class="facet-value">44/100</span>
-          </div>
-          <div class="facet-row">
-            <span class="facet-label">Orderliness</span>
-            <div class="facet-bar"><span style="width:38%"></span></div>
-            <span class="facet-value">38/100</span>
-          </div>
-          <div class="facet-row">
-            <span class="facet-label">Self discipline</span>
-            <div class="facet-bar"><span style="width:38%"></span></div>
-            <span class="facet-value">38/100</span>
+            <div class="facet-bar"><span style="width:31%"></span></div>
+            <span class="facet-value">31/100</span>
           </div>
         </div>
         </div>
@@ -509,14 +534,14 @@ h2 {
       <section class="report__trait trait-section">
 
         <div class="avoid-break">
-          <h2>Extraversion — Balanced (51/100)</h2>
-          <p class="trait__summary">Extraversion shows its strongest facet in Excitement seeking, while your weakest facet is Gregariousness. Overall, your Extraversion is balanced.</p>
+          <h2>Extraversion — Balanced (48/100)</h2>
+          <p class="trait__summary">Extraversion shows its strongest facet in Cheerfulness, while your weakest facet is Excitement seeking. Overall, your Extraversion is balanced.</p>
         </div>
         <div class="avoid-break trait__insights">
           <div class="overview__callout trait__callouts">
             <ul>
-              <li>Your strongest facet: Excitement seeking (69/100).</li>
-              <li>Your weakest facet: Gregariousness (19/100).</li>
+              <li>Your strongest facet: Cheerfulness (69/100).</li>
+              <li>Your weakest facet: Excitement seeking (19/100).</li>
             </ul>
           </div>
           <p class="trait__meaning">Your Extraversion score is balanced. You can flex this trait depending on the situation, balancing it with other strengths.</p>
@@ -524,35 +549,35 @@ h2 {
         <div class="avoid-break trait__facet-spread">
           <h3>Facet spread</h3>
           <p class="trait__facet-spread-label">Spiky</p>
-          <p class="trait__facet-spread-description">Spiky spread: facet scores swing sharply across this trait, highlighting pronounced highs and lows. (Range 50, stdev 17.8.)</p>
+          <p class="trait__facet-spread-description">Facet scores swing sharply across this trait, highlighting pronounced highs and lows. (Range 50, stdev 17.6.)</p>
           <div class="facet-grid">
-          <div class="facet-row">
-            <span class="facet-label">Excitement seeking</span>
-            <div class="facet-bar"><span style="width:69%"></span></div>
-            <span class="facet-value">69/100</span>
-          </div>
           <div class="facet-row">
             <span class="facet-label">Cheerfulness</span>
             <div class="facet-bar"><span style="width:69%"></span></div>
             <span class="facet-value">69/100</span>
           </div>
           <div class="facet-row">
-            <span class="facet-label">Friendliness</span>
-            <div class="facet-bar"><span style="width:56%"></span></div>
-            <span class="facet-value">56/100</span>
-          </div>
-          <div class="facet-row">
-            <span class="facet-label">Activity level</span>
-            <div class="facet-bar"><span style="width:56%"></span></div>
-            <span class="facet-value">56/100</span>
-          </div>
-          <div class="facet-row">
             <span class="facet-label">Assertiveness</span>
-            <div class="facet-bar"><span style="width:38%"></span></div>
-            <span class="facet-value">38/100</span>
+            <div class="facet-bar"><span style="width:63%"></span></div>
+            <span class="facet-value">63/100</span>
           </div>
           <div class="facet-row">
             <span class="facet-label">Gregariousness</span>
+            <div class="facet-bar"><span style="width:56%"></span></div>
+            <span class="facet-value">56/100</span>
+          </div>
+          <div class="facet-row">
+            <span class="facet-label">Friendliness</span>
+            <div class="facet-bar"><span style="width:50%"></span></div>
+            <span class="facet-value">50/100</span>
+          </div>
+          <div class="facet-row">
+            <span class="facet-label">Activity level</span>
+            <div class="facet-bar"><span style="width:31%"></span></div>
+            <span class="facet-value">31/100</span>
+          </div>
+          <div class="facet-row">
+            <span class="facet-label">Excitement seeking</span>
             <div class="facet-bar"><span style="width:19%"></span></div>
             <span class="facet-value">19/100</span>
           </div>
@@ -583,32 +608,27 @@ h2 {
       <section class="report__trait trait-section">
 
         <div class="avoid-break">
-          <h2>Agreeableness — Balanced (64/100)</h2>
-          <p class="trait__summary">Agreeableness shows its strongest facet in Sympathy, while your weakest facet is Cooperation. Overall, your Agreeableness is balanced.</p>
+          <h2>Agreeableness — Balanced (61/100)</h2>
+          <p class="trait__summary">Agreeableness shows its strongest facet in Altruism, while your weakest facet is Modesty. Overall, your Agreeableness is balanced.</p>
         </div>
         <div class="avoid-break trait__insights">
           <div class="overview__callout trait__callouts">
             <ul>
-              <li>Your strongest facet: Sympathy (88/100).</li>
-              <li>Your weakest facet: Cooperation (50/100).</li>
+              <li>Your strongest facet: Altruism (94/100).</li>
+              <li>Your weakest facet: Modesty (44/100).</li>
             </ul>
           </div>
           <p class="trait__meaning">Your Agreeableness score is balanced. You can flex this trait depending on the situation, balancing it with other strengths.</p>
         </div>
         <div class="avoid-break trait__facet-spread">
           <h3>Facet spread</h3>
-          <p class="trait__facet-spread-label">Mixed</p>
-          <p class="trait__facet-spread-description">Mixed spread: facet scores show a blend of steadier areas and sharper contrasts within this trait. (Range 38, stdev 13.9.)</p>
+          <p class="trait__facet-spread-label">Spiky</p>
+          <p class="trait__facet-spread-description">Facet scores swing sharply across this trait, highlighting pronounced highs and lows. (Range 50, stdev 16.)</p>
           <div class="facet-grid">
           <div class="facet-row">
-            <span class="facet-label">Sympathy</span>
-            <div class="facet-bar"><span style="width:88%"></span></div>
-            <span class="facet-value">88/100</span>
-          </div>
-          <div class="facet-row">
-            <span class="facet-label">Modesty</span>
-            <div class="facet-bar"><span style="width:75%"></span></div>
-            <span class="facet-value">75/100</span>
+            <span class="facet-label">Altruism</span>
+            <div class="facet-bar"><span style="width:94%"></span></div>
+            <span class="facet-value">94/100</span>
           </div>
           <div class="facet-row">
             <span class="facet-label">Trust</span>
@@ -617,18 +637,23 @@ h2 {
           </div>
           <div class="facet-row">
             <span class="facet-label">Morality</span>
-            <div class="facet-bar"><span style="width:56%"></span></div>
-            <span class="facet-value">56/100</span>
+            <div class="facet-bar"><span style="width:63%"></span></div>
+            <span class="facet-value">63/100</span>
           </div>
           <div class="facet-row">
-            <span class="facet-label">Altruism</span>
-            <div class="facet-bar"><span style="width:50%"></span></div>
-            <span class="facet-value">50/100</span>
+            <span class="facet-label">Sympathy</span>
+            <div class="facet-bar"><span style="width:56%"></span></div>
+            <span class="facet-value">56/100</span>
           </div>
           <div class="facet-row">
             <span class="facet-label">Cooperation</span>
             <div class="facet-bar"><span style="width:50%"></span></div>
             <span class="facet-value">50/100</span>
+          </div>
+          <div class="facet-row">
+            <span class="facet-label">Modesty</span>
+            <div class="facet-bar"><span style="width:44%"></span></div>
+            <span class="facet-value">44/100</span>
           </div>
         </div>
         </div>
@@ -657,14 +682,14 @@ h2 {
       <section class="report__trait trait-section">
 
         <div class="avoid-break">
-          <h2>Neuroticism — Balanced (58/100)</h2>
-          <p class="trait__summary">Neuroticism shows its strongest facet in Vulnerability, while your weakest facet is Depression. Overall, your Neuroticism is balanced.</p>
+          <h2>Neuroticism — Balanced (40/100)</h2>
+          <p class="trait__summary">Neuroticism shows its strongest facet in Anxiety, while your weakest facet is Vulnerability. Overall, your Neuroticism is balanced.</p>
         </div>
         <div class="avoid-break trait__insights">
           <div class="overview__callout trait__callouts">
             <ul>
-              <li>Your strongest facet: Vulnerability (88/100).</li>
-              <li>Your weakest facet: Depression (38/100).</li>
+              <li>Your strongest facet: Anxiety (56/100).</li>
+              <li>Your weakest facet: Vulnerability (0/100).</li>
             </ul>
           </div>
           <p class="trait__meaning">Your Neuroticism score is balanced. You can flex this trait depending on the situation, balancing it with other strengths.</p>
@@ -672,22 +697,12 @@ h2 {
         <div class="avoid-break trait__facet-spread">
           <h3>Facet spread</h3>
           <p class="trait__facet-spread-label">Spiky</p>
-          <p class="trait__facet-spread-description">Spiky spread: facet scores swing sharply across this trait, highlighting pronounced highs and lows. (Range 50, stdev 16.8.)</p>
+          <p class="trait__facet-spread-description">Facet scores swing sharply across this trait, highlighting pronounced highs and lows. (Range 56, stdev 19.3.)</p>
           <div class="facet-grid">
           <div class="facet-row">
-            <span class="facet-label">Vulnerability</span>
-            <div class="facet-bar"><span style="width:88%"></span></div>
-            <span class="facet-value">88/100</span>
-          </div>
-          <div class="facet-row">
             <span class="facet-label">Anxiety</span>
-            <div class="facet-bar"><span style="width:69%"></span></div>
-            <span class="facet-value">69/100</span>
-          </div>
-          <div class="facet-row">
-            <span class="facet-label">Immoderation</span>
-            <div class="facet-bar"><span style="width:63%"></span></div>
-            <span class="facet-value">63/100</span>
+            <div class="facet-bar"><span style="width:56%"></span></div>
+            <span class="facet-value">56/100</span>
           </div>
           <div class="facet-row">
             <span class="facet-label">Anger</span>
@@ -695,14 +710,24 @@ h2 {
             <span class="facet-value">50/100</span>
           </div>
           <div class="facet-row">
-            <span class="facet-label">Self consciousness</span>
-            <div class="facet-bar"><span style="width:44%"></span></div>
-            <span class="facet-value">44/100</span>
+            <span class="facet-label">Depression</span>
+            <div class="facet-bar"><span style="width:50%"></span></div>
+            <span class="facet-value">50/100</span>
           </div>
           <div class="facet-row">
-            <span class="facet-label">Depression</span>
-            <div class="facet-bar"><span style="width:38%"></span></div>
-            <span class="facet-value">38/100</span>
+            <span class="facet-label">Immoderation</span>
+            <div class="facet-bar"><span style="width:50%"></span></div>
+            <span class="facet-value">50/100</span>
+          </div>
+          <div class="facet-row">
+            <span class="facet-label">Self consciousness</span>
+            <div class="facet-bar"><span style="width:31%"></span></div>
+            <span class="facet-value">31/100</span>
+          </div>
+          <div class="facet-row">
+            <span class="facet-label">Vulnerability</span>
+            <div class="facet-bar"><span style="width:0%"></span></div>
+            <span class="facet-value">0/100</span>
           </div>
         </div>
         </div>
@@ -731,14 +756,14 @@ h2 {
 
       <section class="report__pattern">
         <h2>Your pattern</h2>
-        <p>Your top traits are Agreeableness and Neuroticism. It suggests you balance empathy with honest feedback. Meanwhile, Neuroticism adds another layer: you balance emotional awareness with steady resilience.</p>
+        <p>Your top traits are Agreeableness and Openness. It suggests you balance empathy with honest feedback. Meanwhile, Openness adds another layer: you can blend creativity with practicality when tackling challenges.</p>
       </section>
 
       <section class="report__roadmap">
         <h2>30-day action plan</h2>
         <div class="roadmap roadmap--cards">      <div class="avoid-break">
         <div class="roadmap__block">
-          <h3>Lean into Agreeableness</h3>
+          <h3>Lean into: Agreeableness</h3>
           <ul>
           <li>You balance empathy with honest feedback.</li>
           <li>You can collaborate while maintaining your own perspective.</li>
@@ -747,17 +772,18 @@ h2 {
       </div>
       <div class="avoid-break">
         <div class="roadmap__block">
-          <h3>Support Openness</h3>
+          <h3>Support: Neuroticism</h3>
           <ul>
-          <li>You seek out occasional novelty to keep your thinking flexible.</li>
-          <li>You give yourself permission to experiment in low-risk ways.</li>
+          <li>You use grounding routines when stress levels rise.</li>
+          <li>You name emotions early to keep them manageable.</li>
           </ul>
         </div>
       </div>
       <div class="avoid-break">
         <div class="roadmap__block">
-          <h3>Stress reset (stress-response sensitivity)</h3>
+          <h3>Stress reset: stress-response sensitivity</h3>
           <ul>
+          <li>Acknowledge your stress-response sensitivity and name the first signal you notice (tension, restlessness, or worry).</li>
           <li>Take a 2-minute reset: breathe slowly and name the feeling before moving forward.</li>
           </ul>
         </div>
@@ -768,7 +794,7 @@ h2 {
         <h2>1-week micro-habit</h2>
         <div class="microhabit__card">
           <span class="microhabit__checkbox" aria-hidden="true"></span>
-          <div class="microhabit__text"><p>You spend 7 days dedicating 10 minutes to an Agreeableness-aligned action each morning, then end the day by naming one Conscientiousness-related moment you handled with care.</p></div>
+          <div class="microhabit__text"><p>You spend 7 days dedicating 10 minutes to an Agreeableness-aligned action each morning, then end the day by naming one Neuroticism-related moment you handled with care.</p></div>
         </div>
       </section>
 

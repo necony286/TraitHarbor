@@ -53,17 +53,17 @@ export const formatFacetLabel = (raw: string): string => {
 
 type TraitName = 'Openness' | 'Conscientiousness' | 'Extraversion' | 'Agreeableness' | 'Neuroticism';
 
-const traitKeyMap: Record<string, TraitName> = {
-  openness: 'Openness',
-  conscientiousness: 'Conscientiousness',
-  extraversion: 'Extraversion',
-  agreeableness: 'Agreeableness',
-  neuroticism: 'Neuroticism'
-};
+const traitKeyMap: ReadonlyMap<string, TraitName> = new Map([
+  ['openness', 'Openness'],
+  ['conscientiousness', 'Conscientiousness'],
+  ['extraversion', 'Extraversion'],
+  ['agreeableness', 'Agreeableness'],
+  ['neuroticism', 'Neuroticism']
+]);
 
 const resolveTraitName = (trait: string): TraitName | undefined => {
   const normalized = normalizeTrait(trait);
-  return Object.hasOwn(traitKeyMap, normalized) ? traitKeyMap[normalized] : undefined;
+  return traitKeyMap.get(normalized);
 };
 
 const resolveTraitLabel = (trait: string): string => resolveTraitName(trait) ?? trait.trim();

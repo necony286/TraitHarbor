@@ -28,8 +28,7 @@ import {
   getScoreBandLabel,
   getTraitGuidance,
   getTraitMeaning,
-  getTraitSummary,
-  RESOURCES_BY_TRAIT
+  getTraitSummary
 } from './report-content';
 import { getTraitExtremes } from './trait-extremes';
 
@@ -100,15 +99,6 @@ export const escapeHtml = (value: string) =>
     .replaceAll('"', '&quot;')
     .replaceAll("'", '&#39;');
 
-const isSafeUrl = (value: string) => {
-  try {
-    const parsedUrl = new URL(value);
-    return parsedUrl.protocol === 'http:' || parsedUrl.protocol === 'https:';
-  } catch {
-    return false;
-  }
-};
-
 const clampScore = (value: number) => Math.max(0, Math.min(100, Math.round(value)));
 
 const formatDate = (date: Date) =>
@@ -157,22 +147,23 @@ const buildTraitSections = (
       const scoreValue = traitPercentages[name] ?? score;
       const facetBars = facetSummary ? buildFacetBars(facetSummary.facets) : '';
       const summaryContent = getTraitSummary(name, score, facetScores);
-      const facetSpreadContent = facetSpread
-        ? `<p class="trait__facet-spread-label">${facetSpread.label}</p>
-          <p class="trait__facet-spread-description">${facetSpread.description}</p>`
-        : '';
       const facetCalloutList = facetCallouts.length
-        ? `          <div class="overview__callout trait__callouts">
-            <ul>
-${facetCallouts.map((callout) => `              <li>${escapeHtml(callout)}</li>`).join('\n')}
-            </ul>
-          </div>`
+        ? `        <div class="card trait__callouts">
+          <ul>
+${facetCallouts.map((callout) => `            <li>${escapeHtml(callout)}</li>`).join('\n')}
+          </ul>
+        </div>`
         : '';
       const facetSpreadSection = facetSpread
-        ? `        <div class="avoid-break trait__facet-spread">
-          <h3>Facet spread</h3>
-          ${facetSpreadContent}
-          ${facetBars}
+        ? `        <div class="card card--info trait__facet-spread avoid-break">
+          <p class="trait__facet-spread-label"><strong>Facet spread:</strong> ${facetSpread.label} (range ${facetSpread.range} points).</p>
+          <p class="trait__facet-spread-description">${facetSpread.description}</p>
+        </div>`
+        : '';
+      const facetBreakdownSection = facetBars
+        ? `        <div class="avoid-break trait__facet-breakdown">
+          <h3>Facet breakdown</h3>
+${facetBars}
         </div>`
         : '';
       const facetMeaningSection = `        <div class="avoid-break trait__insights">
@@ -181,27 +172,28 @@ ${facetCalloutList}
         </div>`;
       const sections = `
         <div class="avoid-break">
-          <h2>${escapeHtml(name)} — ${band} (${scoreValue}/100)</h2>
+          <h2>${escapeHtml(name)} - ${band} (${scoreValue}/100)</h2>
           <p class="trait__summary">${summaryContent}</p>
         </div>
-${facetMeaningSection}
 ${facetSpreadSection}
+${facetBreakdownSection}
+${facetMeaningSection}
         <div class="avoid-break trait__guidance">
-          <div>
+          <div class="card">
             <h3>Strengths</h3>
             <ul>
 ${strengths || '              <li>Identify the strengths that support your goals.</li>'}
             </ul>
           </div>
-          <div>
+          <div class="card">
             <h3>Watch-outs</h3>
             <ul>
 ${watchOuts || '              <li>Focus on one growth habit that keeps you balanced.</li>'}
             </ul>
           </div>
         </div>
-        <div class="avoid-break trait__micro-action">
-          <h3>Micro-action</h3>
+        <div class="avoid-break trait__micro-action card card--success">
+          <h3>Try this this week</h3>
           <p>${microAction || 'Choose one small action today that supports your balance.'}</p>
         </div>`;
 
@@ -217,34 +209,6 @@ const buildListItems = (items: string[]) =>
 
 const buildListItemsFromPreEscaped = (items: string[]) =>
   items.length ? items.map((item) => `        <li>${item}</li>`).join('\n') : '';
-
-const buildResourceGroups = () =>
-  traitSectionOrder
-    .map(({ name }) => {
-      const resources = RESOURCES_BY_TRAIT[name] ?? [];
-      const safeResources = resources.filter(({ url }) => isSafeUrl(url));
-      if (!safeResources.length) {
-        return '';
-      }
-      const links = safeResources
-        .map(
-          ({ label, url }) => {
-            const escapedUrl = escapeHtml(url);
-            return `          <li><a href="${escapedUrl}">${escapeHtml(
-              label
-            )}</a> — <span class="resource-url">${escapedUrl}</span></li>`;
-          }
-        )
-        .join('\n');
-      return `        <div class="resource-group">
-          <h3>${escapeHtml(name)}</h3>
-          <ul>
-${links}
-          </ul>
-        </div>`;
-    })
-    .filter(Boolean)
-    .join('\n');
 
 const buildOverviewChart = (
   traitScores: Record<typeof traitSectionOrder[number]['scoreKey'], number>
@@ -297,42 +261,39 @@ const joinWithAnd = (items: string[]) => listFormatter.format(items);
 const buildHighestLowestCallout = ({
   highestTraits,
   lowestTraits,
-  isBalanced
+  isBalanced,
+  scoreMap
 }: {
   highestTraits: string[];
   lowestTraits: string[];
   isBalanced: boolean;
+  scoreMap: Record<string, number>;
 }) => {
-  const highest = highestTraits.map((trait) => `<strong>${escapeHtml(trait)}</strong>`);
-  const lowest = lowestTraits.map((trait) => `<strong>${escapeHtml(trait)}</strong>`);
+  const formatTrait = (trait: string) =>
+    `<strong>${escapeHtml(trait)} (${scoreMap[trait] ?? 0}/100)</strong>`;
+  const highest = highestTraits.map(formatTrait);
+  const lowest = lowestTraits.map(formatTrait);
 
   if (!highest.length && !lowest.length) {
     return '';
-  }
-
-  if (isBalanced) {
-    const tied = highest.length > 1 ? ' (tied)' : '';
-    const traitList = joinWithAnd(highest);
-    return `      <div class="avoid-break">
-        <p class="overview__callout">Your scores are fairly balanced overall, with a slight edge in ${traitList}${tied}.</p>
-      </div>`;
   }
 
   const buildStatement = (traits: string[], label: 'Highest' | 'Lowest') => {
     if (!traits.length) {
       return null;
     }
-    const traitLabel = `${label} ${traits.length > 1 ? 'traits' : 'trait'}`;
     const tied = traits.length > 1 ? ' (tied)' : '';
-    return `${traitLabel}: ${joinWithAnd(traits)}${tied}.`;
+    return `${label}: ${joinWithAnd(traits)}${tied}.`;
   };
 
   const calloutText = [buildStatement(highest, 'Highest'), buildStatement(lowest, 'Lowest')]
     .filter((statement): statement is string => Boolean(statement))
     .join(' ');
 
+  const balancedNote = isBalanced ? ' <span class="muted">Balanced overall.</span>' : '';
+
   return `      <div class="avoid-break">
-        <p class="overview__callout">${calloutText}</p>
+        <p class="overview__callout">${calloutText}${balancedNote}</p>
       </div>`;
 };
 
@@ -435,7 +396,9 @@ export const buildProfileShape = (
     label = 'Peaky';
   }
 
-  return `<p class="overview__profile-shape"><strong>Profile shape:</strong> ${label}</p>`;
+  return `<p class="overview__profile-shape"><strong>Profile shape:</strong> ${label} profile (range ${Math.round(
+    spread
+  )} points across traits).</p>`;
 };
 
 const buildGuardrailsHtml = () => `      <ul>
@@ -516,13 +479,14 @@ const buildMicroHabitHtml = (traitRankOrder: string[]) => {
   return `<p>${escapeHtml(microHabitText)}</p>`;
 };
 
-const buildResourcesMethodologyHtml = (
-  resourcesMethodology: string,
-  resourcesByTrait: string
-) => `      <p>${escapeHtml(resourcesMethodology)}</p>
-      <div class="resource-groups">
-${resourcesByTrait}
-      </div>`;
+const buildResourcesMethodologyHtml = (resourcesMethodology: string[]) => {
+  const items = resourcesMethodology
+    .map((item) => `        <li>${escapeHtml(item)}</li>`)
+    .join('\n');
+  return `      <ul class="resource-list">
+${items}
+      </ul>`;
+};
 
 let activePdfRenders = 0;
 
@@ -767,16 +731,18 @@ export async function buildReportHtml(payload: ReportPayload) {
   const comparisonText = getComparisonText(traitRankOrder);
   const patternSummary = getPatternSummary(clampedTraitPercentages, traitRankOrder);
   const resourcesMethodology = getResourcesMethodologyText();
-  const resourcesByTrait = buildResourceGroups();
   const roadmapBlocks = buildRoadmapBlocks(
     getPersonalDevelopmentRoadmap(clampedTraitPercentages, traitRankOrder)
   );
   const traitRankList = buildListItems(traitRankOrder);
   const { html: overviewChart, allScoresEqual, highestTraits, lowestTraits, isBalanced } =
     buildOverviewChart(scores);
+  const scoreMap = Object.fromEntries(
+    traitSectionOrder.map(({ name, scoreKey }) => [name, scores[scoreKey]])
+  );
   const highestLowestCallout = allScoresEqual
     ? ''
-    : buildHighestLowestCallout({ highestTraits, lowestTraits, isBalanced });
+    : buildHighestLowestCallout({ highestTraits, lowestTraits, isBalanced, scoreMap });
   const profileShape = buildProfileShape(scores);
   const facetCallout = buildFacetCallout(
     highestTrait,
@@ -793,10 +759,7 @@ export async function buildReportHtml(payload: ReportPayload) {
   const patternSummaryHtml = buildPatternSummaryHtml(patternSummary);
   const actionPlanBlocks = buildActionPlanBlocks(clampedTraitPercentages, traitRankOrder);
   const microHabitHtml = buildMicroHabitHtml(traitRankOrder);
-  const resourcesMethodologyHtml = buildResourcesMethodologyHtml(
-    resourcesMethodology,
-    resourcesByTrait
-  );
+  const resourcesMethodologyHtml = buildResourcesMethodologyHtml(resourcesMethodology);
   const hasPercentiles =
     payload.traitPercentiles &&
     Object.values(payload.traitPercentiles).some((value) => Number.isFinite(value));
@@ -832,9 +795,8 @@ export async function buildReportHtml(payload: ReportPayload) {
     .replaceAll('{{roadmap_blocks}}', roadmapBlocks)
     .replace('{{action_plan_blocks}}', actionPlanBlocks)
     .replace('{{micro_habit}}', microHabitHtml)
-    .replaceAll('{{resources_methodology}}', escapeHtml(resourcesMethodology))
     .replace('{{resources_methodology_html}}', resourcesMethodologyHtml)
-    .replaceAll('{{resources_by_trait}}', resourcesByTrait);
+    .replaceAll('{{resources_methodology}}', escapeHtml(resourcesMethodology.join(' ')));
 }
 
 export async function generateReportPdf(payload: ReportPayload) {
@@ -874,11 +836,14 @@ export async function generateReportPdf(payload: ReportPayload) {
         format: 'A4',
         printBackground: true,
         displayHeaderFooter: true,
-        footerTemplate:
+        headerTemplate:
           `<div style="width: 100%; font-size: 10px; color: #4b5563; padding: 0 24px; text-align: right;">` +
-          `TraitHarbor Premium Report — Page <span class='pageNumber'></span> of <span class='totalPages'></span>` +
+          `TraitHarbor Premium Report | Page <span class='pageNumber'></span>` +
           `</div>`,
-        margin: { top: '24px', bottom: '56px', left: '24px', right: '24px' }
+        footerTemplate:
+          `<div style="width: 100%; font-size: 8px; color: #9ca3af; padding: 0 24px; text-align: right;">` +
+          `</div>`,
+        margin: { top: '48px', bottom: '40px', left: '24px', right: '24px' }
       });
 
       if (pdf.byteLength > MAX_PDF_BYTES) {

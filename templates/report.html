@@ -18,19 +18,18 @@
 
       <section class="report__overview">
         <h2>Big Five snapshot</h2>
-        {{overview_chart}}
         {{profile_shape}}
+        {{overview_chart}}
         {{highest_lowest_callout}}
-        {{facet_callout}}
       </section>
 
-      <section class="report__guardrails">
+      <section class="report__guardrails card">
         <h2>How to read this report</h2>
         <ul>
-          <li>Scores reflect tendencies, not fixed labels or limitations.</li>
-          <li>Traits live on a spectrum—context and goals can shift how they show up.</li>
-          <li>Use the strengths and watch-outs as prompts for action, not judgment.</li>
-          <li>Combine this report with lived experience and feedback from people you trust.</li>
+          <li>Scores are on a 0–100 scale based on your responses (not population percentiles).</li>
+          <li>Differences under ~7 points are often small; focus on patterns and facet spread.</li>
+          <li>Traits are not “good” or “bad” — each has upsides, trade-offs, and context.</li>
+          <li>This is for personal insight only and is not a medical or diagnostic tool.</li>
         </ul>
       </section>
 
@@ -54,18 +53,15 @@
 
       <section class="report__microhabit">
         <h2>1-week micro-habit</h2>
-        <div class="microhabit__card">
+        <div class="microhabit__card card card--pink">
           <span class="microhabit__checkbox" aria-hidden="true"></span>
           <div class="microhabit__text">{{micro_habit}}</div>
         </div>
       </section>
 
       <section class="report__resources">
-        <h2>Resources/methodology</h2>
-        <p>{{resources_methodology}}</p>
-        <div class="resource-groups">
-          {{resources_by_trait}}
-        </div>
+        <h2>Resources &amp; methodology</h2>
+        {{resources_methodology_html}}
       </section>
     </main>
   </body>

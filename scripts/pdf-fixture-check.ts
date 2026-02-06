@@ -41,7 +41,8 @@ const payload: ReportPayload = {
       '30-day action plan',
       '1-week micro-habit',
       'Profile shape:',
-      'Resources/methodology'
+      'Resources &amp; methodology',
+      'Try this this week'
     ];
 
     for (const text of requiredStrings) {

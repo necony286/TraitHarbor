@@ -107,31 +107,31 @@ describe('getTraitSummary', () => {
       description: 'an unknown trait',
       trait: 'SomeUnknownTrait',
       score: 30,
-      expected: 'Overall, your SomeUnknownTrait is low.'
+      expected: 'Your someunknowntrait is low (30/100).'
     },
     {
       description: 'a known trait (lowercase)',
       trait: 'openness',
       score: 80,
-      expected: 'Overall, your Openness is high.'
+      expected: 'Your openness is high (80/100).'
     },
     {
       description: 'a known trait (PascalCase)',
       trait: 'Openness',
       score: 55,
-      expected: 'Overall, your Openness is balanced.'
+      expected: 'Your openness is balanced (55/100).'
     },
     {
       description: 'a known trait with whitespace',
       trait: ' conscientiousness ',
       score: 20,
-      expected: 'Overall, your Conscientiousness is low.'
+      expected: 'Your conscientiousness is low (20/100).'
     },
     {
       description: 'a trait name that matches a built-in property',
       trait: '__proto__',
       score: 20,
-      expected: 'Overall, your __proto__ is low.'
+      expected: 'Your __proto__ is low (20/100).'
     }
   ])('should use the correct trait name for $description', ({ trait, score, expected }) => {
     const summary = getTraitSummary(trait, score);
@@ -149,7 +149,7 @@ describe('getTraitSummary', () => {
         }
       },
       expected:
-        'Openness shows its strongest facet in Imagination, while your weakest facet is Adventurousness. Overall, your Openness is high.'
+        'Your openness is high (80/100). Within this trait, Imagination (82/100) stands out most, while Adventurousness (59/100) is lowest facet.'
     },
     {
       description: 'least strong facet',
@@ -160,7 +160,7 @@ describe('getTraitSummary', () => {
         }
       },
       expected:
-        'Openness shows its strongest facet in Imagination, while your least strong facet is Adventurousness. Overall, your Openness is high.'
+        'Your openness is high (80/100). Within this trait, Imagination (82/100) stands out most, while Adventurousness (61/100) is least strong facet.'
     }
   ])('should include facet details with $description label', ({ facetScores, expected }) => {
     const summary = getTraitSummary('openness', 80, facetScores);

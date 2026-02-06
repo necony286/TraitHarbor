@@ -604,8 +604,11 @@ export const getPatternSummary = (
   return `${voice.possessiveName} standout trait is ${primaryTrait}. ${singleLine}`.trim();
 };
 
-export const getResourcesMethodologyText = (): string =>
-  'Your scores are normalized on a 0–100 scale (not percentiles) based on your responses to the Big Five inventory. This report is for personal insight only and does not diagnose or treat any mental health condition.';
+export const getResourcesMethodologyText = (): string[] => [
+  'Scores are normalized on a 0–100 scale from your questionnaire responses (not percentiles).',
+  'The Big Five framework is widely used in personality research; facets show how traits show up in daily life.',
+  'This report is for personal insight only and does not diagnose or treat any mental health condition.'
+];
 
 export const getPersonalDevelopmentRoadmap = (
   traitPercentages: Record<string, number>,
@@ -751,12 +754,16 @@ export const getTraitSummary = (
     const topFacet = facets[0];
     const bottomFacet = facets[facets.length - 1];
     const bottomLabel =
-      bottomFacet.score >= LEAST_STRONG_FACET_SCORE_THRESHOLD ? 'least strong facet' : 'weakest facet';
+      bottomFacet.score >= LEAST_STRONG_FACET_SCORE_THRESHOLD ? 'least strong facet' : 'lowest facet';
     return escapeHtml(
-      `${traitName} shows its strongest facet in ${topFacet.facetName}, while your ${bottomLabel} is ${bottomFacet.facetName}. Overall, your ${traitName} is ${bandLabel}.`
+      `Your ${traitName.toLowerCase()} is ${bandLabel} (${Math.round(
+        score
+      )}/100). Within this trait, ${topFacet.facetName} (${topFacet.score}/100) stands out most, while ${bottomFacet.facetName} (${bottomFacet.score}/100) is ${bottomLabel}.`
     );
   }
-  return escapeHtml(`Overall, your ${traitName} is ${bandLabel}.`);
+  return escapeHtml(
+    `Your ${traitName.toLowerCase()} is ${bandLabel} (${Math.round(score)}/100).`
+  );
 };
 
 export type TraitGuidance = {

@@ -83,6 +83,44 @@ h2 {
   padding: 4px 0;
 }
 
+.chart__row--hi,
+.chart__row--lo {
+  padding: 6px 8px;
+  border-radius: 10px;
+}
+
+.chart__row--hi {
+  background: #eef2ff;
+}
+
+.chart__row--hi .chart__label {
+  color: #3730a3;
+}
+
+.chart__row--hi .chart__bar {
+  background: #c7d2fe;
+}
+
+.chart__row--hi .chart__bar span {
+  background: #4f46e5;
+}
+
+.chart__row--lo {
+  background: #fff1f5;
+}
+
+.chart__row--lo .chart__label {
+  color: #9d174d;
+}
+
+.chart__row--lo .chart__bar {
+  background: #fbcfe8;
+}
+
+.chart__row--lo .chart__bar span {
+  background: #ec4899;
+}
+
 .chart__bar {
   position: relative;
   height: 12px;

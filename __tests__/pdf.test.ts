@@ -209,6 +209,46 @@ describe('report template', () => {
     );
   });
 
+
+  it('renders the rank-order comparison section even without percentiles', async () => {
+    const traits: ReportTraits = {
+      O: 72,
+      C: 64,
+      E: 50,
+      A: 45,
+      N: 38
+    };
+    const html = await buildReportHtml(createReportPayload(traits));
+
+    expect(html).toContain('Your trait rank order');
+    expect(html).toContain('Your trait rank order is Openness, Conscientiousness, Extraversion, Agreeableness, Neuroticism.');
+    expect(html).not.toContain('Percentile snapshot (when available):');
+  });
+
+  it('renders percentiles only when finite values are provided', async () => {
+    const traits: ReportTraits = {
+      O: 72,
+      C: 64,
+      E: 50,
+      A: 45,
+      N: 38
+    };
+    const html = await buildReportHtml(
+      createReportPayload(traits, {
+        traitPercentiles: {
+          Openness: 76,
+          Conscientiousness: Number.NaN,
+          Extraversion: Number.POSITIVE_INFINITY
+        }
+      })
+    );
+
+    expect(html).toContain('Percentile snapshot (when available):');
+    expect(html).toContain('<li>Openness: 76/100</li>');
+    expect(html).not.toContain('Conscientiousness:');
+    expect(html).not.toContain('Extraversion:');
+  });
+
   it('renders the resources methodology list', async () => {
     const traits: ReportTraits = {
       O: 85,
@@ -247,6 +287,8 @@ describe('report template', () => {
       expect(html).toContain(`<li>${escapeHtml(callout)}</li>`);
     }
     expect(html).toContain(`class="trait__meaning">${meaning}</p>`);
+    expect(html).toContain('facet-row facet-row--hi');
+    expect(html).toContain('facet-row facet-row--lo');
   });
 
   it('renders three action plan blocks without neuroticism phrasing', async () => {
@@ -262,6 +304,11 @@ describe('report template', () => {
     expect(html).toContain('30-day action plan');
     expect(html).not.toContain('Do more of Neuroticism');
     expect(html).toContain('Stress reset: stress-response sensitivity');
+    expect(html).toContain('Acknowledge your stress-response sensitivity');
+    expect(html).toContain('Use a quick regulation technique');
+    expect(html).toContain('Morning (10 min):');
+    expect(html).toContain('Evening (1 min):');
+    expect(html).toContain('Balance tips');
     expect(html.match(/<div class="roadmap__block">/g)?.length ?? 0).toBe(3);
   });
 

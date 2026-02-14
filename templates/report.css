@@ -209,6 +209,19 @@ h2 {
   font-variant-numeric: tabular-nums;
 }
 
+
+.facet-row--hi .facet-label {
+  font-weight: 600;
+}
+
+.facet-row--lo .facet-label {
+  font-weight: 600;
+}
+
+.facet-row--lo .facet-bar span {
+  background: #ec4899;
+}
+
 .trait__insights {
   display: grid;
   gap: 12px;
@@ -289,6 +302,14 @@ h2 {
   color: #344054;
 }
 
+.microhabit__list {
+  margin: 0;
+  padding-left: 18px;
+  display: grid;
+  gap: 6px;
+  color: #344054;
+}
+
 .report__resources {
   padding: 0;
 }
@@ -321,6 +342,11 @@ h2 {
   }
 
   .report__trait {
+    break-before: page;
+    page-break-before: always;
+  }
+
+  .report__pattern {
     break-before: page;
     page-break-before: always;
   }

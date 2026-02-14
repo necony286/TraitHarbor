@@ -5,6 +5,7 @@ import {
   getFacetSummary,
   getFacetSpread,
   getActionPlanSelections,
+  getMicroHabitChecklist,
   getMicroHabitRecommendation,
   getPersonalDevelopmentRoadmap,
   getTraitSummary,
@@ -60,20 +61,37 @@ describe('getPersonalDevelopmentRoadmap', () => {
   });
 });
 
+describe('getMicroHabitChecklist', () => {
+  it('returns null when no traits are ranked', () => {
+    expect(getMicroHabitChecklist([])).toBeNull();
+  });
+
+  it('returns mapped checklist actions for known top traits', () => {
+    expect(getMicroHabitChecklist(['Neuroticism', 'Openness'])).toEqual({
+      morning: 'Do a 2-minute stress reset with slow breathing and grounding.',
+      evening: 'Name your first stress signal and one response that helped.'
+    });
+  });
+
+  it('returns fallback checklist actions for unknown traits', () => {
+    expect(getMicroHabitChecklist(['CustomTrait', 'Openness'])).toEqual({
+      morning: 'Spend 10 minutes on one practical action that strengthens CustomTrait.',
+      evening: 'Name one moment today where you handled Openness with care.'
+    });
+  });
+});
+
 describe('getMicroHabitRecommendation', () => {
   it('returns an empty string when no traits are ranked', () => {
     expect(getMicroHabitRecommendation([])).toBe('');
   });
 
-  it.each`
-    name                                                                            | rankedTraits                                              | article | topTrait             | bottomTrait
-    ${'builds a recommendation for a top trait starting with a vowel'}              | ${['Openness', 'Conscientiousness']}                      | ${'an'} | ${'Openness'}        | ${'Conscientiousness'}
-    ${'builds a recommendation for a top trait starting with a consonant'}          | ${['Conscientiousness', 'Openness']}                      | ${'a'}  | ${'Conscientiousness'} | ${'Openness'}
-    ${'builds a recommendation using the same trait when only one is provided'}     | ${['Openness']}                                           | ${'an'} | ${'Openness'}        | ${'Openness'}
-    ${'builds a recommendation using the first and last traits from a longer list'} | ${['Agreeableness', 'Conscientiousness', 'Neuroticism']}   | ${'an'} | ${'Agreeableness'}   | ${'Neuroticism'}
-  `('$name', ({ rankedTraits, article, topTrait, bottomTrait }) => {
-    const expected = `You spend 7 days dedicating 10 minutes to ${article} ${topTrait}-aligned action each morning, then end the day by naming one ${bottomTrait}-related moment you handled with care.`;
-    expect(getMicroHabitRecommendation(rankedTraits)).toBe(expected);
+  it('returns checklist summary phrasing without aligned-action language', () => {
+    const recommendation = getMicroHabitRecommendation(['Openness', 'Conscientiousness']);
+
+    expect(recommendation).toContain('Morning:');
+    expect(recommendation).toContain('Evening:');
+    expect(recommendation).not.toMatch(/\baligned action\b/);
   });
 });
 
@@ -83,18 +101,18 @@ describe('getTraitMeaning', () => {
       trait: 'openness',
       score: 85,
       expected:
-        'Your Openness score is high. This trait shows up often and likely shapes how you think, feel, and act.'
+        'Openness reflects how you typically think, feel, and respond. This trait shows up often and likely shapes how you think, feel, and act.'
     },
     {
       trait: 'Openness',
       score: 55,
       expected:
-        'Your Openness score is balanced. You can flex this trait depending on the situation, balancing it with other strengths.'
+        'Openness reflects how you typically think, feel, and respond. You can flex this trait depending on the situation, balancing it with other strengths.'
     },
     {
       trait: 'Openness',
       score: 20,
-      expected: 'Your Openness score is low. You rely on this trait less, leaning on other qualities in most situations.'
+      expected: 'Openness reflects how you typically think, feel, and respond. You rely on this trait less, leaning on other qualities in most situations.'
     }
   ])('returns the expected narrative for $trait at $score', ({ trait, score, expected }) => {
     expect(getTraitMeaning(trait, score)).toBe(expected);
@@ -141,7 +159,7 @@ describe('getTraitSummary', () => {
 
   it.each([
     {
-      description: 'weakest facet',
+      description: 'lowest facet',
       facetScores: {
         Openness: {
           O1_Imagination: 82,
@@ -149,7 +167,7 @@ describe('getTraitSummary', () => {
         }
       },
       expected:
-        'Your openness is high (80/100). Within this trait, Imagination (82/100) stands out most, while Adventurousness (59/100) is lowest facet.'
+        'Your openness is high (80/100). Within this trait, Imagination (82/100) stands out most, while Adventurousness (59/100) is the lowest facet.'
     },
     {
       description: 'least strong facet',
@@ -160,7 +178,7 @@ describe('getTraitSummary', () => {
         }
       },
       expected:
-        'Your openness is high (80/100). Within this trait, Imagination (82/100) stands out most, while Adventurousness (61/100) is least strong facet.'
+        'Your openness is high (80/100). Within this trait, Imagination (82/100) stands out most, while Adventurousness (61/100) is the lowest facet.'
     }
   ])('should include facet details with $description label', ({ facetScores, expected }) => {
     const summary = getTraitSummary('openness', 80, facetScores);
@@ -178,6 +196,9 @@ describe('formatFacetLabel', () => {
     { raw: 'Warmth', expected: 'Warmth' },
     { raw: 'SelfConsciousness', expected: 'Self consciousness' },
     { raw: 'self-consciousness', expected: 'Self-consciousness' },
+    { raw: 'Depression', expected: 'Low mood' },
+    { raw: 'Anxiety', expected: 'Worry' },
+    { raw: 'Vulnerability', expected: 'Stress sensitivity' },
     { raw: '  ', expected: '' }
   ])('formats "$raw" into "$expected"', ({ raw, expected }) => {
     expect(formatFacetLabel(raw)).toBe(expected);
@@ -190,9 +211,9 @@ describe('getFacetSummary', () => {
   const lowestFacetName = 'Adventurousness';
 
   it.each([
-    { score: 60, label: 'least strong facet', description: 'meets the threshold' },
-    { score: 59, label: 'weakest facet', description: 'falls below the threshold' }
-  ])('uses $label when the lowest score $description ($score)', ({ score, label }) => {
+    { score: 60, description: 'meets the threshold' },
+    { score: 59, description: 'falls below the threshold' }
+  ])('uses neutral lowest-facet wording when the lowest score $description ($score)', ({ score }) => {
     const summary = getFacetSummary('Openness', {
       Openness: {
         [strongestFacetName]: strongestFacetScore,
@@ -201,8 +222,8 @@ describe('getFacetSummary', () => {
     });
 
     expect(summary?.callouts).toEqual([
-      `Your strongest facet: ${strongestFacetName} (${strongestFacetScore}/100).`,
-      `Your ${label}: ${lowestFacetName} (${score}/100).`
+      `Most pronounced facet: ${strongestFacetName} (${strongestFacetScore}/100).`,
+      `Lowest facet: ${lowestFacetName} (${score}/100).`
     ]);
   });
 
@@ -215,8 +236,8 @@ describe('getFacetSummary', () => {
     });
 
     expect(summary?.callouts).toEqual([
-      'Your strongest facet: Imagination (82/100).',
-      'Your weakest facet: Adventurousness (59/100).'
+      'Most pronounced facet: Imagination (82/100).',
+      'Lowest facet: Adventurousness (59/100).'
     ]);
   });
 });
@@ -234,7 +255,7 @@ describe('getFacetSpread', () => {
       expected: { range: 25, stdev: 10.3 }
     },
     {
-      label: 'Spiky',
+      label: 'Varied',
       scores: { Imagination: 30, Adventurousness: 60, ArtisticInterests: 90 },
       expected: { range: 60, stdev: 24.5 }
     }
@@ -244,7 +265,8 @@ describe('getFacetSpread', () => {
     expect(summary?.label).toBe(label);
     expect(summary?.range).toBe(expected.range);
     expect(summary?.stdev).toBe(expected.stdev);
-    expect(summary?.description).toContain(`(Range ${expected.range}, stdev ${expected.stdev}.)`);
+    expect(summary?.description).toContain(`(Range ${expected.range} points.)`);
+    expect(summary?.description).not.toContain('stdev');
   });
 });
 

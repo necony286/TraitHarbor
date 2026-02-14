@@ -47,6 +47,15 @@ export const formatFacetLabel = (raw: string): string => {
   if (!collapsed) {
     return '';
   }
+  const facetLabelOverrides: Record<string, string> = {
+    depression: 'Low mood',
+    anxiety: 'Worry',
+    vulnerability: 'Stress sensitivity'
+  };
+  const override = facetLabelOverrides[collapsed.toLowerCase()];
+  if (override) {
+    return override;
+  }
   const lower = collapsed.toLowerCase();
   return `${lower.charAt(0).toUpperCase()}${lower.slice(1)}`;
 };
@@ -423,12 +432,13 @@ export const getGrowthTips = (trait: string, score: number): string[] =>
   getTraitContent(trait, score)?.growth ?? [];
 
 export const getTraitMeaning = (trait: string, score: number): string => {
-  const voice = NARRATIVE_VOICE;
   const band = getScoreBand(score);
   const traitName = resolveTraitLabel(trait);
-  const bandLabel = getScoreBandLabelForBand(band);
-  const base = `${voice.possessiveAdjective} ${traitName} score is ${bandLabel.toLowerCase()}.`;
-  return escapeHtml(base + TRAIT_MEANING_SUFFIXES[band]);
+  return escapeHtml(
+    `${traitName} reflects how ${NARRATIVE_VOICE.subjectPronoun} typically think, feel, and respond. ${
+      TRAIT_MEANING_SUFFIXES[band].trim()
+    }`
+  );
 };
 
 export const getWorkStyleTips = (trait: string, score: number): string[] =>
@@ -465,8 +475,6 @@ export type FacetSummary = {
   facets: { facetName: string; score: number }[];
   callouts: string[];
 };
-
-const LEAST_STRONG_FACET_SCORE_THRESHOLD = 60;
 
 export const getFacetSummary = (
   trait: string,
@@ -505,13 +513,11 @@ export const getFacetSummary = (
   const callouts: string[] = [];
   const [topFacet] = facets;
   if (topFacet) {
-    callouts.push(`Your strongest facet: ${topFacet.facetName} (${topFacet.score}/100).`);
+    callouts.push(`Most pronounced facet: ${topFacet.facetName} (${topFacet.score}/100).`);
   }
   const lowestFacet = facets[facets.length - 1];
   if (lowestFacet && lowestFacet.facetName !== topFacet.facetName) {
-    const lowestFacetLabel =
-      lowestFacet.score >= LEAST_STRONG_FACET_SCORE_THRESHOLD ? 'least strong facet' : 'weakest facet';
-    callouts.push(`Your ${lowestFacetLabel}: ${lowestFacet.facetName} (${lowestFacet.score}/100).`);
+    callouts.push(`Lowest facet: ${lowestFacet.facetName} (${lowestFacet.score}/100).`);
   }
 
   return { facets, callouts };
@@ -645,15 +651,61 @@ export const getPersonalDevelopmentRoadmap = (
   ];
 };
 
-export const getMicroHabitRecommendation = (traitRankOrder: string[]): string => {
+export type MicroHabitChecklist = {
+  morning: string;
+  evening: string;
+};
+
+const MICRO_HABIT_CHECKLISTS: Partial<Record<TraitName, MicroHabitChecklist>> = {
+  Openness: {
+    morning: 'Explore one new idea for 10 minutes and write down one practical next step.',
+    evening: 'Note one moment where curiosity helped you adapt.'
+  },
+  Conscientiousness: {
+    morning: 'Choose one priority and complete a focused 10-minute starter step.',
+    evening: 'Check off one commitment you followed through on.'
+  },
+  Extraversion: {
+    morning: 'Send one short message to initiate a supportive conversation.',
+    evening: 'Reflect on one interaction that gave you energy.'
+  },
+  Agreeableness: {
+    morning: 'Offer one helpful action while naming one clear boundary.',
+    evening: 'Record one time you balanced support with self-respect.'
+  },
+  Neuroticism: {
+    morning: 'Do a 2-minute stress reset with slow breathing and grounding.',
+    evening: 'Name your first stress signal and one response that helped.'
+  }
+};
+
+export const getMicroHabitChecklist = (traitRankOrder: string[]): MicroHabitChecklist | null => {
   if (!traitRankOrder.length) {
+    return null;
+  }
+
+  const [topTraitRaw] = traitRankOrder;
+  const topTrait = resolveTraitName(topTraitRaw);
+
+  if (topTrait && MICRO_HABIT_CHECKLISTS[topTrait]) {
+    return MICRO_HABIT_CHECKLISTS[topTrait];
+  }
+
+  const bottomTrait = traitRankOrder[traitRankOrder.length - 1] ?? topTraitRaw;
+
+  return {
+    morning: `Spend 10 minutes on one practical action that strengthens ${topTraitRaw}.`,
+    evening: `Name one moment today where you handled ${bottomTrait} with care.`
+  };
+};
+
+export const getMicroHabitRecommendation = (traitRankOrder: string[]): string => {
+  const checklist = getMicroHabitChecklist(traitRankOrder);
+  if (!checklist) {
     return '';
   }
 
-  const [topTrait] = traitRankOrder;
-  const bottomTrait = traitRankOrder[traitRankOrder.length - 1];
-
-  return `You spend 7 days dedicating 10 minutes to ${articleFor(topTrait)} ${topTrait}-aligned action each morning, then end the day by naming one ${bottomTrait}-related moment you handled with care.`;
+  return `Morning: ${checklist.morning} Evening: ${checklist.evening}`;
 };
 
 export const getScoreBandLabel = (score: number): ScoreBandLabel =>
@@ -694,14 +746,13 @@ const getFacetSpreadLabel = ({
   range,
   stdev,
   roundedRange,
-  roundedStdev
+  roundedStdev: _roundedStdev
 }: FacetSpreadLabelOptions) => {
-  const formatMetrics = () =>
-    `Range ${roundedRange}${Number.isFinite(roundedStdev) ? `, stdev ${roundedStdev}` : ''}.`;
+  const formatMetrics = () => `Range ${roundedRange} points.`;
   if (range >= SPIKY_SPREAD_RANGE_MIN || stdev >= SPIKY_SPREAD_STDEV_MIN) {
     return {
-      label: 'Spiky',
-      description: `Facet scores swing sharply across this trait, highlighting pronounced highs and lows. (${formatMetrics()})`
+      label: 'Varied',
+      description: `Facet scores differ noticeably across this trait, with clearer highs and lows. (${formatMetrics()})`
     };
   }
   if (range <= EVEN_SPREAD_RANGE_MAX && stdev <= EVEN_SPREAD_STDEV_MAX) {
@@ -753,12 +804,10 @@ export const getTraitSummary = (
     const { facets } = summary;
     const topFacet = facets[0];
     const bottomFacet = facets[facets.length - 1];
-    const bottomLabel =
-      bottomFacet.score >= LEAST_STRONG_FACET_SCORE_THRESHOLD ? 'least strong facet' : 'lowest facet';
     return escapeHtml(
       `Your ${traitName.toLowerCase()} is ${bandLabel} (${Math.round(
         score
-      )}/100). Within this trait, ${topFacet.facetName} (${topFacet.score}/100) stands out most, while ${bottomFacet.facetName} (${bottomFacet.score}/100) is ${bottomLabel}.`
+      )}/100). Within this trait, ${topFacet.facetName} (${topFacet.score}/100) stands out most, while ${bottomFacet.facetName} (${bottomFacet.score}/100) is the lowest facet.`
     );
   }
   return escapeHtml(

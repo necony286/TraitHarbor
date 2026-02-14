@@ -21,7 +21,7 @@ import {
   getFacetSummary,
   getFacetSpread,
   getActionPlanSelections,
-  getMicroHabitRecommendation,
+  getMicroHabitChecklist,
   getPersonalDevelopmentRoadmap,
   getPatternSummary,
   getResourcesMethodologyText,
@@ -112,20 +112,32 @@ export const traitSectionOrder = [
   { name: 'Neuroticism', token: 'neuroticism', scoreKey: 'N' }
 ] as const;
 
-const buildFacetBars = (facets: { facetName: string; score: number }[]) =>
-  facets.length
-    ? `<div class="facet-grid">
+const buildFacetBars = (facets: { facetName: string; score: number }[]) => {
+  if (!facets.length) {
+    return '';
+  }
+
+  const scores = facets.map(({ score }) => clampScore(score));
+  const maxScore = Math.max(...scores);
+  const minScore = Math.min(...scores);
+
+  return `<div class="facet-grid">
 ${facets
-  .map(
-    ({ facetName, score }) => `          <div class="facet-row">
+  .map(({ facetName, score }) => {
+    const roundedScore = clampScore(score);
+    const classes = ['facet-row'];
+    if (roundedScore === maxScore) classes.push('facet-row--hi');
+    if (roundedScore === minScore) classes.push('facet-row--lo');
+
+    return `          <div class="${classes.join(' ')}">
             <span class="facet-label">${escapeHtml(facetName)}</span>
-            <div class="facet-bar"><span style="width:${clampScore(score)}%"></span></div>
-            <span class="facet-value">${clampScore(score)}/100</span>
-          </div>`
-  )
+            <div class="facet-bar"><span style="width:${roundedScore}%"></span></div>
+            <span class="facet-value">${roundedScore}/100</span>
+          </div>`;
+  })
   .join('\n')}
-        </div>`
-    : '';
+        </div>`;
+};
 
 const buildTraitSections = (
   scores: Record<typeof traitSectionOrder[number]['scoreKey'], number>,
@@ -186,7 +198,7 @@ ${strengths || '              <li>Identify the strengths that support your goals
             </ul>
           </div>
           <div class="card">
-            <h3>Watch-outs</h3>
+            <h3>Balance tips</h3>
             <ul>
 ${watchOuts || '              <li>Focus on one growth habit that keeps you balanced.</li>'}
             </ul>
@@ -440,15 +452,15 @@ const buildActionPlanBlocks = (
   const blocks = [
     {
       title: `Lean into: ${selections.leanInto}`,
-      items: leanIntoGuidance.strengths.slice(0, 2)
+      items: [leanIntoGuidance.microAction, ...leanIntoGuidance.strengths.slice(0, 1)]
     },
     {
       title: `Support: ${selections.support}`,
-      items: supportGuidance.watchOuts.slice(0, 2)
+      items: [supportGuidance.microAction, ...supportGuidance.watchOuts.slice(0, 1)]
     },
     {
       title: `Stress reset: ${stressResetLabel}`,
-      items: stressResetItems.slice(0, 2)
+      items: stressResetItems
     }
   ];
 
@@ -472,11 +484,18 @@ ${listItems}
 };
 
 const buildMicroHabitHtml = (traitRankOrder: string[]) => {
-  const microHabitText = getMicroHabitRecommendation(traitRankOrder);
-  if (!microHabitText) {
-    return '<p class="muted">Create a 7-day habit that reinforces your growth focus.</p>';
+  const checklist = getMicroHabitChecklist(traitRankOrder);
+  if (!checklist) {
+    return `<ul class="microhabit__list">
+        <li>Morning (10 min): Choose one practical action that supports your focus.</li>
+        <li>Evening (1 min): Name one moment where you handled a challenge with care.</li>
+      </ul>`;
   }
-  return `<p>${escapeHtml(microHabitText)}</p>`;
+
+  return `<ul class="microhabit__list">
+        <li>Morning (10 min): ${escapeHtml(checklist.morning)}</li>
+        <li>Evening (1 min): ${escapeHtml(checklist.evening)}</li>
+      </ul>`;
 };
 
 const buildResourcesMethodologyHtml = (resourcesMethodology: string[]) => {
@@ -760,13 +779,25 @@ export async function buildReportHtml(payload: ReportPayload) {
   const actionPlanBlocks = buildActionPlanBlocks(clampedTraitPercentages, traitRankOrder);
   const microHabitHtml = buildMicroHabitHtml(traitRankOrder);
   const resourcesMethodologyHtml = buildResourcesMethodologyHtml(resourcesMethodology);
-  const hasPercentiles =
-    payload.traitPercentiles &&
-    Object.values(payload.traitPercentiles).some((value) => Number.isFinite(value));
-  const comparisonSection = hasPercentiles
+  const percentileEntries = Object.entries(payload.traitPercentiles ?? {}).filter(([, value]) =>
+    Number.isFinite(value)
+  );
+  const hasPercentiles = percentileEntries.length > 0;
+  const percentileItems = percentileEntries
+    .map(([trait, value]) => `        <li>${escapeHtml(trait)}: ${clampScore(value)}/100</li>`)
+    .join('\n');
+  const comparisonSection = traitRankOrder.length
     ? `      <section class="report__comparison">
-        <h2>How You Compare to Others</h2>
+        <h2>Your trait rank order</h2>
         <p>${escapeHtml(comparisonText)}</p>
+${
+  hasPercentiles
+    ? `        <p class="muted">Percentile snapshot (when available):</p>
+        <ul>
+${percentileItems}
+        </ul>`
+    : ''
+}
       </section>`
     : '';
 

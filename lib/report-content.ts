@@ -688,7 +688,7 @@ export const getMicroHabitChecklist = (traitRankOrder: string[]): MicroHabitChec
   const topTrait = resolveTraitName(topTraitRaw);
 
   if (topTrait && MICRO_HABIT_CHECKLISTS[topTrait]) {
-    return MICRO_HABIT_CHECKLISTS[topTrait] ?? null;
+    return MICRO_HABIT_CHECKLISTS[topTrait];
   }
 
   const bottomTrait = traitRankOrder[traitRankOrder.length - 1] ?? topTraitRaw;

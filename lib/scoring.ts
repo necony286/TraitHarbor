@@ -52,12 +52,13 @@ export const scoreAnswers = (answers: AnswerMap, items: QuizItem[]): ScoreResult
     const adjusted = item.reverseKeyed ? -mapped : mapped;
     raw[item.trait] += adjusted;
 
-    if (item.facet) {
+    const facetKey = item.facetKey ?? item.facet;
+    if (facetKey) {
       const traitName = TRAIT_NAME_BY_KEY.get(item.trait) ?? item.trait;
       facetRaw[traitName] ??= {};
       facetCounts[traitName] ??= {};
-      facetRaw[traitName][item.facet] = (facetRaw[traitName][item.facet] ?? 0) + adjusted;
-      facetCounts[traitName][item.facet] = (facetCounts[traitName][item.facet] ?? 0) + 1;
+      facetRaw[traitName][facetKey] = (facetRaw[traitName][facetKey] ?? 0) + adjusted;
+      facetCounts[traitName][facetKey] = (facetCounts[traitName][facetKey] ?? 0) + 1;
     }
   });
 

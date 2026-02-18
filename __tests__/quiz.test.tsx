@@ -15,6 +15,11 @@ describe('ipip loader', () => {
     expect(items).toHaveLength(120);
   });
 
+  it('loads the Quick IPIP-60 set', () => {
+    const items = loadQuizItems({ variant: 'ipip60' });
+    expect(items).toHaveLength(60);
+  });
+
   it('honors fixture mode for quick runs', () => {
     process.env.NEXT_PUBLIC_QUIZ_FIXTURE_MODE = '1';
     const items = loadQuizItems();
@@ -28,16 +33,27 @@ describe('quiz storage helpers', () => {
   });
 
   it('persists and restores quiz state with matching item count', () => {
-    saveQuizState({ answers: { Q1: 3 }, currentPage: 2, itemCount: 5 });
-    const restored = loadQuizState(5);
+    saveQuizState('ipip120', { answers: { Q1: 3 }, currentPage: 2, itemCount: 5 });
+    const restored = loadQuizState('ipip120', 5);
     expect(restored?.answers.Q1).toBe(3);
     expect(restored?.currentPage).toBe(2);
   });
 
   it('ignores state when item count changes', () => {
-    saveQuizState({ answers: { Q1: 3 }, currentPage: 1, itemCount: 5 });
-    const restored = loadQuizState(10);
+    saveQuizState('ipip120', { answers: { Q1: 3 }, currentPage: 1, itemCount: 5 });
+    const restored = loadQuizState('ipip120', 10);
     expect(restored).toBeNull();
+  });
+
+  it('keeps quick and pro quiz state separate', () => {
+    saveQuizState('ipip120', { answers: { Q1: 3 }, currentPage: 1, itemCount: 120 });
+    saveQuizState('ipip60', { answers: { Q2: 4 }, currentPage: 0, itemCount: 60 });
+
+    const pro = loadQuizState('ipip120', 120);
+    const quick = loadQuizState('ipip60', 60);
+
+    expect(pro?.answers.Q1).toBe(3);
+    expect(quick?.answers.Q2).toBe(4);
   });
 });
 

@@ -14,10 +14,9 @@ describe('ipip facet mapping guardrails', () => {
   it('throws when facet mappings are missing in test', async () => {
     vi.doMock('../src/data/ipip120.facets.json', () => ({ default: {} }));
 
-    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    vi.spyOn(console, 'warn').mockImplementation(() => {});
     const { loadQuizItems } = await import('../lib/ipip');
 
-    expect(() => loadQuizItems()).toThrow(/Missing facet mappings/);
-    expect(warnSpy).toHaveBeenCalled();
+    expect(() => loadQuizItems()).toThrow(/Missing facetKey mapping/);
   });
 });

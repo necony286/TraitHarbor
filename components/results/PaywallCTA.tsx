@@ -1,19 +1,22 @@
 'use client';
 
 import { useEffect } from 'react';
+import Link from 'next/link';
 import { trackEvent } from '../../lib/analytics';
 import { CheckoutButton } from '../paywall/CheckoutButton';
 import { Badge } from '../ui/Badge';
 import { Card, CardContent } from '../ui/Card';
+import type { QuizVariant } from '../../lib/ipip';
 
 type PaywallCTAProps = {
   resultId: string;
+  quizVariant: QuizVariant;
 };
 
-export function PaywallCTA({ resultId }: PaywallCTAProps) {
+export function PaywallCTA({ resultId, quizVariant }: PaywallCTAProps) {
   useEffect(() => {
-    trackEvent('paywall_view', { resultId });
-  }, [resultId]);
+    trackEvent('paywall_view', { resultId, quizVariant });
+  }, [quizVariant, resultId]);
 
   return (
     <Card className="shadow-sm">
@@ -24,6 +27,14 @@ export function PaywallCTA({ resultId }: PaywallCTAProps) {
           <p className="text-sm text-muted-foreground">
             Get a personalized, shareable report with deep trait insights and tailored guidance.
           </p>
+          {quizVariant === 'ipip60' ? (
+            <p className="text-sm text-slate-700">
+              Want more detail first?{' '}
+              <Link href="/quiz" className="font-semibold text-indigo-700 underline underline-offset-2">
+                Go deeper (Pro): 120 questions
+              </Link>
+            </p>
+          ) : null}
         </div>
         <CheckoutButton resultId={resultId} />
       </CardContent>

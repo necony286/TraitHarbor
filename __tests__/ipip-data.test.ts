@@ -85,10 +85,10 @@ describe('IPIP-120 data integrity', () => {
 
   it('ensures every facet has exactly four items', () => {
     const counts = items.reduce<Record<string, number>>((acc, item) => {
-      if (!item.facet) {
+      if (!item.facetKey) {
         return acc;
       }
-      acc[item.facet] = (acc[item.facet] ?? 0) + 1;
+      acc[item.facetKey] = (acc[item.facetKey] ?? 0) + 1;
       return acc;
     }, {});
 

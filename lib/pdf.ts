@@ -31,7 +31,7 @@ import {
   getTraitSummary
 } from './report-content';
 import { getTraitExtremes } from './trait-extremes';
-
+import type { QuizVariant } from './ipip';
 
 export type ReportTraits = {
   O: number;
@@ -50,8 +50,12 @@ export type ReportPayload = {
   lowestTrait: string;
   traitRankOrder: string[];
   facetScores?: Record<string, Record<string, number>>;
+  quizVariant?: QuizVariant;
 };
 
+
+const getReportLabel = (quizVariant?: QuizVariant) =>
+  quizVariant === 'ipip60' ? 'TraitHarbor Quick Report' : 'TraitHarbor Pro Report';
 const MAX_PDF_BYTES = 700 * 1024;
 export const MAX_CONCURRENT_PDF = 2;
 const PDF_TIMEOUT_MS = 60_000;
@@ -801,6 +805,8 @@ ${percentileItems}
       </section>`
     : '';
 
+  const reportLabel = getReportLabel(payload.quizVariant);
+
   return template
     .replace('{{styles}}', styles)
     .replace('{{trait_sections}}', buildTraitSections(scores, clampedTraitPercentages, payload.facetScores))
@@ -811,6 +817,7 @@ ${percentileItems}
     .replace('{{facet_callout}}', facetCallout)
     .replace('{{guardrails_html}}', guardrailsHtml)
     .replace('{{comparison_section}}', comparisonSection)
+    .replaceAll('{{report_label}}', escapeHtml(reportLabel))
     .replaceAll('{{date}}', escapeHtml(formatDate(payload.date)))
     .replaceAll('{{score_O}}', scores.O.toString())
     .replaceAll('{{score_C}}', scores.C.toString())
@@ -863,13 +870,15 @@ export async function generateReportPdf(payload: ReportPayload) {
       }
       await new Promise((resolve) => setTimeout(resolve, 50));
 
+      const reportLabel = getReportLabel(payload.quizVariant);
+
       const pdf = await page.pdf({
         format: 'A4',
         printBackground: true,
         displayHeaderFooter: true,
         headerTemplate:
           `<div style="width: 100%; font-size: 10px; color: #4b5563; padding: 0 24px; text-align: right;">` +
-          `TraitHarbor Premium Report | Page <span class='pageNumber'></span>` +
+          `${reportLabel} | Page <span class='pageNumber'></span>` +
           `</div>`,
         footerTemplate:
           `<div style="width: 100%; font-size: 8px; color: #9ca3af; padding: 0 24px; text-align: right;">` +

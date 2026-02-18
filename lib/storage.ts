@@ -1,10 +1,12 @@
+import type { QuizVariant } from './ipip';
+
 export type QuizState = {
   answers: Record<string, number>;
   currentPage: number;
   itemCount: number;
 };
 
-const QUIZ_STATE_KEY = 'traitharbor:quiz-state';
+const QUIZ_STATE_KEY_PREFIX = 'traitharbor:quiz-state';
 
 const isBrowser = typeof window !== 'undefined';
 
@@ -16,6 +18,8 @@ const getReportBucket = () => {
   return process.env.SUPABASE_REPORTS_BUCKET ?? 'reports';
 };
 
+const getQuizStateKey = (quizVariant: QuizVariant) => `${QUIZ_STATE_KEY_PREFIX}:${quizVariant}`;
+
 export const getReportPath = (orderId: string) =>
   `orders/${REPORT_TEMPLATE_VERSION}/${orderId}.pdf`;
 
@@ -26,10 +30,10 @@ const getReportStorageClient = async () => {
   return getSupabaseAdminClient().storage.from(getReportBucket());
 };
 
-export function loadQuizState(expectedItemCount: number): QuizState | null {
+export function loadQuizState(quizVariant: QuizVariant, expectedItemCount: number): QuizState | null {
   if (!isBrowser) return null;
 
-  const raw = window.localStorage.getItem(QUIZ_STATE_KEY);
+  const raw = window.localStorage.getItem(getQuizStateKey(quizVariant));
   if (!raw) return null;
 
   try {
@@ -44,14 +48,14 @@ export function loadQuizState(expectedItemCount: number): QuizState | null {
   }
 }
 
-export function saveQuizState(state: QuizState) {
+export function saveQuizState(quizVariant: QuizVariant, state: QuizState) {
   if (!isBrowser) return;
-  window.localStorage.setItem(QUIZ_STATE_KEY, JSON.stringify(state));
+  window.localStorage.setItem(getQuizStateKey(quizVariant), JSON.stringify(state));
 }
 
-export function clearQuizState() {
+export function clearQuizState(quizVariant: QuizVariant) {
   if (!isBrowser) return;
-  window.localStorage.removeItem(QUIZ_STATE_KEY);
+  window.localStorage.removeItem(getQuizStateKey(quizVariant));
 }
 
 export async function getReportSignedUrl(orderId: string, ttlSeconds = REPORT_TTL_SECONDS): Promise<string | null> {

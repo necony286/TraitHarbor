@@ -1,18 +1,37 @@
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
-import { loadQuizItems } from '../../../../lib/ipip';
-import { getMissingAnswerIds, scoreAnswers } from '../../../../lib/scoring';
+import { loadQuizItems, resolveQuizVariant } from '../../../../lib/ipip';
+import { scoreAnswers } from '../../../../lib/scoring';
 import { createResponseAndScores } from '../../../../lib/db';
 import { enforceRateLimit } from '../../../../lib/rate-limit';
 
 const scoreRequestSchema = z.object({
   answers: z.record(z.string(), z.number().int().min(1).max(5)),
-  userId: z.string().uuid()
+  userId: z.string().uuid(),
+  quizVariant: z.enum(['ipip120', 'ipip60']).optional()
 });
 
 const isAnswerStorageError = (error?: { code?: string } | null) => {
   if (!error?.code) return false;
   return error.code.startsWith('XXA');
+};
+
+const getIdSet = (ids: string[]) => new Set(ids);
+
+const getAnswerSetMismatch = ({
+  submittedIds,
+  expectedIds
+}: {
+  submittedIds: string[];
+  expectedIds: string[];
+}) => {
+  const submittedSet = getIdSet(submittedIds);
+  const expectedSet = getIdSet(expectedIds);
+
+  const missing = expectedIds.filter((id) => !submittedSet.has(id));
+  const extra = submittedIds.filter((id) => !expectedSet.has(id));
+
+  return { missing, extra };
 };
 
 export async function POST(request: Request) {
@@ -48,33 +67,25 @@ export async function POST(request: Request) {
   }
 
   const { answers, userId } = parsed.data;
-  const items = loadQuizItems();
-  const allowedIds = new Set(items.map((item) => item.id));
-  const sanitizedAnswers: Record<string, number> = {};
-  const extraIds: string[] = [];
+  const quizVariant = resolveQuizVariant(parsed.data.quizVariant);
+  const items = loadQuizItems({ variant: quizVariant });
+  const submittedIds = Object.keys(answers);
+  const expectedIds = items.map((item) => item.id);
+  const { missing, extra } = getAnswerSetMismatch({ submittedIds, expectedIds });
 
-  for (const [id, value] of Object.entries(answers)) {
-    if (allowedIds.has(id)) {
-      sanitizedAnswers[id] = value;
-    } else {
-      extraIds.push(id);
-    }
-  }
-
-  if (extraIds.length > 0) {
+  if (missing.length > 0 || extra.length > 0) {
     return NextResponse.json(
-      { error: 'Unexpected answers.', extra: extraIds },
+      {
+        error: 'Answer IDs must exactly match quiz items for this quiz variant.',
+        quizVariant,
+        missing,
+        extra
+      },
       { status: 400 }
     );
   }
 
-  const missing = getMissingAnswerIds(sanitizedAnswers, items);
-
-  if (missing.length > 0) {
-    return NextResponse.json({ error: 'Missing answers.', missing }, { status: 400 });
-  }
-
-  const result = scoreAnswers(sanitizedAnswers, items);
+  const result = scoreAnswers(answers, items);
 
   let createdResultId: string | null = null;
   let createError: { code?: string; message?: string } | null = null;
@@ -82,10 +93,11 @@ export async function POST(request: Request) {
   try {
     const response = await createResponseAndScores({
       userId,
-      answers: sanitizedAnswers,
+      answers,
       traits: result.traits,
       facetScores: result.facetScores,
-      expectedCount: items.length
+      expectedCount: items.length,
+      quizVariant
     });
     createdResultId = response.data;
     createError = response.error;
@@ -104,5 +116,5 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: errorMessage }, { status: 500 });
   }
 
-  return NextResponse.json({ resultId: createdResultId });
+  return NextResponse.json({ resultId: createdResultId, quizVariant });
 }

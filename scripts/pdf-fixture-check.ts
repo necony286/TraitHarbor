@@ -29,7 +29,8 @@ const payload: ReportPayload = {
   traitPercentiles: { ...traitPercentages }, // TODO: Replace with actual percentile data. Mirrored for now to enable percentile-dependent UI sections.
   highestTrait: traitRankOrder[0],
   lowestTrait: traitRankOrder[traitRankOrder.length - 1],
-  traitRankOrder
+  traitRankOrder,
+  quizVariant: 'ipip120'
 };
 
 (async () => {

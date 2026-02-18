@@ -227,12 +227,7 @@ export const getScoresByResultId = async (
   resultId: string
 ): Promise<DbResult<TraitScores>> => {
   const { data, error } = await getScoresAndQuizVariantByResultId(resultId);
-
-  if (error || !data) {
-    return { data: data?.traits ?? null, error };
-  }
-
-  return { data: data.traits, error: null };
+  return { data: data?.traits ?? null, error };
 };
 
 export const getFacetScoresByResultId = async (

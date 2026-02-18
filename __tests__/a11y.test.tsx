@@ -10,45 +10,59 @@ import CheckoutCallbackClient from '../src/app/checkout/callback/CheckoutCallbac
 vi.mock('next/navigation', () => ({
   useRouter: () => ({ push: vi.fn() }),
   useSearchParams: () => ({
-    get: (key: string) => (key === 'session_id' ? 'session-123' : null)
+    get: (key: string) => (key === 'session_id' ? 'session-123' : null),
   }),
-  redirect: vi.fn()
+  redirect: vi.fn(),
 }));
 
 vi.mock('next/link', () => ({
-  default: ({ href, children, ...props }: { href: string; children: React.ReactNode }) => (
+  default: ({
+    href,
+    children,
+    ...props
+  }: {
+    href: string;
+    children: React.ReactNode;
+  }) => (
     <a href={href} {...props}>
       {children}
     </a>
-  )
+  ),
 }));
 
 vi.mock('../lib/analytics', () => ({
   trackQuizEvent: vi.fn(),
-  trackEvent: vi.fn()
+  trackEvent: vi.fn(),
 }));
 
 vi.mock('../lib/storage', () => ({
   saveQuizState: vi.fn(),
   loadQuizState: vi.fn(() => null),
-  clearQuizState: vi.fn()
+  clearQuizState: vi.fn(),
 }));
 
 vi.mock('../lib/ipip', () => ({
   loadQuizItems: () => [
     { id: 'Q1', prompt: 'Question one.' },
-    { id: 'Q2', prompt: 'Question two.' }
-  ]
+    { id: 'Q2', prompt: 'Question two.' },
+  ],
 }));
 
 vi.mock('../lib/anonymous-user', () => ({
   getOrCreateAnonymousUserId: vi.fn(),
   getAnonymousUserId: vi.fn(() => null),
-  setAnonymousUserId: vi.fn()
+  setAnonymousUserId: vi.fn(),
 }));
 
 vi.mock('../lib/db', () => ({
-  getScoresByResultId: vi.fn(async () => ({ data: null, error: { message: 'Unavailable.' } }))
+  getScoresByResultId: vi.fn(async () => ({
+    data: null,
+    error: { message: 'Unavailable.' },
+  })),
+  getScoresAndQuizVariantByResultId: vi.fn(async () => ({
+    data: null,
+    error: { message: 'Unavailable.' },
+  })),
 }));
 
 const AXE_SUITE_TIMEOUT_MS = 30000;
@@ -85,7 +99,9 @@ describe('core screens a11y', { timeout: AXE_SUITE_TIMEOUT_MS }, () => {
     vi.stubEnv('SUPABASE_SERVICE_ROLE_KEY', '');
 
     const ui = await ResultsPage({
-      params: Promise.resolve({ resultId: '11111111-1111-1111-1111-111111111111' })
+      params: Promise.resolve({
+        resultId: '11111111-1111-1111-1111-111111111111',
+      }),
     });
     const { container } = render(ui);
     const results = await axe(container);
@@ -103,13 +119,13 @@ describe('core screens a11y', { timeout: AXE_SUITE_TIMEOUT_MS }, () => {
       paidAt: '2024-01-02T00:00:00.000Z',
       email: 'buyer@example.com',
       reportReady: true,
-      providerSessionId: 'session-123'
+      providerSessionId: 'session-123',
     };
 
     const fetchMock = vi.fn().mockResolvedValueOnce(
       new Response(JSON.stringify({ order: paidOrder }), {
         status: 200,
-        headers: { 'Content-Type': 'application/json' }
+        headers: { 'Content-Type': 'application/json' },
       })
     );
 

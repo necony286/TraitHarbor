@@ -11,13 +11,13 @@ const traitSchema = z.object({
   C: z.number(),
   E: z.number(),
   A: z.number(),
-  N: z.number()
+  N: z.number(),
 });
 
 const scoreRowSchema = z.object({
   response_id: z.string().uuid(),
   traits: traitSchema,
-  quiz_variant: z.enum(['ipip120', 'ipip60']).optional().nullable()
+  quiz_variant: z.enum(['ipip120', 'ipip60']).optional().nullable(),
 });
 
 const facetScoresSchema = z.record(z.record(z.number()));
@@ -45,6 +45,11 @@ type CreateResponseParams = {
   traits: TraitScores;
   facetScores?: FacetScores | null;
   expectedCount: number;
+  quizVariant: QuizVariant;
+};
+
+export type ScoresWithVariant = {
+  traits: TraitScores;
   quizVariant: QuizVariant;
 };
 
@@ -113,7 +118,7 @@ export const reportAccessLinkSchema = z.object({
   token_hash: z.string(),
   expires_at: reportAccessLinkTimestampSchema,
   used_at: reportAccessLinkTimestampSchema.nullable().optional(),
-  created_at: reportAccessLinkTimestampSchema
+  created_at: reportAccessLinkTimestampSchema,
 });
 
 const PAID_ORDER_COLUMNS =
@@ -132,7 +137,9 @@ const REPORT_ACCESS_LINK_COLUMNS = REPORT_ACCESS_LINK_COLUMNS_ARRAY.join(', ');
 
 const ensureUserRecord = async (userId: string): Promise<DbError | null> => {
   const supabase = getSupabaseAdminClient();
-  const { error } = await supabase.from('users').upsert({ id: userId }, { onConflict: 'id' });
+  const { error } = await supabase
+    .from('users')
+    .upsert({ id: userId }, { onConflict: 'id' });
   if (error) {
     return { message: error.message, code: error.code };
   }
@@ -153,7 +160,7 @@ export const createResponseAndScores = async ({
   traits,
   facetScores,
   expectedCount,
-  quizVariant
+  quizVariant,
 }: CreateResponseParams): Promise<DbResult<string>> => {
   const userError = await ensureUserRecord(userId);
   if (userError) {
@@ -167,11 +174,14 @@ export const createResponseAndScores = async ({
     traits,
     facet_scores: facetScores ?? null,
     expected_count: expectedCount,
-    quiz_variant: quizVariant
+    quiz_variant: quizVariant,
   });
 
   if (error || !data) {
-    return { data: null, error: mapDbError(error, 'Failed to create response.') };
+    return {
+      data: null,
+      error: mapDbError(error, 'Failed to create response.'),
+    };
   }
 
   if (typeof data !== 'string') {
@@ -181,7 +191,9 @@ export const createResponseAndScores = async ({
   return { data, error: null };
 };
 
-export const getScoresByResultId = async (resultId: string): Promise<DbResult<TraitScores>> => {
+export const getScoresAndQuizVariantByResultId = async (
+  resultId: string
+): Promise<DbResult<ScoresWithVariant>> => {
   const supabase = getSupabaseAdminClient();
   const { data, error } = await supabase
     .from('scores')
@@ -202,33 +214,25 @@ export const getScoresByResultId = async (resultId: string): Promise<DbResult<Tr
     return { data: null, error: { message: parsed.error.message } };
   }
 
-  return { data: parsed.data.traits, error: null };
+  return {
+    data: {
+      traits: parsed.data.traits,
+      quizVariant: resolveQuizVariant(parsed.data.quiz_variant),
+    },
+    error: null,
+  };
 };
 
-export const getQuizVariantByResultId = async (
+export const getScoresByResultId = async (
   resultId: string
-): Promise<DbResult<QuizVariant>> => {
-  const supabase = getSupabaseAdminClient();
-  const { data, error } = await supabase
-    .from('scores')
-    .select('response_id, traits, quiz_variant')
-    .eq('response_id', resultId)
-    .maybeSingle();
+): Promise<DbResult<TraitScores>> => {
+  const { data, error } = await getScoresAndQuizVariantByResultId(resultId);
 
-  if (error) {
-    return { data: null, error: mapDbError(error, 'Failed to fetch quiz variant.') };
+  if (error || !data) {
+    return { data: data?.traits ?? null, error };
   }
 
-  if (!data) {
-    return { data: null, error: null };
-  }
-
-  const parsed = scoreRowSchema.safeParse(data);
-  if (!parsed.success) {
-    return { data: null, error: { message: parsed.error.message } };
-  }
-
-  return { data: resolveQuizVariant(parsed.data.quiz_variant), error: null };
+  return { data: data.traits, error: null };
 };
 
 export const getFacetScoresByResultId = async (
@@ -246,7 +250,10 @@ export const getFacetScoresByResultId = async (
     if (error.code === '42703' && error.message.includes('facet_scores')) {
       return { data: null, error: null };
     }
-    return { data: null, error: mapDbError(error, 'Failed to fetch facet scores.') };
+    return {
+      data: null,
+      error: mapDbError(error, 'Failed to fetch facet scores.'),
+    };
   }
 
   if (!data || !('facet_scores' in data) || data.facet_scores === null) {
@@ -268,7 +275,7 @@ export const createProvisionalOrder = async ({
   reportAccessTokenHash,
   email,
   provider,
-  providerSessionId
+  providerSessionId,
 }: CreateOrderParams): Promise<DbResult<z.infer<typeof orderSchema>>> => {
   const userError = await ensureUserRecord(userId);
   if (userError) {
@@ -284,11 +291,17 @@ export const createProvisionalOrder = async ({
     .maybeSingle();
 
   if (responseError) {
-    return { data: null, error: mapDbError(responseError, 'Failed to lookup response.') };
+    return {
+      data: null,
+      error: mapDbError(responseError, 'Failed to lookup response.'),
+    };
   }
 
   if (!responseData) {
-    return { data: null, error: { message: 'Response not found.', code: 'NOT_FOUND' } };
+    return {
+      data: null,
+      error: { message: 'Response not found.', code: 'NOT_FOUND' },
+    };
   }
 
   const { data, error } = await supabase
@@ -302,15 +315,20 @@ export const createProvisionalOrder = async ({
       email: email?.toLowerCase() ?? null,
       provider: provider ?? null,
       provider_session_id: providerSessionId ?? null,
-      quiz_variant: resolveQuizVariant(responseData.quiz_variant)
+      quiz_variant: resolveQuizVariant(responseData.quiz_variant),
     })
-    .select('id, status, amount_cents, response_id, paddle_order_id, created_at, quiz_variant')
+    .select(
+      'id, status, amount_cents, response_id, paddle_order_id, created_at, quiz_variant'
+    )
     .single();
 
   if (error || !data) {
     const mappedError = mapDbError(error, 'Failed to create order.');
     if (error?.code === PG_FOREIGN_KEY_VIOLATION_ERROR_CODE) {
-      return { data: null, error: { message: 'Response not found.', code: 'NOT_FOUND' } };
+      return {
+        data: null,
+        error: { message: 'Response not found.', code: 'NOT_FOUND' },
+      };
     }
     return { data: null, error: mappedError };
   }
@@ -323,7 +341,10 @@ export const createProvisionalOrder = async ({
   return { data: parsed.data, error: null };
 };
 
-export const getOrderById = async ({ orderId, paddleOrderId }: OrderLookup): Promise<DbResult<z.infer<typeof orderDetailSchema>>> => {
+export const getOrderById = async ({
+  orderId,
+  paddleOrderId,
+}: OrderLookup): Promise<DbResult<z.infer<typeof orderDetailSchema>>> => {
   if (!orderId && !paddleOrderId) {
     return { data: null, error: { message: 'Order identifier required.' } };
   }
@@ -333,11 +354,7 @@ export const getOrderById = async ({ orderId, paddleOrderId }: OrderLookup): Pro
   }
 
   const supabase = getSupabaseAdminClient();
-  let lookupQuery = supabase
-    .from('orders')
-    .select(
-      PAID_ORDER_COLUMNS
-    );
+  let lookupQuery = supabase.from('orders').select(PAID_ORDER_COLUMNS);
 
   if (orderId) {
     lookupQuery = lookupQuery.eq('id', orderId);
@@ -372,7 +389,12 @@ export const getOrderByProviderSessionId = async (
   } catch (error) {
     return {
       data: null,
-      error: { message: error instanceof Error ? error.message : 'Missing Supabase configuration.' }
+      error: {
+        message:
+          error instanceof Error
+            ? error.message
+            : 'Missing Supabase configuration.',
+      },
     };
   }
   const { data, error } = await supabase
@@ -397,14 +419,21 @@ export const getOrderByProviderSessionId = async (
   return { data: parsed.data, error: null };
 };
 
-export const updateOrderStatus = async ({ orderId, status }: UpdateOrderStatusParams): Promise<DbResult<z.infer<typeof orderSchema> | null>> => {
+export const updateOrderStatus = async ({
+  orderId,
+  status,
+}: UpdateOrderStatusParams): Promise<
+  DbResult<z.infer<typeof orderSchema> | null>
+> => {
   const supabase = getSupabaseAdminClient();
   const { data, error } = await supabase
     .from('orders')
     .update({ status })
     .eq('id', orderId)
     .eq('status', 'created')
-    .select('id, status, amount_cents, response_id, paddle_order_id, created_at, quiz_variant')
+    .select(
+      'id, status, amount_cents, response_id, paddle_order_id, created_at, quiz_variant'
+    )
     .maybeSingle();
 
   if (error) {
@@ -428,10 +457,17 @@ export const updateOrderFromWebhook = async ({
   status,
   paddleOrderId,
   paddleTransactionId,
-  customerEmail
-}: WebhookUpdateParams): Promise<DbResult<z.infer<typeof orderDetailSchema>>> => {
+  customerEmail,
+}: WebhookUpdateParams): Promise<
+  DbResult<z.infer<typeof orderDetailSchema>>
+> => {
   const supabase = getSupabaseAdminClient();
-  const updates: { status: typeof status; paddle_order_id?: string; paddle_transaction_id?: string; email?: string } = { status };
+  const updates: {
+    status: typeof status;
+    paddle_order_id?: string;
+    paddle_transaction_id?: string;
+    email?: string;
+  } = { status };
 
   if (paddleOrderId) {
     updates.paddle_order_id = paddleOrderId;
@@ -447,7 +483,11 @@ export const updateOrderFromWebhook = async ({
 
   const { data, error } = await supabase
     .from('orders')
-    .update({ ...updates, paid_at: status === 'paid' ? new Date().toISOString() : undefined, updated_at: new Date().toISOString() })
+    .update({
+      ...updates,
+      paid_at: status === 'paid' ? new Date().toISOString() : undefined,
+      updated_at: new Date().toISOString(),
+    })
     .eq('id', orderId)
     .select(
       'id, status, amount_cents, response_id, paddle_order_id, created_at, report_access_token_hash, user_id, email, provider, provider_session_id, report_id, results_snapshot_id, report_file_key, paid_at, updated_at'
@@ -474,12 +514,12 @@ export const updateOrderFromWebhook = async ({
     if (userLookupError) {
       logWarn('Failed to lookup user for webhook email update.', {
         orderId: parsed.data.id,
-        error: userLookupError
+        error: userLookupError,
       });
     } else if (!userData) {
       logWarn('User not found for order during webhook processing.', {
         orderId: parsed.data.id,
-        userId: parsed.data.user_id
+        userId: parsed.data.user_id,
       });
     } else if (!userData.email) {
       const { error: userUpdateError } = await supabase
@@ -490,14 +530,14 @@ export const updateOrderFromWebhook = async ({
       if (userUpdateError) {
         logWarn('Failed to update user email from webhook.', {
           orderId: parsed.data.id,
-          error: userUpdateError
+          error: userUpdateError,
         });
       }
     } else if (userData.email !== normalizedEmail) {
       logWarn('Webhook email mismatch for user.', {
         orderId: parsed.data.id,
         existingEmail: userData.email,
-        webhookEmail: normalizedEmail
+        webhookEmail: normalizedEmail,
       });
     }
   }
@@ -505,7 +545,10 @@ export const updateOrderFromWebhook = async ({
   return { data: parsed.data, error: null };
 };
 
-export const getReportAsset = async (orderId: string, kind: ReportAssetParams['kind']): Promise<DbResult<{ path: string }>> => {
+export const getReportAsset = async (
+  orderId: string,
+  kind: ReportAssetParams['kind']
+): Promise<DbResult<{ path: string }>> => {
   const supabase = getSupabaseAdminClient();
   const { data, error } = await supabase
     .from('assets')
@@ -533,7 +576,7 @@ export const storeReportAsset = async ({
   orderId,
   userId,
   reportPath,
-  kind
+  kind,
 }: ReportAssetParams): Promise<DbResult<null>> => {
   const supabase = getSupabaseAdminClient();
   const { error } = await supabase.from('assets').upsert(
@@ -541,7 +584,7 @@ export const storeReportAsset = async ({
       user_id: userId,
       order_id: orderId,
       kind,
-      path: reportPath
+      path: reportPath,
     },
     { onConflict: 'order_id,kind' }
   );
@@ -555,7 +598,7 @@ export const storeReportAsset = async ({
 
 export const updateOrderReportFileKey = async ({
   orderId,
-  reportFileKey
+  reportFileKey,
 }: {
   orderId: string;
   reportFileKey: string;
@@ -563,11 +606,17 @@ export const updateOrderReportFileKey = async ({
   const supabase = getSupabaseAdminClient();
   const { error } = await supabase
     .from('orders')
-    .update({ report_file_key: reportFileKey, updated_at: new Date().toISOString() })
+    .update({
+      report_file_key: reportFileKey,
+      updated_at: new Date().toISOString(),
+    })
     .eq('id', orderId);
 
   if (error) {
-    return { data: null, error: mapDbError(error, 'Failed to update order report file key.') };
+    return {
+      data: null,
+      error: mapDbError(error, 'Failed to update order report file key.'),
+    };
   }
 
   return { data: null, error: null };
@@ -575,7 +624,7 @@ export const updateOrderReportFileKey = async ({
 
 export const updateOrderReportAccessToken = async ({
   orderId,
-  reportAccessTokenHash
+  reportAccessTokenHash,
 }: {
   orderId: string;
   reportAccessTokenHash: string;
@@ -583,11 +632,17 @@ export const updateOrderReportAccessToken = async ({
   const supabase = getSupabaseAdminClient();
   const { error } = await supabase
     .from('orders')
-    .update({ report_access_token_hash: reportAccessTokenHash, updated_at: new Date().toISOString() })
+    .update({
+      report_access_token_hash: reportAccessTokenHash,
+      updated_at: new Date().toISOString(),
+    })
     .eq('id', orderId);
 
   if (error) {
-    return { data: null, error: mapDbError(error, 'Failed to update order report access token.') };
+    return {
+      data: null,
+      error: mapDbError(error, 'Failed to update order report access token.'),
+    };
   }
 
   return { data: null, error: null };
@@ -622,11 +677,15 @@ const getPaidOrdersBy = async (
   return { data: parsed.data, error: null };
 };
 
-export const getPaidOrdersByEmail = async (email: string): Promise<DbResult<z.infer<typeof orderDetailSchema>[]>> => {
+export const getPaidOrdersByEmail = async (
+  email: string
+): Promise<DbResult<z.infer<typeof orderDetailSchema>[]>> => {
   return getPaidOrdersBy('email', email);
 };
 
-export const getPaidOrdersByUserId = async (userId: string): Promise<DbResult<z.infer<typeof orderDetailSchema>[]>> => {
+export const getPaidOrdersByUserId = async (
+  userId: string
+): Promise<DbResult<z.infer<typeof orderDetailSchema>[]>> => {
   return getPaidOrdersBy('user_id', userId);
 };
 
@@ -634,8 +693,10 @@ export const createReportAccessLink = async ({
   email,
   orderId,
   tokenHash,
-  expiresAt
-}: ReportAccessLinkParams): Promise<DbResult<z.infer<typeof reportAccessLinkSchema>>> => {
+  expiresAt,
+}: ReportAccessLinkParams): Promise<
+  DbResult<z.infer<typeof reportAccessLinkSchema>>
+> => {
   const supabase = getSupabaseAdminClient();
   const { data, error } = await supabase
     .from('report_access_links')
@@ -643,13 +704,16 @@ export const createReportAccessLink = async ({
       email: email.toLowerCase(),
       order_id: orderId,
       token_hash: tokenHash,
-      expires_at: expiresAt
+      expires_at: expiresAt,
     })
     .select(REPORT_ACCESS_LINK_COLUMNS)
     .single();
 
   if (error || !data) {
-    return { data: null, error: mapDbError(error, 'Failed to create report access link.') };
+    return {
+      data: null,
+      error: mapDbError(error, 'Failed to create report access link.'),
+    };
   }
 
   const parsed = reportAccessLinkSchema.safeParse(data);
@@ -671,7 +735,10 @@ export const getReportAccessLinkByHash = async (
     .maybeSingle();
 
   if (error) {
-    return { data: null, error: mapDbError(error, 'Failed to lookup report access link.') };
+    return {
+      data: null,
+      error: mapDbError(error, 'Failed to lookup report access link.'),
+    };
   }
 
   if (!data) {
@@ -699,7 +766,10 @@ export const markReportAccessLinkUsed = async (
     .maybeSingle();
 
   if (error) {
-    return { data: null, error: mapDbError(error, 'Failed to update report access link.') };
+    return {
+      data: null,
+      error: mapDbError(error, 'Failed to update report access link.'),
+    };
   }
 
   if (!data) {

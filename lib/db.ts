@@ -150,10 +150,10 @@ const mapDbError = (error: unknown, fallback: string): DbError => {
 export const createResponseAndScores = async ({
   userId,
   answers,
-    traits,
-    facetScores,
-    expectedCount,
-    quizVariant
+  traits,
+  facetScores,
+  expectedCount,
+  quizVariant
 }: CreateResponseParams): Promise<DbResult<string>> => {
   const userError = await ensureUserRecord(userId);
   if (userError) {

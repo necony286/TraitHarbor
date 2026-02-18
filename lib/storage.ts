@@ -18,7 +18,7 @@ const getReportBucket = () => {
   return process.env.SUPABASE_REPORTS_BUCKET ?? 'reports';
 };
 
-const getQuizStateKey = (quizVariant: QuizVariant) => `${QUIZ_STATE_KEY_PREFIX}:${quizVariant}`;
+const getQuizStateKey = (quizVariant: QuizVariant) => quizVariant === 'ipip120' ? QUIZ_STATE_KEY_PREFIX : `${QUIZ_STATE_KEY_PREFIX}:${quizVariant}`;
 
 export const getReportPath = (orderId: string) =>
   `orders/${REPORT_TEMPLATE_VERSION}/${orderId}.pdf`;

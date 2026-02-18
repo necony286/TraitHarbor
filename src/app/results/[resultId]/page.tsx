@@ -3,7 +3,8 @@ import { redirect } from 'next/navigation';
 import { z } from 'zod';
 import { ResultsDisplay } from '../../../../components/results/ResultsDisplay';
 import { Container } from '../../../../components/ui/Container';
-import { getScoresByResultId } from '../../../../lib/db';
+import { getQuizVariantByResultId, getScoresByResultId } from '../../../../lib/db';
+import { resolveQuizVariant } from '../../../../lib/ipip';
 import resultsFixture from '../../../data/results.fixture.json';
 import { canonicalUrl, ogUrl } from '@/lib/siteUrl';
 
@@ -61,7 +62,7 @@ export default async function ResultsPage({ params }: ResultsPageProps) {
 
       const { traits } = fixtureResult.data;
 
-      return <ResultsDisplay traits={traits} resultId={resultId} />;
+      return <ResultsDisplay traits={traits} resultId={resultId} quizVariant="ipip120" />;
     }
 
     const { data, error } = await getScoresByResultId(resultId);
@@ -76,7 +77,14 @@ export default async function ResultsPage({ params }: ResultsPageProps) {
     if (data) {
       const parsed = resultSchema.safeParse({ id: resultId, traits: data });
       if (parsed.success) {
-        return <ResultsDisplay traits={parsed.data.traits} resultId={resultId} />;
+        const { data: quizVariant } = await getQuizVariantByResultId(resultId);
+        return (
+          <ResultsDisplay
+            traits={parsed.data.traits}
+            resultId={resultId}
+            quizVariant={resolveQuizVariant(quizVariant)}
+          />
+        );
       }
     }
 

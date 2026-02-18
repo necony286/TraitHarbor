@@ -46,7 +46,7 @@ const ensureFullQuizItems = () => {
     if (previousFixtureMode !== undefined) {
       delete process.env.NEXT_PUBLIC_QUIZ_FIXTURE_MODE;
     }
-    return loadQuizItems();
+    return loadQuizItems({ variant: 'ipip120' });
   } finally {
     if (previousFixtureMode !== undefined) {
       process.env.NEXT_PUBLIC_QUIZ_FIXTURE_MODE = previousFixtureMode;
@@ -113,7 +113,8 @@ export const run = async () => {
       traitRankOrder,
       highestTrait,
       lowestTrait,
-      facetScores
+      facetScores,
+      quizVariant: 'ipip120'
     };
 
     await writeFixtureFiles(fixtureIndex, payload);

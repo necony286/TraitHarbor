@@ -164,7 +164,8 @@ describe('orders API route', () => {
         amountCents: 5000,
         resultId,
         paddleOrderId: null,
-        createdAt: '2024-01-01T00:00:00.000Z'
+        createdAt: '2024-01-01T00:00:00.000Z',
+        quizVariant: 'ipip120'
       },
       checkout: null,
       providerSessionId: expect.any(String)

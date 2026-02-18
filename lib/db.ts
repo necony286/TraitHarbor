@@ -4,6 +4,7 @@ import { logWarn } from './logger';
 import { OrderStatus, orderDetailSchema, orderSchema } from './orders';
 import { FacetScores, TraitScores } from './scoring';
 import { getSupabaseAdminClient } from './supabase';
+import { QuizVariant, resolveQuizVariant } from './ipip';
 
 const traitSchema = z.object({
   O: z.number(),
@@ -15,7 +16,8 @@ const traitSchema = z.object({
 
 const scoreRowSchema = z.object({
   response_id: z.string().uuid(),
-  traits: traitSchema
+  traits: traitSchema,
+  quiz_variant: z.enum(['ipip120', 'ipip60']).optional().nullable()
 });
 
 const facetScoresSchema = z.record(z.record(z.number()));
@@ -43,6 +45,7 @@ type CreateResponseParams = {
   traits: TraitScores;
   facetScores?: FacetScores | null;
   expectedCount: number;
+  quizVariant: QuizVariant;
 };
 
 type CreateOrderParams = {
@@ -114,7 +117,7 @@ export const reportAccessLinkSchema = z.object({
 });
 
 const PAID_ORDER_COLUMNS =
-  'id, status, amount_cents, response_id, paddle_order_id, created_at, report_access_token_hash, user_id, email, provider, provider_session_id, report_id, results_snapshot_id, report_file_key, paid_at, updated_at';
+  'id, status, amount_cents, response_id, paddle_order_id, created_at, report_access_token_hash, user_id, email, provider, provider_session_id, report_id, results_snapshot_id, report_file_key, paid_at, updated_at, quiz_variant';
 
 const REPORT_ACCESS_LINK_COLUMNS_ARRAY = [
   'id',
@@ -149,7 +152,8 @@ export const createResponseAndScores = async ({
   answers,
   traits,
   facetScores,
-  expectedCount
+  expectedCount,
+  quizVariant
 }: CreateResponseParams): Promise<DbResult<string>> => {
   const userError = await ensureUserRecord(userId);
   if (userError) {
@@ -162,7 +166,8 @@ export const createResponseAndScores = async ({
     answers,
     traits,
     facet_scores: facetScores ?? null,
-    expected_count: expectedCount
+    expected_count: expectedCount,
+    quiz_variant: quizVariant
   });
 
   if (error || !data) {
@@ -180,7 +185,7 @@ export const getScoresByResultId = async (resultId: string): Promise<DbResult<Tr
   const supabase = getSupabaseAdminClient();
   const { data, error } = await supabase
     .from('scores')
-    .select('response_id, traits')
+    .select('response_id, traits, quiz_variant')
     .eq('response_id', resultId)
     .maybeSingle();
 
@@ -198,6 +203,32 @@ export const getScoresByResultId = async (resultId: string): Promise<DbResult<Tr
   }
 
   return { data: parsed.data.traits, error: null };
+};
+
+export const getQuizVariantByResultId = async (
+  resultId: string
+): Promise<DbResult<QuizVariant>> => {
+  const supabase = getSupabaseAdminClient();
+  const { data, error } = await supabase
+    .from('scores')
+    .select('response_id, traits, quiz_variant')
+    .eq('response_id', resultId)
+    .maybeSingle();
+
+  if (error) {
+    return { data: null, error: mapDbError(error, 'Failed to fetch quiz variant.') };
+  }
+
+  if (!data) {
+    return { data: null, error: null };
+  }
+
+  const parsed = scoreRowSchema.safeParse(data);
+  if (!parsed.success) {
+    return { data: null, error: { message: parsed.error.message } };
+  }
+
+  return { data: resolveQuizVariant(parsed.data.quiz_variant), error: null };
 };
 
 export const getFacetScoresByResultId = async (
@@ -247,7 +278,7 @@ export const createProvisionalOrder = async ({
   const supabase = getSupabaseAdminClient();
   const { data: responseData, error: responseError } = await supabase
     .from('responses')
-    .select('id')
+    .select('id, quiz_variant')
     .eq('id', responseId)
     .eq('user_id', userId)
     .maybeSingle();
@@ -270,9 +301,10 @@ export const createProvisionalOrder = async ({
       user_id: userId,
       email: email?.toLowerCase() ?? null,
       provider: provider ?? null,
-      provider_session_id: providerSessionId ?? null
+      provider_session_id: providerSessionId ?? null,
+      quiz_variant: resolveQuizVariant(responseData.quiz_variant)
     })
-    .select('id, status, amount_cents, response_id, paddle_order_id, created_at')
+    .select('id, status, amount_cents, response_id, paddle_order_id, created_at, quiz_variant')
     .single();
 
   if (error || !data) {
@@ -304,7 +336,7 @@ export const getOrderById = async ({ orderId, paddleOrderId }: OrderLookup): Pro
   let lookupQuery = supabase
     .from('orders')
     .select(
-      'id, status, amount_cents, response_id, paddle_order_id, created_at, report_access_token_hash, user_id, email, provider, provider_session_id, report_id, results_snapshot_id, report_file_key, paid_at, updated_at'
+      PAID_ORDER_COLUMNS
     );
 
   if (orderId) {
@@ -372,7 +404,7 @@ export const updateOrderStatus = async ({ orderId, status }: UpdateOrderStatusPa
     .update({ status })
     .eq('id', orderId)
     .eq('status', 'created')
-    .select('id, status, amount_cents, response_id, paddle_order_id, created_at')
+    .select('id, status, amount_cents, response_id, paddle_order_id, created_at, quiz_variant')
     .maybeSingle();
 
   if (error) {

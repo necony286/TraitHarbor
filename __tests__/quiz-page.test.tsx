@@ -9,7 +9,8 @@ vi.mock('next/navigation', () => ({
 }));
 
 vi.mock('../lib/analytics', () => ({
-  trackQuizEvent: vi.fn()
+  trackQuizEvent: vi.fn(),
+  trackEvent: vi.fn()
 }));
 
 vi.mock('../lib/storage', () => ({
@@ -20,8 +21,8 @@ vi.mock('../lib/storage', () => ({
 
 vi.mock('../lib/ipip', () => ({
   loadQuizItems: () => [
-    { id: 'Q1', prompt: 'Question one.' },
-    { id: 'Q2', prompt: 'Question two.' }
+    { id: 'Q1', prompt: 'Question one.', trait: 'O', reverseKeyed: false, facetKey: 'O1_Imagination' },
+    { id: 'Q2', prompt: 'Question two.', trait: 'C', reverseKeyed: false, facetKey: 'C1_SelfEfficacy' }
   ]
 }));
 
@@ -55,5 +56,6 @@ describe('QuizPage autosave', () => {
     });
 
     expect(saveQuizStateMock).toHaveBeenCalledTimes(1);
+    expect(saveQuizStateMock).toHaveBeenCalledWith('ipip120', expect.any(Object));
   });
 });

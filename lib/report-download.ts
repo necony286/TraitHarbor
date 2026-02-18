@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { resolveQuizVariant } from './ipip';
 import {
   BrowserlessConfigError,
   PdfRenderConcurrencyError,
@@ -89,6 +90,7 @@ type OrderDetail = {
   created_at: string;
   report_file_key?: string | null;
   user_id?: string | null;
+  quiz_variant?: string | null;
 };
 
 const resolveReportFileKey = async (order: OrderDetail, reportPath: string) => {
@@ -146,6 +148,7 @@ export const getOrCreateReportDownloadUrl = async ({
     parsedResult.data.traits
   );
   const { data: facetScores, error: facetError } = await getFacetScoresByResultId(order.response_id);
+  const quizVariant = resolveQuizVariant(order.quiz_variant);
   if (facetError) {
     logWarn('Unable to fetch facet scores.', {
       resultId: order.response_id,
@@ -160,7 +163,8 @@ export const getOrCreateReportDownloadUrl = async ({
     traitRankOrder,
     highestTrait,
     lowestTrait,
-    facetScores: facetScores ?? undefined
+    facetScores: facetScores ?? undefined,
+    quizVariant
   });
 
   await uploadReport(order.id, pdfBuffer);

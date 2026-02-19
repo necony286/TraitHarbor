@@ -27,7 +27,7 @@ export function QuizOptions() {
 
       <div className="grid gap-4 md:grid-cols-2 lg:gap-6">
         {OPTIONS.map((option) => (
-          <article key={option.title} className="rounded-2xl border border-border bg-card p-6 shadow-sm">
+          <article key={option.href} className="rounded-2xl border border-border bg-card p-6 shadow-sm">
             <h3 className="text-xl font-medium text-foreground">{option.title}</h3>
             <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{option.summary}</p>
             <p className="mt-3 text-sm leading-relaxed text-muted-foreground">{option.trustNote}</p>

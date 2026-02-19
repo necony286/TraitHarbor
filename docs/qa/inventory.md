@@ -47,6 +47,7 @@
 ## Routes/pages (user-facing)
 - `/` — Landing/home.
 - `/quiz` — IPIP-120 quiz flow.
+- `/quiz/quick` — IPIP-60 Quick quiz flow.
 - `/results/[resultId]` — Free results + paywall CTA.
 - `/checkout/callback` — Payment callback/status.
 - `/my-reports` — Authenticated report list + download.
@@ -58,7 +59,7 @@
 ## API routes
 - `POST /api/score` — Score quiz answers.
 - `POST /api/report` — Generate PDF report.
-- `POST /api/checkout` — Create checkout session.
+- `GET /api/checkout` — Return checkout configuration.
 - `GET|POST|PATCH /api/orders` — Create and manage orders.
 - `GET /api/orders/by-session` — Poll order status by session id.
 - `POST /api/reports/[orderId]/download-url` — Signed report download URL.

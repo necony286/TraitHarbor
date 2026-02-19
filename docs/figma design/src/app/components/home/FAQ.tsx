@@ -4,7 +4,7 @@ import { ChevronDown } from "lucide-react";
 const FAQ_ITEMS = [
   {
     question: "How long does it take?",
-    answer: "About ~10 minutes for 120 questions.",
+    answer: "Choose Pro (IPIP-120) or Quick (IPIP-60).",
   },
   {
     question: "Is it free?",

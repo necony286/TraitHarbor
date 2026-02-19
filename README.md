@@ -1,7 +1,7 @@
 # TraitHarbor
 
 ## Overview
-TraitHarbor is a personality-test SaaS built around the IPIP-120 questionnaire, offering a free interactive quiz and an optional premium PDF report. The product targets primarily women 18–34 who are self-help and career curious, with a global EU-first audience, delivering credible, shareable insights with a privacy-first approach.
+TraitHarbor is a personality-test SaaS built around two Big Five quiz variants: IPIP-120 (`/quiz`) and IPIP-60 Quick (`/quiz/quick`). The product offers a free interactive quiz experience and an optional premium PDF report, with a privacy-first approach.
 
 ## Start here
 1. Read the docs index: [`docs/00-README.md`](./docs/00-README.md).
@@ -101,7 +101,9 @@ GitHub Actions (`.github/workflows/ci.yml`) runs on `main` and pull requests:
 
 ## Project conventions
 - Routes live in `src/app/**` and API routes in `src/app/api/**/route.ts`.
-- Quiz data will be stored in `src/data/ipip120.json` and loaded directly (no `/public` fetch).
+- Quiz routes: `/quiz` uses `ipip120`; `/quiz/quick` uses `ipip60`.
+- Quiz data is loaded from `src/data/ipip120.json` and `src/data/ipip60.json` via `lib/ipip.ts` (no `/public` fetch).
+- `src/data/ipip60.json` is derived from `src/data/ipip120.json` + `src/data/ipip120.facets.json` using `scripts/generate-ipip60.ts` (`pnpm gen:ipip60`).
 - Shared UI/utilities belong in top-level `components/**` and `lib/**`.
-- Fixture mode for the quiz will use `src/data/ipip120.fixture.json` when `NEXT_PUBLIC_QUIZ_FIXTURE_MODE=1`.
-- PDF generation uses the Node.js runtime (Playwright is not supported in Edge); see `src/app/api/report/route.ts` for the runtime declaration.
+- Fixture mode uses `src/data/ipip120.fixture.json` when `NEXT_PUBLIC_QUIZ_FIXTURE_MODE=1`.
+- PDF generation uses the Node.js runtime; see `src/app/api/report/route.ts` and `src/app/api/reports/[orderId]/download-url/route.ts`.

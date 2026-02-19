@@ -13,11 +13,11 @@
 - Geography: Global (EU focus).
 
 ## 3. Value Proposition
-- Free accurate five-factor test + optional premium report in minutes.
+- Free accurate five-factor test (IPIP-120 or IPIP-60 Quick) + optional premium report.
 - Shareable results & personalized advice.
 
 ## 4. Unique Selling Points (USPs)
-- Evidence-based (IPIP-120), clean UX, instant premium PDF, privacy-first (GDPR).
+- Evidence-based (IPIP-120 + IPIP-60 Quick), clean UX, premium PDF, privacy-first (GDPR).
 
 ## 5. Success Metrics (KPI)
 - Quiz start rate, completion rate, paywall CTR, purchase rate, ARPU, CAC, refund rate.
@@ -35,7 +35,7 @@
 - Performance → edge caching, light bundle.
 
 ## 9. Scope v1 (MVP)
-- Landing, Quiz (120), Free result, Paywall, Checkout, PDF, Email delivery.
+- Landing, Quiz (`/quiz` IPIP-120 + `/quiz/quick` IPIP-60), Free result, Paywall, Checkout, PDF, Email delivery.
 
 ## 10. Out of Scope (v1)
 - Accounts/Teams, B2B dashboards, multi-language (later).

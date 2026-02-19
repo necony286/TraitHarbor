@@ -1,6 +1,6 @@
 # TraitHarbor Documentation Index
 
-This folder is the single source of truth for product, design, engineering, and launch notes. All docs aim to be short, actionable, and aligned to the current deployment (Vercel + Supabase + Upstash; Paddle is pending enablement).
+This folder is the single source of truth for product, design, engineering, and launch notes. All docs aim to be short, actionable, and aligned to the current deployment (Vercel + Supabase + Upstash; Paddle is pending enablement). Current quiz variants are `/quiz` (IPIP-120) and `/quiz/quick` (IPIP-60 Quick).
 
 ## Start here
 1. **Product intent:** [`01-product-brief.md`](./01-product-brief.md)

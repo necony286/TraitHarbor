@@ -4,7 +4,7 @@ const STEPS = [
   {
     icon: ClipboardList,
     title: "Answer 120 questions",
-    description: "Takes about 10 minutes. Simple Likert scale responses.",
+    description: "Quick Likert scale responses with a Pro and Quick quiz option.",
   },
   {
     icon: Eye,

@@ -119,3 +119,16 @@ Then run:
 ```bash
 pnpm gen:fixtures
 ```
+
+
+## 8) Regenerate IPIP-60 dataset (optional)
+
+`src/data/ipip60.json` is generated from `src/data/ipip120.json` and `src/data/ipip120.facets.json` using `scripts/generate-ipip60.ts`.
+
+Run:
+
+```bash
+pnpm gen:ipip60
+```
+
+Use this after updating IPIP-120 items or facet mappings.

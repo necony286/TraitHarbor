@@ -2,18 +2,21 @@
 
 ```mermaid
 flowchart LR
-  A[Landing] -->|CTA Start| B[Quiz 1/120]
-  B --> C[Quiz 120/120]
-  C --> D[Compute Scores]
-  D --> E[Free Results Page]
-  E -->|Unlock full report| F[Checkout (Paddle modal - pending enablement)]
-  F -->|Paid| G[Webhook confirms]
-  G --> H[Generate PDF]
-  H --> I[Thank-you + Download Link + Email]
+  A[Landing] -->|Start Pro| B[/quiz · IPIP-120]
+  A -->|Start Quick| C[/quiz/quick · IPIP-60]
+  B --> D[Answer all required items]
+  C --> D
+  D --> E[POST /api/score]
+  E --> F[Free Results Page]
+  F -->|Unlock full report| G[Checkout (Paddle modal - pending enablement)]
+  G -->|Paid| H[Webhook confirms]
+  H --> I[Generate PDF]
+  I --> J[My Reports + Download URL]
 ```
 
 ## Edge-cases
-- Reload mid-quiz → restore progress from local storage.
+- Reload mid-quiz → restore progress from local storage (variant-scoped state).
+- Score submit rejects missing/extra answer IDs for the selected variant.
 - Payment failure → retry, support link.
 - PDF link expired → signed URL refresh endpoint.
 

@@ -1,59 +1,88 @@
 # 09 · Data Model & ERD
 
+Current schema is defined by `supabase/migrations/*.sql`, with `quiz_variant` support added in `0015_add_quiz_variant.sql` and facet scores added in `0014_add_facet_scores.sql`.
+
 ```mermaid
 erDiagram
   users ||--o{ responses : has
   responses ||--|| scores : has
-  users ||--o{ orders : has
-  responses ||--o{ orders : purchased_with
-  users ||--o{ assets : has
+  users ||--o{ orders : places
+  responses ||--o{ orders : source_response
+  users ||--o{ assets : owns
   orders ||--o{ assets : generates
+  orders ||--o{ report_access_links : grants
 
   users {
     uuid id PK
     text email
-    timestamp created_at
+    timestamptz created_at
   }
+
   responses {
     uuid id PK
     uuid user_id FK
     jsonb answers
-    timestamp created_at
+    text quiz_variant
+    timestamptz created_at
   }
+
   scores {
     uuid id PK
     uuid response_id FK
     jsonb traits
-    timestamp created_at
+    jsonb facet_scores
+    text quiz_variant
+    timestamptz created_at
   }
+
   orders {
     uuid id PK
     uuid user_id FK
     uuid response_id FK
     text paddle_order_id
+    text paddle_transaction_id
+    text provider
+    text provider_session_id
     text status
     integer amount_cents
-    uuid report_access_token
-    timestamp created_at
+    text email
+    text report_access_token_hash
+    text report_file_key
+    text quiz_variant
+    timestamptz paid_at
+    timestamptz updated_at
+    timestamptz created_at
   }
+
   assets {
     uuid id PK
     uuid user_id FK
     uuid order_id FK
     text kind
     text path
-    timestamp created_at
+    timestamptz created_at
+  }
+
+  report_access_links {
+    uuid id PK
+    text email
+    uuid order_id FK
+    text token_hash
+    timestamptz expires_at
+    timestamptz used_at
+    timestamptz created_at
   }
 ```
 
-## Indexes
-- users.email unique
-- responses.user_id
-- scores.response_id unique
-- orders.user_id, orders.response_id, orders.paddle_order_id
-- assets.order_id + assets.kind unique (also indexed by user_id and order_id)
+## Important constraints
+- `responses.quiz_variant`, `scores.quiz_variant`, `orders.quiz_variant` are constrained to `ipip120 | ipip60`.
+- `scores.response_id` is unique (1:1 between response and score row).
+- `assets` has unique `(order_id, kind)`.
+- `report_access_links.token_hash` is unique.
 
-## Anonymous user model
-- `users.id` is an anonymous UUID stored in a cookie/localStorage (no Supabase Auth).
-- `users.email` is optional and only populated for paid orders via the Paddle webhook.
-- Access is enforced server-side using the Supabase service role; no RLS policies are assumed.
+## Runtime mapping
+Application-level DB contracts are implemented in:
+- `lib/db.ts`
+- `lib/orders.ts`
+
+These map snake_case DB columns (e.g., `quiz_variant`, `facet_scores`) to API-facing camelCase fields (`quizVariant`, `facetScores`).

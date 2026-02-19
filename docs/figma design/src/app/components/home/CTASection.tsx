@@ -58,7 +58,7 @@ export function CTASection({ onStartTest }: CTASectionProps) {
             {/* Meta text */}
             <div className="pt-4">
               <p className="text-sm text-white/70">
-                Takes about 10 minutes • 120 thoughtful prompts • Instant results
+                Quick flow • Pro and Quick quiz options • Instant results
               </p>
             </div>
           </div>

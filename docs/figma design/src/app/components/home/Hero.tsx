@@ -13,7 +13,7 @@ export function Hero({ onStartTest }: HeroProps) {
         <div className="space-y-8">
           <div className="space-y-4">
             <h1 className="text-4xl lg:text-5xl xl:text-6xl font-medium leading-tight tracking-tight text-foreground">
-              See your Big Five profile in ~10 minutes.
+              See your Big Five profile with a Quick flow.
             </h1>
             <p className="text-lg lg:text-xl text-muted-foreground leading-relaxed">
               120 questions • Instant results • Full report unlock $3

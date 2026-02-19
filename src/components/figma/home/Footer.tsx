@@ -14,7 +14,10 @@ export function Footer() {
             </p>
           </div>
 
-          <div className="flex items-center gap-6 text-sm">
+          <div className="flex flex-wrap items-center justify-center gap-6 text-sm">
+            <Link href="/quiz/quick" className="text-muted-foreground hover:text-foreground transition-colors duration-150">
+              Quick quiz
+            </Link>
             <Link href="/privacy" className="text-muted-foreground hover:text-foreground transition-colors duration-150">
               Privacy
             </Link>

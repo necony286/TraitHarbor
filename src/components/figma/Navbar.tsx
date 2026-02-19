@@ -14,7 +14,8 @@ const navLinks: ReadonlyArray<Readonly<{ href: string; label: string }>> = [
   { href: '/#what-you-get', label: 'What you get' },
   { href: '/#faq', label: 'FAQ' },
   { href: '/my-reports', label: 'My reports' },
-  { href: '/quiz', label: 'Quiz' },
+  { href: '/quiz/quick', label: 'Quick quiz' },
+  { href: '/quiz', label: 'Pro quiz' },
 ];
 
 export function Navbar({ onStartQuiz }: NavbarProps) {
@@ -44,11 +45,11 @@ export function Navbar({ onStartQuiz }: NavbarProps) {
 
         <div className="hidden md:flex">
           <Link
-            href="/quiz"
+            href="/quiz/quick"
             className="rounded-xl bg-primary px-5 py-2 text-sm font-medium text-primary-foreground shadow-lg shadow-primary/25 transition-all duration-200 hover:bg-primary/90 hover:shadow-xl hover:shadow-primary/30 active:scale-[0.98] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
             onClick={onStartQuiz}
           >
-            Start quiz
+            Quick quiz
           </Link>
         </div>
 
@@ -76,11 +77,11 @@ export function Navbar({ onStartQuiz }: NavbarProps) {
             </div>
             <div className="mt-4">
               <Link
-                href="/quiz"
+                href="/quiz/quick"
                 className="block w-full rounded-xl bg-primary px-5 py-2 text-center text-sm font-medium text-primary-foreground shadow-lg shadow-primary/25 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
                 onClick={onStartQuiz}
               >
-                Start quiz
+                Quick quiz
               </Link>
             </div>
           </Container>
